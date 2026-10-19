@@ -3,11 +3,11 @@
 An interactive exam-prep app for **Exam AI-901: Microsoft Azure AI Fundamentals**, built for a
 few-day study sprint rather than a leisurely course.
 
-**→ [dileepadev.github.io/learn-ai-901](https://dileepadev.github.io/learn-ai-901/)**
+**[dileepadev.github.io/learn-ai-901](https://dileepadev.github.io/learn-ai-901/)**
 
 It is not a documentation site. It is a learning loop:
 
-> Learn → Interact → Answer → Get feedback → Identify weakness → Practise → Review → Simulate the exam → Improve
+> Learn, answer, get marked, find the weak spots, practise, review, sit a practice exam, improve.
 
 Everything is static. Progress lives in your browser. No backend, no account, no tracking.
 
@@ -17,15 +17,15 @@ Everything is static. Progress lives in your browser. No backend, no account, no
 
 | | |
 | :--- | :--- |
-| **12 lessons** | 3.8 hours total, in recommended study order, with 8 interactive demos and 79 inline knowledge checks |
-| **206 questions** | 176 exam-style plus 30 inline checks. Multiple choice, multi-select, matching and ordering - each with an explanation, and a reason why each wrong option is wrong |
+| **12 lessons** | About 4 hours in all, in recommended study order, with 8 interactive demos and 80 inline knowledge checks |
+| **217 questions** | 186 exam-style plus 31 lesson checks. Multiple choice, multi-select, matching and ordering, each with an explanation, a reason why every wrong option is wrong, and a link to the Microsoft Learn page that backs it up. Options are shuffled, so the answer is never always A |
 | **Spaced repetition** | A Leitner scheduler tuned for a sprint: intervals run from 8 minutes to 4 days, so the whole bank can resurface before exam day |
 | **Weak-area drilling** | Topics ranked by *weighted readiness left on the table*, so a shaky high-weight topic outranks a neglected small one |
 | **Mistakes mode** | Every question currently sitting on a wrong answer, in one place |
-| **Exam simulator** | Timed, no feedback until the end, question palette with flagging, and a topic-by-topic report scaled to Microsoft's 1000-point scale |
-| **Rapid review** | 69 flashcards with their own review schedule, 10 comparison drills with hidden cells, and 18 one-line facts |
-| **Cram mode** | 19 "know this" callouts, 14 exam traps and 12 changed-since-AI-900 notes in one linear pass, for the final day |
-| **Study plan** | A three-day sprint that ticks itself off as you work through it |
+| **Practice exam** | 45 questions in 45 minutes (or a 15-question mini exam), weighted like the blueprint, nothing marked until the end, mark for review, a wall-clock timer, and an attempt saved after every answer so a reload can be resumed |
+| **Rapid review** | 78 flashcards with their own review schedule, 11 comparison drills with hidden cells, and 23 one-line facts |
+| **Cram sheet** | 20 key facts, 14 exam traps and 17 renamed-or-retired notes in one printable pass, for the final day |
+| **Study plan** | A three-day sprint: lesson and exam steps tick themselves off, and you tick the rest |
 
 ### The dashboard answers one question
 
@@ -48,19 +48,25 @@ app treats as current, and older material usually gets wrong:
 
 - **Foundry resources and projects**, not AI hubs. Hub-based projects are the *classic* model;
   a Foundry project is a child of a Foundry resource and needs no separate Storage or Key Vault.
-- **Prompt agents vs. hosted agents** - the two agent types in Foundry Agent Service - plus
-  calling the Responses API directly for an ephemeral agent, and **toolboxes** for shared tools.
-- **Two deployment options** (Serverless API, managed compute), with provisioned throughput as a
-  deployment *type* rather than a third option, and **instant access** removing the deployment
-  step for supported models.
+- **Prompt agents, voice-based prompt agents and hosted agents** - the three agent types in
+  Foundry Agent Service - plus calling the Responses API directly for an ephemeral agent, and
+  **toolboxes** for shared tools.
+- **Two deployment options** (Serverless API, and managed compute in preview), with provisioned
+  throughput as a deployment *type* rather than a third option, and **instant access** (preview)
+  removing the deployment step for supported models.
+- **Reasoning models** such as the GPT-5 series, which reject `temperature` and `top_p` and are
+  steered with `reasoning_effort` instead.
+- **Guardrails** checked at user input, tool calls, tool responses and output, and the renamed
+  **Foundry User** family of roles.
 - **Foundry IQ**: multi-source knowledge bases, agentic retrieval, permission-aware answers with
   citations.
 - **Azure Content Understanding** across documents, images, audio and video - analyzers, the
   Extract / Classify / Generate field methods, and confidence-driven straight-through processing.
-- The **GPT-image** family and **Sora-2**, not DALL·E alone; and Image Analysis 4.0's deprecation.
+- The **GPT-image** series and **Sora 2**: DALL·E 3 was retired on 4 March 2026. Image Analysis
+  4.0 is deprecated, and several Azure Language features retire on 31 March 2029.
 - Current naming: **Foundry Tools**, not Cognitive Services.
 
-There is a whole section in cram mode dedicated to these, because they are where stale practice
+There is a whole section of the cram sheet dedicated to these, because they are where stale practice
 questions will cost you marks.
 
 The original markdown notes this repo started as are archived in
@@ -92,8 +98,9 @@ npm run dev          # http://localhost:4321/learn-ai-901/
 
 `test:smoke` needs the preview server running and a local Chrome or Chromium (set `CHROME_PATH`
 if it is not on a standard path). It walks the dashboard, a lesson, a quiz, practice, the exam
-simulator, rapid review, cram, the plan and the progress page - 56 assertions including
-persistence, theme switching and mobile overflow. Worth running after editing content.
+exam, rapid review, the cram sheet, the plan, progress and resources - 80 checks, including
+server-rendered HTML, persistence, resuming an exam, keyboard answering, theme switching and
+phone layouts. Worth running after editing content or components.
 
 The dev server serves under `/learn-ai-901/` because that is the GitHub Pages base path. To work
 at the root instead:
@@ -109,7 +116,7 @@ BASE_PATH=/ npm run dev
 The workflow in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds and
 deploys on every push to `main`.
 
-**One-time setup:** in the repository, go to **Settings → Pages** and set **Source** to
+**One-time setup:** in the repository, go to **Settings**, then **Pages**, and set **Source** to
 **GitHub Actions**. Then push to `main`.
 
 The site publishes to `https://<user>.github.io/<repo>/`.
@@ -139,19 +146,24 @@ src/
 │   ├── types.ts          #   Content model + progress schema
 │   ├── exam.ts           #   Exam metadata, topics, and weights
 │   ├── modules/          #   12 lessons, authored as typed block arrays
-│   ├── questions/        #   206 questions, one file per topic + two scenario banks
+│   ├── questions/        #   217 questions, one file per topic + two scenario banks
 │   ├── review.ts         #   Flashcards, comparisons, quick facts
-│   └── roadmap.ts        #   The three-day sprint plan
+│   ├── resources.ts      #   Official links, each one checked
+│   └── roadmap.ts        #   The three-day sprint plan and exam-day tips
 ├── lib/                  # Engine - no UI
 │   ├── store.ts          #   localStorage-backed observable, Svelte store contract
 │   ├── srs.ts            #   Leitner scheduling, tuned for a few-day sprint
 │   ├── scoring.ts        #   Readiness, per-topic mastery, streaks
 │   ├── queue.ts          #   Question selection per mode, exam-weighted sampling
 │   ├── recommend.ts      #   "What should I do next?"
+│   ├── catalog.ts        #   Compact question/lesson refs passed to islands
+│   ├── pageData.ts       #   Build-time refs shared by pages (server only)
+│   ├── live.svelte.ts    #   Hydration-safe progress for islands
+│   ├── examSession.ts    #   The saved, resumable practice exam attempt
 │   └── markdown.ts       #   Tiny escape-first inline markdown renderer
-├── components/           # Svelte islands, including demos/
+├── components/           # Svelte islands, lesson/ (static lesson renderer) and demos/
 ├── layouts/ pages/       # Astro shell and routes
-└── styles/global.css     # Design tokens, light and dark
+└── styles/global.css     # Design tokens, light and dark, plus print styles
 ```
 
 Content and logic are kept apart on purpose. Adding a question means adding an object to a file
@@ -186,9 +198,10 @@ in `data/questions/`; nothing in `lib/` or `components/` needs to change.
 Lessons are arrays of typed blocks: `p`, `list`, `table`, `code`, `key`, `trap`, `changed`,
 `steps`, `demo` and `check`.
 
-The build **fails** on a duplicate question id, a single-answer question without exactly one
-correct option, or a lesson referencing a question id that does not exist - so broken content
-never ships.
+The build **fails** on a duplicate question id, a question without an https `reference`, a
+single-answer question without exactly one correct option, a wrong option without a `why`, a
+lesson referencing a question id that does not exist, or a lesson quiz that repeats its own
+knowledge checks - so broken content never ships.
 
 ### Progress and privacy
 
@@ -202,7 +215,15 @@ if you need to move between devices.
 
 [Astro 7](https://astro.build) (static output) with [Svelte 5](https://svelte.dev) islands and
 TypeScript in strict mode. No CSS framework, no chart library, no runtime dependencies beyond
-Svelte. The whole site is prerendered HTML plus a shared, cacheable JS bundle.
+Svelte. Type is Inter, one variable font self-hosted at build time, with the tailed `l` turned on
+so "AI" and "Il" never blur together. Code uses the system monospace font.
+
+### Performance
+
+Every page is prerendered, lessons included: their text, tables and callouts are plain HTML, and
+only the interactive parts (knowledge checks, demos, progress) hydrate, mostly when they scroll
+into view. Islands work from compact build-time refs, so the 240 KB question bank is downloaded
+only when a practice session or exam starts. Pages load 29 to 44 KB of gzipped JavaScript.
 
 ## Licence
 

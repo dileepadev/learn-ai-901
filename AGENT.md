@@ -40,7 +40,8 @@ src/data/          All content. Most changes go here.
   review.ts        Flashcards, comparisons, quick facts
   resources.ts     Official links
   types.ts         Every content type
-src/components/    Svelte islands (the interactive UI)
+src/lib/           Engine: progress store, SRS, scoring, catalog refs, exam session
+src/components/    Svelte islands (the interactive UI); lesson/ renders lessons statically
 src/pages/         Astro pages (the static shell)
 src/layouts/       Base.astro
 tests/smoke.mjs    Playwright smoke suite
@@ -75,6 +76,11 @@ than two, and a lesson referencing a question id that does not exist. Run `npm r
 - Match the surrounding code - naming, comment density, idiom.
 - Build internal links from `import.meta.env.BASE_URL`, never hardcode `/learn-ai-901`.
 - Keep bundle size in mind: no new runtime dependency without a good reason.
+- Islands must not import `data/questions` or `data/modules` just to count or score. Pass the
+  build-time refs from `lib/pageData` as props, and `await import('../data/questions')` only
+  when a session actually starts.
+- Islands are server-rendered, so read progress through `liveProgress()` (`lib/live.svelte.ts`),
+  never during the first render, or hydration will not match.
 - Keep components typed. `any` is a smell.
 
 ## Git
