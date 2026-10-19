@@ -1,12 +1,16 @@
 /**
  * Progress store: a tiny observable backed by localStorage.
  *
- * It implements Svelte's store contract, so components can use `$progress`
- * directly. All reads are SSR-safe: on the server the store simply reports an
- * empty progress object and never touches `localStorage`.
+ * It implements Svelte's store contract, so components can subscribe directly.
+ * Every notification carries a fresh shallow snapshot, which lets components
+ * hold progress in `$state.raw` and recompute only when it actually changes.
+ * All reads are SSR-safe: on the server the store reports empty progress and
+ * never touches `localStorage`.
  */
 import type {
   Answer,
+  FlashcardState,
+  ModuleState,
   Progress,
   Question,
   QuestionState,
@@ -32,10 +36,12 @@ export function emptyProgress(): Progress {
     sessions: [],
     activeDays: [],
     achievements: [],
+    planDone: [],
   };
 }
 
 let state: Progress = emptyProgress();
+let snapshot: Progress = state;
 let hydrated = false;
 const subscribers = new Set<(p: Progress) => void>();
 
@@ -45,21 +51,67 @@ function todayISO(d = new Date()): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+/* ------------------------------------------------------------------ *
+ * Loading and migration
+ * ------------------------------------------------------------------ */
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+const strings = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+
+/** Keep only entries whose values pass `ok`, so one bad record can't break a page. */
+function filterRecord<T>(v: unknown, ok: (x: Record<string, unknown>) => boolean): Record<string, T> {
+  if (!isRecord(v)) return {};
+  const out: Record<string, T> = {};
+  for (const [key, value] of Object.entries(v)) {
+    if (isRecord(value) && ok(value)) out[key] = value as T;
+  }
+  return out;
+}
+
 function migrate(raw: unknown): Progress {
   const base = emptyProgress();
-  if (!raw || typeof raw !== 'object') return base;
-  const parsed = raw as Partial<Progress>;
-  // Merge field-by-field so a partially-written or older payload still loads.
+  if (!isRecord(raw)) return base;
+
   return {
-    ...base,
-    ...parsed,
     v: SCHEMA_VERSION,
-    modules: parsed.modules ?? {},
-    questions: parsed.questions ?? {},
-    flashcards: parsed.flashcards ?? {},
-    sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
-    activeDays: Array.isArray(parsed.activeDays) ? parsed.activeDays : [],
-    achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
+    createdAt: isNum(raw.createdAt) ? raw.createdAt : base.createdAt,
+    updatedAt: isNum(raw.updatedAt) ? raw.updatedAt : base.updatedAt,
+    examDate:
+      typeof raw.examDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.examDate)
+        ? raw.examDate
+        : undefined,
+    lastVisited:
+      isRecord(raw.lastVisited) &&
+      typeof raw.lastVisited.path === 'string' &&
+      typeof raw.lastVisited.label === 'string' &&
+      isNum(raw.lastVisited.at)
+        ? (raw.lastVisited as Progress['lastVisited'])
+        : undefined,
+    modules: filterRecord<ModuleState>(raw.modules, (m) => {
+      m.sectionsSeen = strings(m.sectionsSeen);
+      return true;
+    }),
+    questions: filterRecord<QuestionState>(
+      raw.questions,
+      (q) => isNum(q.seen) && isNum(q.correct) && isNum(q.wrong) && isNum(q.box) && isNum(q.due),
+    ),
+    flashcards: filterRecord<FlashcardState>(
+      raw.flashcards,
+      (c) => isNum(c.box) && isNum(c.due) && isNum(c.seen),
+    ),
+    sessions: Array.isArray(raw.sessions)
+      ? (raw.sessions.filter(
+          (s) => isRecord(s) && typeof s.mode === 'string' && isNum(s.total) && isNum(s.correct),
+        ) as SessionResult[])
+      : [],
+    activeDays: strings(raw.activeDays),
+    achievements: strings(raw.achievements),
+    planDone: strings(raw.planDone),
   };
 }
 
@@ -73,34 +125,56 @@ function hydrate(): void {
     // Corrupt or unreadable storage: start clean rather than crashing the app.
     state = emptyProgress();
   }
+  snapshot = { ...state };
 }
 
+/* ------------------------------------------------------------------ *
+ * Persistence
+ * ------------------------------------------------------------------ */
+
 let flushHandle: number | undefined;
+
+function write(): void {
+  flushHandle = undefined;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Quota exceeded or private mode: keep the in-memory state working.
+  }
+}
+
+/** Write any pending change now, rather than waiting for the debounce. */
+function flush(): void {
+  if (flushHandle === undefined) return;
+  clearTimeout(flushHandle);
+  write();
+}
 
 function persist(): void {
   if (!isBrowser) return;
   // Batch rapid updates (e.g. answering through a quiz) into one write.
   if (flushHandle !== undefined) clearTimeout(flushHandle);
-  flushHandle = window.setTimeout(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // Quota exceeded or private mode: keep the in-memory state working.
-    }
-  }, 120);
+  flushHandle = window.setTimeout(write, 120);
 }
 
 function notify(): void {
-  for (const fn of subscribers) fn(state);
+  snapshot = { ...state };
+  for (const fn of subscribers) fn(snapshot);
 }
 
-/** Apply a mutation, stamp the streak, persist, and notify subscribers. */
-function update(fn: (draft: Progress) => void): void {
+/**
+ * Apply a mutation, persist, and notify subscribers. Real study (answering,
+ * reading, reviewing) also stamps today as a study day; bookkeeping such as
+ * opening a page or setting the exam date does not.
+ */
+function update(fn: (draft: Progress) => void, studied = true): void {
   hydrate();
   fn(state);
   state.updatedAt = Date.now();
-  const today = todayISO();
-  if (!state.activeDays.includes(today)) state.activeDays.push(today);
+  if (studied) {
+    const today = todayISO();
+    if (!state.activeDays.includes(today)) state.activeDays.push(today);
+  }
   persist();
   notify();
 }
@@ -109,7 +183,7 @@ function update(fn: (draft: Progress) => void): void {
 export const progress = {
   subscribe(fn: (p: Progress) => void): () => void {
     hydrate();
-    fn(state);
+    fn(snapshot);
     subscribers.add(fn);
     return () => subscribers.delete(fn);
   },
@@ -118,7 +192,17 @@ export const progress = {
 /** Snapshot the current progress. Returns empty progress during SSR. */
 export function get(): Progress {
   hydrate();
-  return state;
+  return snapshot;
+}
+
+/** True when this browser already holds some progress. */
+export function hasStoredProgress(): boolean {
+  if (!isBrowser) return false;
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== null;
+  } catch {
+    return false;
+  }
 }
 
 if (isBrowser) {
@@ -131,6 +215,13 @@ if (isBrowser) {
     } catch {
       /* ignore malformed cross-tab payloads */
     }
+  });
+
+  // A full navigation, a closed tab or a backgrounded phone must not lose the
+  // last answer to the write debounce.
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flush();
   });
 }
 
@@ -190,17 +281,20 @@ export function recordAnswer(questionId: string, correct: boolean): void {
  * ------------------------------------------------------------------ */
 
 export function markModuleStarted(moduleId: string): void {
+  if (get().modules[moduleId]?.startedAt) return;
   update((p) => {
     const m = (p.modules[moduleId] ??= { sectionsSeen: [] });
     m.startedAt ??= Date.now();
-  });
+  }, false);
 }
 
 export function markSectionSeen(moduleId: string, sectionId: string): void {
+  const existing = get().modules[moduleId];
+  if (existing?.sectionsSeen.includes(sectionId)) return;
   update((p) => {
     const m = (p.modules[moduleId] ??= { sectionsSeen: [] });
     m.startedAt ??= Date.now();
-    if (!m.sectionsSeen.includes(sectionId)) m.sectionsSeen.push(sectionId);
+    if (!m.sectionsSeen.includes(sectionId)) m.sectionsSeen = [...m.sectionsSeen, sectionId];
   });
 }
 
@@ -208,7 +302,7 @@ export function markModuleComplete(moduleId: string, complete = true): void {
   update((p) => {
     const m = (p.modules[moduleId] ??= { sectionsSeen: [] });
     m.startedAt ??= Date.now();
-    if (complete) m.completedAt = Date.now();
+    if (complete) m.completedAt ??= Date.now();
     else delete m.completedAt;
   });
 }
@@ -230,14 +324,14 @@ export function recordFlashcard(cardId: string, knewIt: boolean): void {
 }
 
 /* ------------------------------------------------------------------ *
- * Sessions
+ * Sessions, plan and settings
  * ------------------------------------------------------------------ */
 
 export function saveSession(result: Omit<SessionResult, 'id'>): SessionResult {
   const withId: SessionResult = { ...result, id: `s_${result.finishedAt.toString(36)}` };
   update((p) => {
-    p.sessions.push(withId);
-    // Keep history bounded; the dashboard only ever charts the recent run.
+    p.sessions = [...p.sessions, withId];
+    // Keep history bounded; nothing charts more than the recent run.
     if (p.sessions.length > 120) p.sessions = p.sessions.slice(-120);
   });
   return withId;
@@ -246,30 +340,38 @@ export function saveSession(result: Omit<SessionResult, 'id'>): SessionResult {
 export function setLastVisited(path: string, label: string): void {
   update((p) => {
     p.lastVisited = { path, label, at: Date.now() };
-  });
+  }, false);
 }
 
 export function setExamDate(date: string | undefined): void {
   update((p) => {
     if (date) p.examDate = date;
     else delete p.examDate;
+  }, false);
+}
+
+export function setPlanStepDone(stepId: string, done: boolean): void {
+  update((p) => {
+    const has = p.planDone.includes(stepId);
+    if (done && !has) p.planDone = [...p.planDone, stepId];
+    if (!done && has) p.planDone = p.planDone.filter((id) => id !== stepId);
   });
 }
 
+/** Record a one-off marker. Returns true the first time only. */
 export function unlockAchievement(id: string): boolean {
-  let unlocked = false;
+  if (get().achievements.includes(id)) return false;
   update((p) => {
-    if (!p.achievements.includes(id)) {
-      p.achievements.push(id);
-      unlocked = true;
-    }
-  });
-  return unlocked;
+    if (!p.achievements.includes(id)) p.achievements = [...p.achievements, id];
+  }, false);
+  return true;
 }
 
 /** Wipe all stored progress. */
 export function resetAll(): void {
   hydrate();
+  if (flushHandle !== undefined) clearTimeout(flushHandle);
+  flushHandle = undefined;
   state = emptyProgress();
   if (isBrowser) {
     try {
@@ -283,17 +385,21 @@ export function resetAll(): void {
 
 /** Export progress as a JSON string for backup. */
 export function exportJSON(): string {
-  return JSON.stringify(get(), null, 2);
+  hydrate();
+  return JSON.stringify(state, null, 2);
 }
 
 /** Import a previously exported payload. Returns false if it isn't usable. */
 export function importJSON(raw: string): boolean {
   try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return false;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed) || !isRecord(parsed.questions) || !isRecord(parsed.modules)) {
+      return false;
+    }
     hydrate();
     state = migrate(parsed);
     persist();
+    flush();
     notify();
     return true;
   } catch {

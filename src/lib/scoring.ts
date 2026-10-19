@@ -6,9 +6,22 @@
  * (question accuracy), and discounts accuracy that rests on a small sample -
  * three lucky guesses should not read as mastery.
  */
-import type { Module, Progress, Question, TopicId } from '../data/types';
+import type { Progress, TopicId } from '../data/types';
 import { TOPICS } from '../data/exam';
 import { MASTERED_BOX } from './srs';
+
+/** Anything with an id and a topic can be scored - a full question or a QuestionRef. */
+export interface ScoredQuestion {
+  id: string;
+  topic: TopicId;
+}
+
+/** Anything with an id and the topics it teaches - a full module or a ModuleRef. */
+export interface ScoredModule {
+  id: string;
+  topic: TopicId;
+  alsoCovers?: TopicId[];
+}
 
 /** Attempts on a topic needed before its accuracy is trusted at face value. */
 const CONFIDENCE_TARGET = 10;
@@ -72,8 +85,8 @@ export function readinessLabel(pct: number): ReadinessLabel {
 
 export function computeTopicStats(
   p: Progress,
-  questions: Question[],
-  modules: Module[],
+  questions: ScoredQuestion[],
+  modules: ScoredModule[],
 ): TopicStats[] {
   return TOPICS.map((topic) => {
     const bank = questions.filter((q) => q.topic === topic.id);
@@ -124,8 +137,8 @@ export function computeTopicStats(
 
 export function computeReadiness(
   p: Progress,
-  questions: Question[],
-  modules: Module[],
+  questions: ScoredQuestion[],
+  modules: ScoredModule[],
 ): ReadinessBreakdown {
   const byTopic = computeTopicStats(p, questions, modules);
   const totalWeight = byTopic.reduce((sum, t) => sum + t.weight, 0) || 1;
@@ -179,8 +192,8 @@ export interface OverallStats {
 
 export function computeOverall(
   p: Progress,
-  questions: Question[],
-  modules: Module[],
+  questions: ScoredQuestion[],
+  modules: ScoredModule[],
 ): OverallStats {
   let questionsAnswered = 0;
   let distinctAnswered = 0;
@@ -223,11 +236,23 @@ export function computeOverall(
   };
 }
 
+/** Whole-day index of an ISO date, independent of the viewer's time zone. */
+function dayNumber(iso: string): number {
+  return Math.floor(Date.parse(`${iso}T00:00:00Z`) / 86_400_000);
+}
+
+/** Today's local calendar date as YYYY-MM-DD. */
+function localToday(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 /** Consecutive-day streaks from a list of ISO dates. */
 export function streaks(days: string[]): { current: number; best: number } {
   if (days.length === 0) return { current: 0, best: 0 };
   const sorted = [...new Set(days)].sort();
-  const toDayNumber = (iso: string) => Math.floor(Date.parse(`${iso}T00:00:00`) / 86_400_000);
+  const toDayNumber = dayNumber;
 
   let best = 1;
   let run = 1;
@@ -237,8 +262,9 @@ export function streaks(days: string[]): { current: number; best: number } {
     if (run > best) best = run;
   }
 
-  // The streak is only "current" if it includes today or yesterday.
-  const today = Math.floor(Date.now() / 86_400_000);
+  // The streak is only "current" if it includes today or yesterday. Both sides
+  // are calendar dates, so the comparison holds in every time zone.
+  const today = toDayNumber(localToday());
   const lastDay = toDayNumber(sorted[sorted.length - 1]!);
   const current = today - lastDay <= 1 ? run : 0;
 

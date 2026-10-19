@@ -165,7 +165,7 @@ export function sampleByExamWeight(
 }
 
 /** Questions currently due for review. */
-export function dueQuestions(all: Question[], p: Progress, now = Date.now()): Question[] {
+export function dueQuestions<T extends { id: string }>(all: T[], p: Progress, now = Date.now()): T[] {
   return all.filter((q) => {
     const s = p.questions[q.id];
     return s ? s.due <= now : false;
@@ -173,6 +173,6 @@ export function dueQuestions(all: Question[], p: Progress, now = Date.now()): Qu
 }
 
 /** Questions never attempted. */
-export function unseenQuestions(all: Question[], p: Progress): Question[] {
+export function unseenQuestions<T extends { id: string }>(all: T[], p: Progress): T[] {
   return all.filter((q) => !p.questions[q.id]?.seen);
 }
