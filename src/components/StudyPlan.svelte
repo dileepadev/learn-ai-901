@@ -1,420 +1,331 @@
 <script lang="ts">
-  /** The three-day sprint plan, with each step ticked off as its work is done. */
-  import { SPRINT_PLAN, EXAM_DAY_TIPS } from '../data/roadmap';
-  import { MODULE_BY_ID, TOTAL_LESSON_MINUTES } from '../data/modules';
-  import { MODULES } from '../data/modules';
-  import { ALL_QUESTIONS } from '../data/questions';
-  import { progress, emptyProgress, get } from '../lib/store';
-  import { computeOverall, daysUntilExam } from '../lib/scoring';
-  import { EXAM, TOPICS } from '../data/exam';
-  import type { Progress } from '../data/types';
+  /**
+   * The three-day sprint plan. Lesson steps tick themselves off when their
+   * lessons are complete, exam steps when you have sat that paper; anything
+   * else you tick yourself.
+   */
+  import { SPRINT_PLAN, type PlanStep } from '../data/roadmap';
+  import type { ModuleRef } from '../lib/catalog';
+  import { setPlanStepDone } from '../lib/store';
+  import { daysUntilExam } from '../lib/scoring';
+  import { liveProgress } from '../lib/live.svelte';
+  import type { IconName } from '../lib/icons';
+  import Icon from './Icon.svelte';
 
   interface Props {
     base: string;
+    modules: ModuleRef[];
   }
-  let { base }: Props = $props();
+
+  let { base, modules }: Props = $props();
 
   const link = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+  const live = liveProgress();
+  const p = $derived(live.value);
+  const byId = $derived(new Map(modules.map((m) => [m.id, m])));
 
-  let p = $state<Progress>(get());
-  $effect(() => progress.subscribe((next) => (p = next)));
+  const ICON: Record<PlanStep['kind'], IconName> = {
+    learn: 'learn',
+    practice: 'practice',
+    exam: 'exam',
+    review: 'review',
+    cram: 'cram',
+  };
 
-  const overall = $derived(computeOverall(p, ALL_QUESTIONS, MODULES));
-  const daysLeft = $derived(daysUntilExam(p));
-
-  /** A learn step is done when all its modules are complete. */
-  function stepDone(step: (typeof SPRINT_PLAN)[number]['steps'][number]): boolean {
-    if (step.kind === 'learn' && step.moduleIds) {
+  /** Done by evidence: the lessons are complete, or that paper has been sat. */
+  function autoDone(step: PlanStep): boolean {
+    if (step.kind === 'learn' && step.moduleIds?.length) {
       return step.moduleIds.every((id) => Boolean(p.modules[id]?.completedAt));
     }
     if (step.kind === 'exam') {
-      return p.sessions.some((s) => s.mode === 'exam' || s.mode === 'mini-exam');
-    }
-    if (step.kind === 'practice') {
-      return p.sessions.some((s) => s.mode !== 'exam' && s.mode !== 'mini-exam' && s.total >= 8);
+      const mode = step.exam === 'mini' ? 'mini-exam' : 'exam';
+      return p.sessions.some((s) => s.mode === mode);
     }
     return false;
   }
 
-  function stepHref(step: (typeof SPRINT_PLAN)[number]['steps'][number]): string {
+  function isDone(step: PlanStep): boolean {
+    return autoDone(step) || p.planDone.includes(step.id);
+  }
+
+  function minutesOf(step: PlanStep): number {
+    if (step.kind === 'learn' && step.moduleIds) {
+      return step.moduleIds.reduce((sum, id) => sum + (byId.get(id)?.minutes ?? 0), 0);
+    }
+    return step.minutes ?? 0;
+  }
+
+  function hrefOf(step: PlanStep): string {
     switch (step.kind) {
       case 'learn': {
-        const nextIncomplete = step.moduleIds?.find((id) => !p.modules[id]?.completedAt);
-        return link(`/learn/${nextIncomplete ?? step.moduleIds?.[0] ?? ''}/`);
+        const next = step.moduleIds?.find((id) => !p.modules[id]?.completedAt) ?? step.moduleIds?.[0];
+        return link(`/learn/${next ?? ''}/`);
       }
+      case 'practice':
+        if (step.practice === 'weak') return link('/practice/weak/');
+        if (step.practice === 'mistakes') return link('/practice/mistakes/');
+        return step.topics?.length ? link(`/practice/?topics=${step.topics.join(',')}`) : link('/practice/');
       case 'exam':
-        return link('/exam/');
+        return link(step.exam === 'mini' ? '/exam/?preset=mini' : '/exam/');
       case 'review':
         return link('/review/');
       case 'cram':
         return link('/cram/');
-      case 'practice':
-      default:
-        return link('/practice/');
     }
   }
 
-  const kindIcon: Record<string, string> = {
-    learn: '📘',
-    practice: '✏️',
-    exam: '⏱️',
-    review: '⚡',
-    cram: '🔥',
-  };
+  function hours(minutes: number): string {
+    const h = minutes / 60;
+    return h >= 1 ? `about ${Math.round(h * 10) / 10} hours` : `${minutes} minutes`;
+  }
 
-  const dayProgress = $derived(
-    SPRINT_PLAN.map((day) => {
-      const done = day.steps.filter(stepDone).length;
-      return { day, done, total: day.steps.length, minutes: day.steps.reduce((s, x) => s + x.minutes, 0) };
-    }),
+  const days = $derived(
+    SPRINT_PLAN.map((day) => ({
+      day,
+      done: day.steps.filter(isDone).length,
+      minutes: day.steps.reduce((sum, s) => sum + minutesOf(s), 0),
+    })),
   );
-
-  const currentDay = $derived(dayProgress.find((d) => d.done < d.total) ?? dayProgress[dayProgress.length - 1]);
+  const currentDay = $derived(days.find((d) => d.done < d.day.steps.length)?.day.id);
+  const daysLeft = $derived(daysUntilExam(p));
 </script>
 
-<div class="plan">
-  <header class="head">
-    <div>
-      <h1>Your study plan</h1>
-      <p class="muted">
-        A three-day sprint, front-loaded with the heaviest-weighted topics. Every day ends with
-        retrieval practice rather than more reading, because that is what actually moves a score.
-      </p>
-    </div>
-    <div class="head-stats">
-      {#if daysLeft !== null}
-        <div class="card card-tight stat" class:urgent={daysLeft <= 1}>
-          <strong>{daysLeft <= 0 ? 'Today' : daysLeft}</strong>
-          <span class="tiny muted">{daysLeft <= 0 ? 'exam day' : daysLeft === 1 ? 'day left' : 'days left'}</span>
+{#if live.ready && daysLeft !== null && daysLeft >= 0 && daysLeft <= 1}
+  <a class="sheet urgent" href={link('/cram/')}>
+    <strong>{daysLeft === 0 ? 'It is exam day.' : 'Your exam is tomorrow.'} Switch to the cram sheet.</strong>
+    <span class="small muted">No new material this close in. Consolidate, and clear the questions you got wrong.</span>
+  </a>
+{:else if live.ready && daysLeft !== null && daysLeft > 1 && daysLeft < 3}
+  <p class="callout callout-changed">
+    You have fewer days left than this plan assumes. Skim lessons on topics you already know, and keep the
+    full practice exam: it tells you where the remaining time should go.
+  </p>
+{/if}
+
+<div class="days">
+  {#each days as { day, done, minutes } (day.id)}
+    {@const complete = done === day.steps.length}
+    <section
+      class="day sheet"
+      class:current={live.ready && day.id === currentDay}
+      aria-labelledby={`${day.id}-title`}
+    >
+      <header class="day-head">
+        <div>
+          <h2 id={`${day.id}-title`}>{day.title}</h2>
+          <p class="muted">{day.goal}</p>
         </div>
-      {/if}
-      <div class="card card-tight stat">
-        <strong>{overall.modulesComplete}/{overall.moduleCount}</strong>
-        <span class="tiny muted">lessons done</span>
-      </div>
-    </div>
-  </header>
+        <p class="day-meta small num">
+          <span class="pv" class:ready={live.ready} class:complete>{done} of {day.steps.length} done</span>
+          <span class="subtle">{hours(minutes)}</span>
+        </p>
+      </header>
 
-  {#if daysLeft !== null && daysLeft <= 1}
-    <a class="urgent-banner card" href={link('/cram/')}>
-      <strong>🔥 {daysLeft <= 0 ? 'Exam day.' : 'Exam tomorrow.'} Switch to cram mode.</strong>
-      <span class="tiny muted">
-        No new material this close in - consolidate what you have and clear your outstanding
-        mistakes. →
-      </span>
-    </a>
-  {/if}
-
-  <div class="days">
-    {#each dayProgress as { day, done, total, minutes } (day.id)}
-      <section class="card day" class:current={day.id === currentDay?.day.id} class:complete={done === total}>
-        <header class="day-head">
-          <div>
-            <h2>{day.title}</h2>
-            <p class="tiny muted">{day.goal}</p>
-          </div>
-          <div class="day-meta">
-            <span class="chip" class:chip-success={done === total}>{done}/{total}</span>
-            <span class="tiny subtle">≈{Math.round((minutes / 60) * 10) / 10}h</span>
-          </div>
-        </header>
-
-        <ol class="steps">
-          {#each day.steps as step (step.label)}
-            {@const done = stepDone(step)}
-            <li class="step" class:done>
-              <a class="step-link" href={stepHref(step)}>
-                <span class="step-check" aria-hidden="true">{done ? '✓' : kindIcon[step.kind]}</span>
-                <span class="step-body">
-                  <span class="step-label">{step.label}</span>
-                  <span class="tiny muted">{step.why}</span>
-                  {#if step.moduleIds}
-                    <span class="step-mods">
-                      {#each step.moduleIds as id (id)}
-                        {#if MODULE_BY_ID[id]}
-                          <span class="chip" class:chip-success={p.modules[id]?.completedAt}>
-                            {MODULE_BY_ID[id]!.icon}
-                            {MODULE_BY_ID[id]!.title}
-                          </span>
-                        {/if}
-                      {/each}
-                    </span>
-                  {/if}
+      <ol class="steps">
+        {#each day.steps as step (step.id)}
+          {@const done = isDone(step)}
+          {@const auto = autoDone(step)}
+          <li class="step" class:done>
+            <label class="tick" title={auto ? 'Done: worked out from your progress' : 'Tick when done'}>
+              <input
+                type="checkbox"
+                checked={done}
+                disabled={auto}
+                onchange={(e) => setPlanStepDone(step.id, e.currentTarget.checked)}
+              />
+              <span class="visually-hidden">{step.label} done</span>
+              <span class="box" aria-hidden="true"><Icon name="check" size={16} /></span>
+            </label>
+            <a class="step-link" href={hrefOf(step)}>
+              <span class="step-title">
+                <Icon name={ICON[step.kind]} size={18} />
+                {step.label}
+              </span>
+              <span class="small muted">{step.why}</span>
+              {#if step.moduleIds}
+                <span class="mods small">
+                  {#each step.moduleIds as id (id)}
+                    {@const m = byId.get(id)}
+                    {#if m}
+                      <span class="chip" class:chip-success={live.ready && Boolean(p.modules[id]?.completedAt)}>
+                        Lesson {m.order}: {m.title}
+                      </span>
+                    {/if}
+                  {/each}
                 </span>
-                <span class="chip step-time">{step.minutes}m</span>
-              </a>
-            </li>
-          {/each}
-        </ol>
-      </section>
-    {/each}
-  </div>
-
-  <section class="card weights">
-    <h2 class="h-sm">Why this order</h2>
-    <p>
-      Time goes where the marks are. These are the published weights, and the plan covers the heavy
-      topics first so that if you run out of time, what you skipped is what mattered least.
-    </p>
-    <ul class="weight-list">
-      {#each [...TOPICS].sort((a, b) => b.weight - a.weight) as t (t.id)}
-        <li>
-          <span class="w-label">{t.label}</span>
-          <span class="w-bar"><span style:width={`${(t.weight / 20) * 100}%`}></span></span>
-          <strong>{t.weight}%</strong>
-        </li>
-      {/each}
-    </ul>
-    <p class="tiny subtle">
-      Domain weights come from the official study guide ({EXAM.skillsMeasuredDate}); the split within
-      each domain is proportional to how many skills-measured bullets it lists. Total lesson time is
-      about {Math.round((TOTAL_LESSON_MINUTES / 60) * 10) / 10} hours.
-    </p>
-  </section>
-
-  <section class="card">
-    <h2 class="h-sm">Sitting the exam</h2>
-    <div class="tips">
-      {#each EXAM_DAY_TIPS as tip (tip.title)}
-        <div class="tip">
-          <strong>{tip.title}</strong>
-          <p class="tiny muted">{tip.body}</p>
-        </div>
-      {/each}
-    </div>
-  </section>
+              {/if}
+            </a>
+            <span class="chip step-time num">{minutesOf(step)} min</span>
+          </li>
+        {/each}
+      </ol>
+    </section>
+  {/each}
 </div>
 
 <style>
-  .plan {
-    max-width: 820px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .head p {
-    max-width: 60ch;
-    margin: 0;
-    font-size: 0.95rem;
-  }
-
-  .head-stats {
-    display: flex;
-    gap: 0.5rem;
-  }
-  .stat {
-    text-align: center;
-    min-width: 92px;
-    display: flex;
-    flex-direction: column;
-  }
-  .stat strong {
-    font-size: 1.4rem;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-  }
-  .stat.urgent {
-    border-color: var(--danger-border);
-    background: var(--danger-soft);
-  }
-
-  .urgent-banner {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    text-decoration: none;
-    color: inherit;
-    border-color: var(--warn-border);
+  .urgent {
+    display: grid;
+    gap: 0.2rem;
+    margin-bottom: 1.25rem;
+    border-color: var(--warn-edge);
     background: var(--warn-soft);
-  }
-  .urgent-banner:hover {
     color: inherit;
-    transform: translateY(-1px);
+  }
+  .callout {
+    margin-bottom: 1.25rem;
   }
 
   .days {
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
+    display: grid;
+    gap: 1rem;
   }
 
   .day {
-    padding: 1rem 1.1rem;
+    border-radius: var(--radius-xl);
   }
   .day.current {
-    border-color: var(--accent);
-  }
-  .day.complete {
-    border-color: var(--success-border);
+    border-color: var(--accent-edge);
+    box-shadow:
+      0 0 0 1px var(--accent-edge),
+      var(--shadow-md);
   }
 
   .day-head {
     display: flex;
-    align-items: flex-start;
     justify-content: space-between;
-    gap: 0.8rem;
-    margin-bottom: 0.75rem;
+    align-items: flex-start;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
   }
   .day-head h2 {
-    font-size: 1.05rem;
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.25rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
   }
   .day-head p {
     margin: 0;
-    max-width: 54ch;
   }
   .day-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.15rem;
-    flex-shrink: 0;
+    display: grid;
+    justify-items: end;
+    gap: 0.1rem;
+    font-weight: 600;
+  }
+  .day-meta .complete {
+    color: var(--success);
   }
 
   .steps {
-    list-style: none;
+    display: grid;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.85rem;
+    margin: 0;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .tick {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+  }
+  .tick input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .tick input:disabled {
+    cursor: default;
+  }
+  .box {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 7px;
+    background: var(--surface);
+    color: transparent;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .tick:hover .box {
+    border-color: var(--accent);
+  }
+  .tick input:checked + .visually-hidden + .box {
+    border-color: transparent;
+    background: var(--success);
+    color: var(--surface);
+  }
+  .tick input:focus-visible + .visually-hidden + .box {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .step-link {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    padding: 0.55rem 0.7rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    text-decoration: none;
-    color: inherit;
-    transition:
-      border-color 0.13s,
-      background 0.13s;
-  }
-  .step-link:hover {
-    border-color: var(--accent);
-    background: var(--bg-hover);
-    color: inherit;
-  }
-  .step.done .step-link {
-    border-color: var(--success-border);
-    background: var(--success-soft);
-  }
-
-  .step-check {
     display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-    margin-top: 0.1rem;
-    border-radius: 999px;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    font-size: 0.72rem;
-  }
-  .step.done .step-check {
-    background: var(--success);
-    border-color: var(--success);
-    color: var(--bg-elevated);
-    font-weight: 800;
-  }
-
-  .step-body {
-    display: flex;
-    flex-direction: column;
     gap: 0.2rem;
-    flex: 1;
-    min-width: 0;
+    color: inherit;
+    text-decoration: none;
   }
-  .step-label {
-    font-size: 0.93rem;
-    font-weight: 620;
-    line-height: 1.35;
+  .step-link:hover .step-title {
+    color: var(--accent);
   }
-
-  .step-mods {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    margin-top: 0.15rem;
-  }
-  .step-mods .chip {
-    font-size: 0.66rem;
-  }
-
-  .step-time {
-    flex-shrink: 0;
-    font-size: 0.68rem;
-  }
-
-  .h-sm {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--fg-subtle);
-    font-weight: 700;
-    margin-bottom: 0.6rem;
-  }
-
-  .weights p {
-    font-size: 0.92rem;
-    max-width: 64ch;
-  }
-
-  .weight-list {
-    list-style: none;
-    margin: 0.8rem 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .weight-list li {
-    display: grid;
-    grid-template-columns: minmax(120px, 1fr) 2fr auto;
+  .step-title {
+    display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    font-size: 0.88rem;
+    gap: 0.45rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: color 0.15s ease;
   }
-  .w-bar {
-    display: block;
-    height: 7px;
-    border-radius: 999px;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    overflow: hidden;
+  .step-title :global(.icon) {
+    color: var(--ink-3);
   }
-  .w-bar > span {
-    display: block;
-    height: 100%;
-    background: var(--accent);
+  .step.done .step-title {
+    color: var(--ink-3);
+    text-decoration: line-through;
+    text-decoration-color: var(--ink-3);
+    text-decoration-thickness: 1px;
+  }
+  .mods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+  }
+  .step-time {
+    margin-top: 0.25rem;
   }
 
-  .tips {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0.7rem;
-  }
-  .tip strong {
-    display: block;
-    font-size: 0.9rem;
-    margin-bottom: 0.1rem;
-  }
-  .tip p {
-    margin: 0;
-    line-height: 1.5;
+  @media (max-width: 560px) {
+    .step {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .step-time {
+      grid-column: 2;
+      justify-self: start;
+      margin-top: 0;
+    }
   }
 </style>

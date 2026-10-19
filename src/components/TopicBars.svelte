@@ -1,13 +1,14 @@
 <script lang="ts">
-  /** Per-topic readiness, ordered by exam weight so the important rows lead. */
+  /** Readiness per exam topic, heaviest topics first. */
   import type { TopicStats } from '../lib/scoring';
 
   interface Props {
     stats: TopicStats[];
     base: string;
-    /** Show the "drill this" link on each row. */
+    /** Show the drill link on each row. */
     actionable?: boolean;
   }
+
   let { stats, base, actionable = true }: Props = $props();
 
   const link = (p: string) => `${base.replace(/\/$/, '')}${p}`;
@@ -24,26 +25,21 @@
 <ul class="bars">
   {#each sorted as t (t.topic)}
     {@const pct = Math.round(t.score * 100)}
-    <li class="row-item {tone(t.score)}">
-      <div class="row-head">
+    <li class={tone(t.score)}>
+      <div class="head">
         <span class="name">{t.label}</span>
-        <span class="chip weight" title="Approximate share of the exam">{t.weight}%</span>
-        <span class="score">{pct}%</span>
+        <span class="weight small subtle num" title="Estimated share of the exam">about {t.weight}% of the exam</span>
+        <span class="score num">{pct}%</span>
       </div>
       <div class="bar" role="img" aria-label={`${t.label}: ${pct} percent ready`}>
         <span style:width={`${pct}%`}></span>
       </div>
-      <div class="row-meta tiny subtle">
-        <span>
-          {t.modulesComplete}/{t.moduleCount} lessons
-          &middot;
-          {t.attempted}/{t.bankSize} questions
-          {#if t.accuracy !== null}
-            &middot; {Math.round(t.accuracy * 100)}% correct
-          {/if}
-        </span>
+      <div class="meta small subtle num">
+        <span>{t.modulesComplete} of {t.moduleCount} lessons</span>
+        <span>{t.attempted} of {t.bankSize} questions tried</span>
+        {#if t.accuracy !== null}<span>{Math.round(t.accuracy * 100)}% correct</span>{/if}
         {#if actionable}
-          <a href={link(`/practice/weak/?topic=${t.topic}`)}>Drill →</a>
+          <a class="drill" href={link(`/practice/weak/?topic=${t.topic}`)}>Drill {t.label}</a>
         {/if}
       </div>
     </li>
@@ -52,51 +48,32 @@
 
 <style>
   .bars {
-    list-style: none;
+    display: grid;
+    gap: 1.35rem;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
+    list-style: none;
   }
-
-  .row-head {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    margin-bottom: 0.3rem;
+  .bars li {
+    margin: 0;
   }
-
+  .head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+  }
   .name {
-    font-size: 0.92rem;
     font-weight: 600;
+    letter-spacing: -0.01em;
   }
-
-  .weight {
-    font-size: 0.68rem;
-    padding: 0.1rem 0.38rem;
-  }
-
   .score {
     margin-left: auto;
-    font-size: 0.85rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--fg-muted);
-  }
-
-  .bar {
-    height: 7px;
-    border-radius: 999px;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    overflow: hidden;
+    font-weight: 650;
   }
   .bar > span {
-    display: block;
-    height: 100%;
-    background: var(--fg-subtle);
-    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    background: var(--ink-3);
   }
   .good .bar > span {
     background: var(--success);
@@ -108,15 +85,20 @@
     background: var(--danger);
   }
   .none .bar > span {
-    background: var(--border-strong);
+    background: transparent;
   }
-
-  .row-meta {
+  .meta {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    margin-top: 0.25rem;
     flex-wrap: wrap;
+    gap: 0.2rem 1rem;
+    margin-top: 0.35rem;
+  }
+  .drill {
+    margin-left: auto;
+    font-weight: 550;
+    text-decoration: none;
+  }
+  .drill:hover {
+    text-decoration: underline;
   }
 </style>

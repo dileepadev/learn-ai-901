@@ -46,14 +46,13 @@
 </script>
 
 <div class="demo">
-  <div class="tabs" role="tablist" aria-label="Computer vision task">
+  <div class="tabs" role="group" aria-label="Computer vision task">
     {#each TASKS as t (t.id)}
       <button
         type="button"
-        role="tab"
         class="tab"
         class:active={task === t.id}
-        aria-selected={task === t.id}
+        aria-pressed={task === t.id}
         onclick={() => (task = t.id)}>{t.label}</button
       >
     {/each}
@@ -62,20 +61,20 @@
   <div class="stage">
     <svg viewBox="0 0 200 150" role="img" aria-label={`Warehouse scene with ${current.label} output`}>
       <!-- Scene -->
-      <rect x="0" y="0" width="200" height="150" fill="var(--bg-sunken)" />
+      <rect x="0" y="0" width="200" height="150" fill="var(--surface-2)" />
       <rect x="0" y="112" width="200" height="38" fill="var(--border)" opacity="0.5" />
 
       <!-- Sign -->
-      <rect x="110" y="20" width="66" height="14" rx="2" fill="var(--bg-elevated)" stroke="var(--border-strong)" />
-      <text x="143" y="30" font-size="8" text-anchor="middle" fill="var(--fg-muted)" font-family="monospace">AISLE 4</text>
+      <rect x="110" y="20" width="66" height="14" rx="2" fill="var(--surface)" stroke="var(--border-strong)" />
+      <text x="143" y="30" font-size="8" text-anchor="middle" fill="var(--ink-2)" font-family="monospace">AISLE 4</text>
 
       <!-- Pallet -->
-      <rect x="14" y="128" width="74" height="14" rx="1" fill="var(--warn-soft)" stroke="var(--warn-border)" />
+      <rect x="14" y="128" width="74" height="14" rx="1" fill="var(--warn-soft)" stroke="var(--warn-edge)" />
 
       <!-- Boxes -->
-      <rect x="18" y="96" width="30" height="26" rx="2" fill="var(--info-soft)" stroke="var(--info-border)" />
-      <text x="33" y="108" font-size="5" text-anchor="middle" fill="var(--fg-muted)" font-family="monospace">FRAGILE</text>
-      <rect x="54" y="96" width="30" height="26" rx="2" fill="var(--info-soft)" stroke="var(--info-border)" />
+      <rect x="18" y="96" width="30" height="26" rx="2" fill="var(--accent-soft)" stroke="var(--border)" />
+      <text x="33" y="108" font-size="5" text-anchor="middle" fill="var(--ink-2)" font-family="monospace">FRAGILE</text>
+      <rect x="54" y="96" width="30" height="26" rx="2" fill="var(--accent-soft)" stroke="var(--border)" />
 
       <!-- Person -->
       <circle cx="142" cy="74" r="10" fill="var(--accent-soft)" stroke="var(--border-strong)" />
@@ -85,14 +84,14 @@
       {#if task === 'classify'}
         <rect x="2" y="2" width="196" height="146" fill="none" stroke="var(--accent)" stroke-width="2.5" rx="4" />
         <rect x="6" y="6" width="78" height="15" rx="3" fill="var(--accent)" />
-        <text x="45" y="17" font-size="8" text-anchor="middle" fill="var(--accent-fg)" font-weight="700">warehouse 94%</text>
+        <text x="45" y="17" font-size="8" text-anchor="middle" fill="var(--on-accent)" font-weight="700">warehouse 94%</text>
       {/if}
 
       {#if task === 'detect'}
         {#each [{ x: 18, y: 96, w: 30, h: 26, l: 'box' }, { x: 54, y: 96, w: 30, h: 26, l: 'box' }, { x: 14, y: 128, w: 74, h: 14, l: 'pallet' }, { x: 128, y: 62, w: 30, h: 80, l: 'person' }] as b (b.l + b.x)}
           <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke="var(--accent)" stroke-width="1.8" />
           <rect x={b.x} y={b.y - 9} width={b.l.length * 4.6 + 6} height="9" fill="var(--accent)" />
-          <text x={b.x + 3} y={b.y - 2.5} font-size="6" fill="var(--accent-fg)" font-weight="700">{b.l}</text>
+          <text x={b.x + 3} y={b.y - 2.5} font-size="6" fill="var(--on-accent)" font-weight="700">{b.l}</text>
         {/each}
       {/if}
 
@@ -114,7 +113,7 @@
       {#if task === 'face'}
         <rect x="132" y="64" width="20" height="22" fill="none" stroke="var(--danger)" stroke-width="1.8" />
         <rect x="132" y="55" width="26" height="9" fill="var(--danger)" />
-        <text x="135" y="61.5" font-size="6" fill="var(--bg-elevated)" font-weight="700">face</text>
+        <text x="135" y="61.5" font-size="6" fill="var(--surface)" font-weight="700">face</text>
       {/if}
     </svg>
 
@@ -145,21 +144,21 @@
     padding: 0.3rem 0.65rem;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg-muted);
+    background: var(--surface);
+    color: var(--ink-2);
     cursor: pointer;
     transition:
       background 0.13s,
       color 0.13s;
   }
   .tab:hover {
-    background: var(--bg-hover);
-    color: var(--fg);
+    background: var(--hover);
+    color: var(--ink);
   }
   .tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--accent-fg);
+    color: var(--on-accent);
   }
 
   .stage {
@@ -188,7 +187,7 @@
     font-size: 0.72rem;
     padding: 0.6rem;
     border-radius: var(--radius-sm);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     max-height: 170px;
     overflow: auto;
@@ -196,7 +195,7 @@
 
   .note {
     margin: 0;
-    color: var(--fg-muted);
+    color: var(--ink-2);
     line-height: 1.5;
   }
 

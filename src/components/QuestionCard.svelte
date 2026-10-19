@@ -1,32 +1,39 @@
 <script lang="ts">
   /**
    * Renders any question type, collects an answer, and - outside exam mode -
-   * shows immediate feedback explaining both the correct answer and why the
-   * chosen distractor was wrong.
+   * marks it straight away: the correct answer, why it is correct, and why each
+   * wrong option is wrong.
+   *
+   * State is initialised once from props. Parents that reuse one card for a
+   * sequence of questions wrap it in `{#key question.id}`.
    */
-  import type { Answer, Question } from '../data/types';
+  import { tick, untrack } from 'svelte';
+  import type { Answer, ChoiceOption, Question } from '../data/types';
   import { grade } from '../lib/store';
   import { inlineMarkdown } from '../lib/markdown';
   import { topicLabel } from '../data/exam';
+  import Icon from './Icon.svelte';
 
   interface Props {
     question: Question;
     /** Exam mode hides feedback and lets the answer be changed freely. */
     examMode?: boolean;
-    /** Pre-existing answer, for review screens or resuming an exam. */
+    /** Pre-existing answer, for review screens or returning to an exam question. */
     initial?: Answer | null;
-    /** Show the explanation immediately (review-of-mistakes screens). */
+    /** Show the marking immediately (review screens). */
     revealed?: boolean;
-    /** Called whenever the answer changes (exam mode autosave). */
+    /** Varies the option order between sessions while keeping it stable within one. */
+    seed?: number;
+    /** Listen for keyboard shortcuts. Only one card on the page should do this. */
+    keys?: boolean;
+    /** Called whenever the answer changes (exam mode). */
     onchange?: (answer: Answer, complete: boolean) => void;
-    /** Called once when the learner submits and feedback is shown. */
+    /** Called once when the learner submits and the marking is shown. */
     onanswered?: (correct: boolean, answer: Answer) => void;
     /** Called when the learner asks for the next question. */
     onnext?: () => void;
     /** Label for the advance button. */
     nextLabel?: string;
-    /** Hide the advance button (lesson inline checks manage their own flow). */
-    hideNext?: boolean;
   }
 
   let {
@@ -34,77 +41,80 @@
     examMode = false,
     initial = null,
     revealed = false,
+    seed = 0,
+    keys = false,
     onchange,
     onanswered,
     onnext,
-    nextLabel = 'Next',
-    hideNext = false,
+    nextLabel = 'Next question',
   }: Props = $props();
 
-  /* ---------------- answer state ---------------- */
+  const LETTERS = 'ABCDEFGHIJ';
 
-  let selectedSingle = $state<string | null>(null);
-  let selectedMulti = $state<string[]>([]);
-  let assignments = $state<Record<string, string | null>>({});
-  let ordering = $state<string[]>([]);
+  /* ---------------- stable shuffles ---------------- */
 
-  let submitted = $state(false);
-  let wasCorrect = $state(false);
-
-  /** Reset everything when the question changes. */
-  let currentId = $state('');
-  $effect(() => {
-    if (currentId === question.id) return;
-    currentId = question.id;
-    submitted = revealed;
-    wasCorrect = false;
-
-    selectedSingle = null;
-    selectedMulti = [];
-    assignments = {};
-    ordering = [];
-
-    if (question.type === 'match') {
-      assignments = Object.fromEntries(question.pairs.map((p) => [p.id, null]));
-    }
-    if (question.type === 'order') {
-      // Present in a shuffled order that is stable for this question.
-      ordering = shuffleStable(question.items.map((i) => i.id), question.id);
-    }
-
-    if (initial) restore(initial);
-    if (revealed) {
-      submitted = true;
-      wasCorrect = initial ? grade(question, initial) : false;
-    }
-  });
-
-  function restore(answer: Answer) {
-    if (answer.type === 'single') selectedSingle = answer.optionId;
-    else if (answer.type === 'multi') selectedMulti = [...answer.optionIds];
-    else if (answer.type === 'match') assignments = { ...answer.assignments };
-    else if (answer.type === 'order') ordering = [...answer.itemIds];
-  }
-
-  /** Deterministic shuffle so a re-render never reorders mid-question. */
-  function shuffleStable(ids: string[], seedText: string): string[] {
+  function hash(text: string): number {
     let h = 2166136261;
-    for (let i = 0; i < seedText.length; i++) {
-      h ^= seedText.charCodeAt(i);
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
       h = Math.imul(h, 16777619);
     }
-    const out = [...ids];
+    return h >>> 0;
+  }
+
+  function shuffleStable<T>(items: T[], seedText: string): T[] {
+    let h = hash(seedText);
+    const out = [...items];
     for (let i = out.length - 1; i > 0; i--) {
       h = (Math.imul(h, 48271) + 11) >>> 0;
       const j = h % (i + 1);
       [out[i], out[j]] = [out[j]!, out[i]!];
     }
-    // Guard against the shuffle landing on the correct order.
-    if (out.every((id, i) => id === ids[i]) && out.length > 1) {
-      [out[0], out[out.length - 1]] = [out[out.length - 1]!, out[0]!];
-    }
     return out;
   }
+
+  const options = $derived<ChoiceOption[]>(
+    question.type === 'single' || question.type === 'multi'
+      ? shuffleStable(question.options, `${question.id}:${seed}`)
+      : [],
+  );
+
+  /* ---------------- answer state ---------------- */
+
+  const start = untrack(() => ({ initial, revealed, question }));
+
+  function startingOrder(): string[] {
+    const q = start.question;
+    if (q.type !== 'order') return [];
+    if (start.initial?.type === 'order') return [...start.initial.itemIds];
+    const ids = q.items.map((i) => i.id);
+    const shuffled = shuffleStable(ids, `${q.id}:order`);
+    // Never hand out the answer: if the shuffle lands on the correct order, rotate it.
+    return shuffled.every((id, i) => id === ids[i]) ? [...ids.slice(1), ids[0]!] : shuffled;
+  }
+
+  let selectedSingle = $state<string | null>(
+    start.initial?.type === 'single' ? start.initial.optionId : null,
+  );
+  let selectedMulti = $state<string[]>(
+    start.initial?.type === 'multi' ? [...start.initial.optionIds] : [],
+  );
+  let assignments = $state<Record<string, string | null>>(
+    start.question.type === 'match'
+      ? Object.fromEntries(
+          start.question.pairs.map((p) => [
+            p.id,
+            start.initial?.type === 'match' ? (start.initial.assignments[p.id] ?? null) : null,
+          ]),
+        )
+      : {},
+  );
+  let ordering = $state<string[]>(startingOrder());
+
+  let submitted = $state(start.revealed);
+  let wasCorrect = $state(
+    start.revealed && start.initial ? grade(start.question, start.initial) : false,
+  );
 
   const answer = $derived.by((): Answer => {
     switch (question.type) {
@@ -136,91 +146,141 @@
     question.type === 'multi' ? question.options.filter((o) => o.correct).length : 0,
   );
 
-  function notifyChange() {
-    onchange?.(answer, complete);
-  }
+  const showMarking = $derived(submitted && !examMode);
+  const locked = $derived(showMarking);
 
   /* ---------------- interactions ---------------- */
 
+  let verdictEl = $state<HTMLElement | null>(null);
+
+  function changed() {
+    onchange?.(answer, complete);
+  }
+
   function pickSingle(id: string) {
-    if (submitted && !examMode) return;
+    if (locked) return;
     selectedSingle = id;
-    notifyChange();
-    // Single-choice questions submit on selection outside exam mode: one tap,
-    // instant feedback, which is what makes rapid practice feel fast.
+    changed();
+    // Outside exam mode one tap marks the question: fast practice depends on it.
     if (!examMode) submit();
   }
 
   function toggleMulti(id: string) {
-    if (submitted && !examMode) return;
+    if (locked) return;
     selectedMulti = selectedMulti.includes(id)
       ? selectedMulti.filter((x) => x !== id)
       : [...selectedMulti, id];
-    notifyChange();
+    changed();
+  }
+
+  function choose(option: ChoiceOption) {
+    if (question.type === 'single') pickSingle(option.id);
+    else toggleMulti(option.id);
   }
 
   function assign(pairId: string, value: string) {
-    if (submitted && !examMode) return;
+    if (locked) return;
     assignments = { ...assignments, [pairId]: value || null };
-    notifyChange();
+    changed();
   }
 
   function move(index: number, delta: number) {
-    if (submitted && !examMode) return;
+    if (locked) return;
     const target = index + delta;
     if (target < 0 || target >= ordering.length) return;
     const next = [...ordering];
     [next[index], next[target]] = [next[target]!, next[index]!];
     ordering = next;
-    notifyChange();
+    changed();
   }
 
-  function submit() {
-    if (submitted || !complete) return;
+  async function submit() {
+    if (submitted || !complete || examMode) return;
     submitted = true;
     wasCorrect = grade(question, answer);
     onanswered?.(wasCorrect, answer);
+    // The options just became read-only. Hand focus to the marking, which is
+    // what the learner reads next, so keyboard and screen reader users land on it.
+    await tick();
+    verdictEl?.focus({ preventScroll: true });
+    verdictEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
-  /* ---------------- lookups for feedback ---------------- */
+  function isChosen(id: string): boolean {
+    return question.type === 'single' ? selectedSingle === id : selectedMulti.includes(id);
+  }
+
+  type Mark = 'right' | 'wrong' | 'missed' | 'other' | '';
+
+  function markOf(option: ChoiceOption): Mark {
+    if (!showMarking) return '';
+    const chosen = isChosen(option.id);
+    if (chosen && option.correct) return 'right';
+    if (chosen) return 'wrong';
+    if (option.correct) return 'missed';
+    return 'other';
+  }
+
+  /* ---------------- keyboard ---------------- */
+
+  function onKey(event: KeyboardEvent) {
+    if (!keys || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('input, textarea, select, [contenteditable="true"], dialog')) return;
+
+    if (event.key === 'Enter') {
+      // Let a focused button do its own thing.
+      if (target?.closest('button, a')) return;
+      if (showMarking && onnext) {
+        event.preventDefault();
+        onnext();
+      } else if (!submitted && complete && !examMode) {
+        event.preventDefault();
+        submit();
+      }
+      return;
+    }
+
+    if (question.type !== 'single' && question.type !== 'multi') return;
+    const key = event.key.toUpperCase();
+    let index = -1;
+    if (/^[1-9]$/.test(key)) index = Number(key) - 1;
+    else if (key.length === 1 && LETTERS.includes(key)) index = LETTERS.indexOf(key);
+    const option = options[index];
+    if (!option || locked) return;
+    event.preventDefault();
+    choose(option);
+  }
+
+  /* ---------------- lookups for marking ---------------- */
 
   const rightOptions = $derived(
-    question.type === 'match'
-      ? [...new Set(question.pairs.map((p) => p.right))].sort()
-      : [],
+    question.type === 'match' ? [...new Set(question.pairs.map((p) => p.right))].sort() : [],
   );
 
-  function optionState(optionId: string, correct: boolean): 'correct' | 'wrong' | 'missed' | '' {
-    if (!submitted || examMode) return '';
-    const chosen =
-      question.type === 'single' ? selectedSingle === optionId : selectedMulti.includes(optionId);
-    if (chosen && correct) return 'correct';
-    if (chosen && !correct) return 'wrong';
-    if (!chosen && correct) return 'missed';
-    return '';
-  }
-
-  const showFeedback = $derived(submitted && !examMode);
-
-  const itemById = $derived(
-    question.type === 'order'
-      ? Object.fromEntries(question.items.map((i) => [i.id, i.text]))
-      : {},
+  const itemText = $derived(
+    question.type === 'order' ? Object.fromEntries(question.items.map((i) => [i.id, i.text])) : {},
   );
 
-  const correctPositions = $derived(
-    question.type === 'order' ? question.items.map((i) => i.id) : [],
+  const correctOrder = $derived(question.type === 'order' ? question.items.map((i) => i.id) : []);
+
+  const correctLetters = $derived(
+    options
+      .map((o, i) => (o.correct ? LETTERS[i] : null))
+      .filter((l): l is string => l !== null)
+      .join(' and '),
   );
+
+  const uid = $props.id();
 </script>
 
-<article class="q" class:answered={showFeedback}>
+<svelte:window onkeydown={onKey} />
+
+<article class="q" class:marked={showMarking}>
   <header class="q-head">
     <span class="chip">{topicLabel(question.topic)}</span>
-    <span class="chip" class:chip-warn={question.difficulty === 'hard'}>
-      {question.difficulty}
-    </span>
-    {#if question.kind === 'exam'}
-      <span class="chip chip-info">exam style</span>
+    {#if question.difficulty === 'hard'}
+      <span class="chip chip-warn">Hard</span>
     {/if}
   </header>
 
@@ -232,95 +292,111 @@
 
   {#if question.type === 'single' || question.type === 'multi'}
     {#if question.type === 'multi'}
-      <p class="tiny subtle hint">Select {requiredCount}.</p>
+      <p class="choose">Choose {requiredCount}. Each correct answer is part of the solution.</p>
     {/if}
-    <ul class="options" role={question.type === 'single' ? 'radiogroup' : 'group'}>
-      {#each question.options as option (option.id)}
-        {@const state = optionState(option.id, option.correct)}
-        <li>
-          <button
-            type="button"
-            class="option {state}"
-            class:selected={question.type === 'single'
-              ? selectedSingle === option.id
-              : selectedMulti.includes(option.id)}
-            role={question.type === 'single' ? 'radio' : 'checkbox'}
-            aria-checked={question.type === 'single'
-              ? selectedSingle === option.id
-              : selectedMulti.includes(option.id)}
-            disabled={showFeedback}
-            onclick={() =>
-              question.type === 'single' ? pickSingle(option.id) : toggleMulti(option.id)}
-          >
-            <span class="marker" class:round={question.type === 'single'} aria-hidden="true">
-              {#if state === 'correct'}✓{:else if state === 'wrong'}✕{:else if state === 'missed'}✓{/if}
-            </span>
-            <span class="option-body">
-              <span class="option-text">{@html inlineMarkdown(option.text)}</span>
-              {#if showFeedback && option.why && !option.correct}
-                <span class="why">{@html inlineMarkdown(option.why)}</span>
-              {/if}
-            </span>
-          </button>
-        </li>
+    <div class="options" role="group" aria-label="Answer options">
+      {#each options as option, i (option.id)}
+        {@const mark = markOf(option)}
+        {@const chosen = isChosen(option.id)}
+        <button
+          type="button"
+          class="option {mark}"
+          class:chosen
+          aria-pressed={chosen}
+          aria-disabled={locked}
+          onclick={() => choose(option)}
+        >
+          <span class="bubble" class:square={question.type === 'multi'} aria-hidden="true">
+            {#if mark === 'right' || mark === 'missed'}
+              <Icon name="check" size={16} />
+            {:else if mark === 'wrong'}
+              <Icon name="x" size={16} />
+            {:else}
+              {LETTERS[i]}
+            {/if}
+          </span>
+          <span class="option-body">
+            <span class="visually-hidden">{LETTERS[i]}.</span>
+            <span class="option-text">{@html inlineMarkdown(option.text)}</span>
+            {#if mark === 'missed'}
+              <span class="tag tag-tick">Correct answer</span>
+            {:else if mark === 'wrong'}
+              <span class="tag tag-red">Your answer</span>
+            {/if}
+            {#if showMarking && !option.correct && option.why}
+              <span class="why">{@html inlineMarkdown(option.why)}</span>
+            {/if}
+          </span>
+        </button>
       {/each}
-    </ul>
+    </div>
   {:else if question.type === 'match'}
     <ul class="matches">
       {#each question.pairs as pair (pair.id)}
         {@const chosen = assignments[pair.id]}
-        {@const ok = submitted && !examMode && chosen === pair.right}
-        <li class="match" class:correct={ok} class:wrong={submitted && !examMode && !ok}>
+        {@const ok = showMarking && chosen === pair.right}
+        <li class="match" class:right={ok} class:wrong={showMarking && !ok}>
           <span class="match-left">{@html inlineMarkdown(pair.left)}</span>
           <span class="match-control">
             <select
+              class="input"
               value={chosen ?? ''}
-              disabled={showFeedback}
-              aria-label={`${question.rightLabel} for: ${pair.left}`}
+              disabled={locked}
+              aria-label={`${question.rightLabel} for ${pair.left}`}
               onchange={(e) => assign(pair.id, e.currentTarget.value)}
             >
-              <option value="">Choose {question.rightLabel.toLowerCase()}…</option>
+              <option value="">Choose {question.rightLabel.toLowerCase()}</option>
               {#each rightOptions as right (right)}
                 <option value={right}>{right}</option>
               {/each}
             </select>
-            {#if submitted && !examMode && !ok}
-              <span class="correction">→ {pair.right}</span>
+            {#if showMarking && !ok}
+              <span class="correction"><Icon name="check" size={16} /> {pair.right}</span>
+            {/if}
+            {#if showMarking && !ok && pair.why}
+              <span class="why">{@html inlineMarkdown(pair.why)}</span>
             {/if}
           </span>
         </li>
       {/each}
     </ul>
   {:else if question.type === 'order'}
+    <p class="choose">Put these in order, first at the top.</p>
     <ol class="ordering">
       {#each ordering as id, i (id)}
-        {@const ok = submitted && !examMode && correctPositions[i] === id}
-        <li class="order-item" class:correct={ok} class:wrong={submitted && !examMode && !ok}>
-          <span class="order-index">{i + 1}</span>
-          <span class="order-text">{@html inlineMarkdown(itemById[id] ?? id)}</span>
-          <span class="order-controls">
-            <button
-              type="button"
-              class="btn btn-sm btn-ghost"
-              disabled={showFeedback || i === 0}
-              aria-label="Move up"
-              onclick={() => move(i, -1)}>↑</button
-            >
-            <button
-              type="button"
-              class="btn btn-sm btn-ghost"
-              disabled={showFeedback || i === ordering.length - 1}
-              aria-label="Move down"
-              onclick={() => move(i, 1)}>↓</button
-            >
-          </span>
+        {@const ok = showMarking && correctOrder[i] === id}
+        <li class="order-item" class:right={ok} class:wrong={showMarking && !ok}>
+          <span class="order-index num" aria-hidden="true">{i + 1}</span>
+          <span class="order-text">{@html inlineMarkdown(itemText[id] ?? id)}</span>
+          {#if !locked}
+            <span class="order-controls">
+              <button
+                type="button"
+                class="icon-btn"
+                disabled={i === 0}
+                aria-label={`Move up: ${itemText[id] ?? id}`}
+                onclick={() => move(i, -1)}
+              >
+                <Icon name="chevron-down" class="flip" />
+              </button>
+              <button
+                type="button"
+                class="icon-btn"
+                disabled={i === ordering.length - 1}
+                aria-label={`Move down: ${itemText[id] ?? id}`}
+                onclick={() => move(i, 1)}
+              >
+                <Icon name="chevron-down" />
+              </button>
+            </span>
+          {/if}
         </li>
       {/each}
     </ol>
-    {#if submitted && !examMode && !wasCorrect}
-      <div class="callout callout-info correct-order">
-        <div class="callout-title">Correct order</div>
-        <ol>
+    {#if showMarking && !wasCorrect}
+      <div class="callout callout-info">
+        <p class="callout-title">The correct order</p>
+        <ol class="correct-order">
           {#each question.items as item (item.id)}
             <li>{@html inlineMarkdown(item.text)}</li>
           {/each}
@@ -329,46 +405,55 @@
     {/if}
   {/if}
 
-  <!--
-    In exam mode the runner owns navigation, so the card renders no footer at all.
-    Outside exam mode, single-choice questions submit on selection; every other
-    type needs an explicit check.
-  -->
   {#if !examMode && !submitted && question.type !== 'single'}
     <footer class="q-foot">
       <button type="button" class="btn btn-primary" disabled={!complete} onclick={submit}>
         Check answer
       </button>
       {#if !complete}
-        <span class="tiny subtle">
+        <span class="small subtle">
           {question.type === 'multi'
-            ? `Select ${requiredCount}.`
+            ? `Choose ${requiredCount}, then check.`
             : question.type === 'match'
-              ? 'Match every row to continue.'
+              ? 'Match every row, then check.'
               : 'Arrange the items, then check.'}
         </span>
       {/if}
     </footer>
   {/if}
 
-  {#if showFeedback}
-    <div class="verdict pop-in" class:ok={wasCorrect} class:no={!wasCorrect}>
-      <div class="verdict-head">
-        <span class="verdict-icon" aria-hidden="true">{wasCorrect ? '✓' : '✕'}</span>
-        <strong>{wasCorrect ? 'Correct' : 'Not quite'}</strong>
-      </div>
+  {#if showMarking}
+    <section
+      class="verdict rise-in"
+      class:ok={wasCorrect}
+      bind:this={verdictEl}
+      tabindex="-1"
+      aria-labelledby={`${uid}-verdict`}
+    >
+      <p class="verdict-head" id={`${uid}-verdict`}>
+        <span class="verdict-mark" aria-hidden="true">
+          <Icon name={wasCorrect ? 'check' : 'x'} size={18} />
+        </span>
+        {wasCorrect ? 'Correct' : 'Not quite'}
+        {#if !wasCorrect && correctLetters}
+          <span class="visually-hidden">. The correct answer is {correctLetters}.</span>
+        {/if}
+      </p>
       <p class="explanation">{@html inlineMarkdown(question.explanation)}</p>
-      {#if question.reference}
-        <p class="tiny">
-          <a href={question.reference.url} target="_blank" rel="noopener noreferrer">
-            {question.reference.label} ↗
-          </a>
-        </p>
+      <p class="source small">
+        <a href={question.reference.url} target="_blank" rel="noopener noreferrer">
+          {question.reference.label}<Icon name="external" size={14} label="(opens in a new tab)" />
+        </a>
+      </p>
+      {#if onnext}
+        <div class="verdict-actions">
+          <button type="button" class="btn btn-primary" onclick={() => onnext?.()}>{nextLabel}</button>
+          {#if keys}
+            <span class="small subtle key-hint">or press <kbd>Enter</kbd></span>
+          {/if}
+        </div>
       {/if}
-      {#if !hideNext && onnext}
-        <button type="button" class="btn btn-primary" onclick={() => onnext?.()}>{nextLabel}</button>
-      {/if}
-    </div>
+    </section>
   {/if}
 </article>
 
@@ -376,97 +461,154 @@
   .q {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 1rem;
   }
 
   .q-head {
     display: flex;
-    gap: 0.35rem;
     flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
   .scenario {
     margin: 0;
-    padding: 0.7rem 0.9rem;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
+    padding: 0.85rem 1rem;
     border-radius: var(--radius);
-    font-size: 0.92rem;
-    color: var(--fg-muted);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.97rem;
   }
 
   .q-prompt {
     margin: 0;
-    font-size: 1.08rem;
+    font-size: 1.15rem;
     font-weight: 600;
     line-height: 1.45;
+    letter-spacing: -0.014em;
+    text-wrap: pretty;
   }
 
-  .hint {
+  .choose {
     margin: -0.4rem 0 0;
+    color: var(--ink-2);
+    font-size: 0.92rem;
+    font-weight: 550;
   }
 
-  .options,
-  .matches,
-  .ordering {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  /* ---- options ---- */
+
+  .options {
+    display: grid;
+    gap: 0.55rem;
   }
 
   .option {
     display: flex;
     align-items: flex-start;
-    gap: 0.65rem;
+    gap: 0.85rem;
     width: 100%;
-    text-align: left;
-    font: inherit;
-    font-size: 0.95rem;
-    padding: 0.7rem 0.85rem;
+    min-height: 3.1rem;
+    padding: 0.75rem 1rem 0.75rem 0.8rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-elevated);
-    color: var(--fg);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+    color: var(--ink);
+    font-size: 0.98rem;
+    text-align: left;
+    line-height: 1.5;
     cursor: pointer;
     transition:
-      border-color 0.13s,
-      background 0.13s;
+      border-color 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
   }
-  .option:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: var(--bg-hover);
+  .option:hover:not([aria-disabled='true']) {
+    border-color: var(--accent-edge);
+    background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface));
   }
-  .option:disabled {
+  .option:hover:not([aria-disabled='true']) .bubble {
+    border-color: var(--accent-edge);
+    color: var(--accent);
+  }
+  .option[aria-disabled='true'] {
     cursor: default;
   }
-  .option.selected {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-  }
 
-  .marker {
+  /* A keycap with the option's letter: it is also the keyboard shortcut. */
+  .bubble {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    margin-top: 1px;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: -0.1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    font-weight: 650;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .bubble.square {
     border-radius: 5px;
-    border: 1.5px solid var(--border-strong);
-    font-size: 0.7rem;
-    font-weight: 800;
-    line-height: 1;
   }
-  .marker.round {
-    border-radius: 999px;
+
+  .option.chosen {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--accent);
   }
-  .option.selected .marker {
+  .option.chosen .bubble,
+  .option.chosen:hover .bubble {
     border-color: var(--accent);
     background: var(--accent);
-    color: var(--accent-fg);
+    color: var(--on-accent);
+  }
+
+  .option.right {
+    border-color: var(--success);
+    background: var(--success-soft);
+    box-shadow: 0 0 0 1px var(--success);
+  }
+  .option.right .bubble {
+    border-color: var(--success);
+    background: var(--success);
+    color: var(--surface);
+  }
+
+  .option.wrong {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+    box-shadow: 0 0 0 1px var(--danger);
+  }
+  .option.wrong .bubble {
+    border-color: var(--danger);
+    background: var(--danger);
+    color: var(--surface);
+  }
+
+  .option.missed {
+    border-color: var(--success);
+    border-style: dashed;
+    box-shadow: none;
+  }
+  .option.missed .bubble {
+    border-color: var(--success-edge);
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .option.other {
+    color: var(--ink-2);
+    box-shadow: none;
+  }
+  .option.other .bubble {
+    opacity: 0.7;
   }
 
   .option-body {
@@ -476,199 +618,214 @@
     min-width: 0;
   }
 
-  .option.correct {
-    border-color: var(--success-border);
-    background: var(--success-soft);
+  .tag {
+    align-self: flex-start;
+    font-size: 0.78rem;
+    font-weight: 650;
   }
-  .option.correct .marker {
-    border-color: var(--success);
-    background: var(--success);
-    color: var(--bg-elevated);
-  }
-  .option.wrong {
-    border-color: var(--danger-border);
-    background: var(--danger-soft);
-  }
-  .option.wrong .marker {
-    border-color: var(--danger);
-    background: var(--danger);
-    color: var(--bg-elevated);
-  }
-  .option.missed {
-    border-color: var(--success-border);
-    border-style: dashed;
-  }
-  .option.missed .marker {
-    border-color: var(--success);
+  .tag-tick {
     color: var(--success);
+  }
+  .tag-red {
+    color: var(--danger);
   }
 
   .why {
-    font-size: 0.85rem;
-    color: var(--fg-muted);
-    padding-left: 0.7rem;
-    border-left: 2px solid var(--danger-border);
+    color: var(--ink-2);
+    font-size: 0.92rem;
+  }
+
+  /* ---- matching ---- */
+
+  .matches,
+  .ordering {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .matches li + li,
+  .ordering li + li {
+    margin-top: 0;
   }
 
   .match {
     display: grid;
-    grid-template-columns: 1fr minmax(180px, 42%);
-    gap: 0.6rem;
-    align-items: center;
-    padding: 0.6rem 0.75rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.6rem 1rem;
+    align-items: start;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-elevated);
-    font-size: 0.92rem;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
   }
-  .match.correct {
-    border-color: var(--success-border);
+  .match.right {
+    border-color: var(--success-edge);
     background: var(--success-soft);
   }
   .match.wrong {
-    border-color: var(--danger-border);
+    border-color: var(--danger-edge);
     background: var(--danger-soft);
   }
-
+  .match-left {
+    align-self: center;
+    font-weight: 550;
+  }
   .match-control {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    display: grid;
+    gap: 0.35rem;
   }
-
-  select {
-    font: inherit;
-    font-size: 0.88rem;
-    padding: 0.4rem 0.5rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-strong);
-    background: var(--bg-elevated);
-    color: var(--fg);
-    width: 100%;
-  }
-
   .correction {
-    font-size: 0.8rem;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     color: var(--success);
-  }
-
-  .ordering {
-    counter-reset: none;
-  }
-
-  .order-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.65rem;
-    align-items: center;
-    padding: 0.55rem 0.7rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-elevated);
+    font-weight: 650;
     font-size: 0.92rem;
-  }
-  .order-item.correct {
-    border-color: var(--success-border);
-    background: var(--success-soft);
-  }
-  .order-item.wrong {
-    border-color: var(--danger-border);
-    background: var(--danger-soft);
-  }
-
-  .order-index {
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-
-  .order-controls {
-    display: flex;
-    gap: 0.15rem;
-  }
-  .order-controls .btn {
-    padding: 0.2rem 0.45rem;
-    min-width: 28px;
-  }
-
-  .correct-order ol {
-    margin: 0.3rem 0 0;
-    padding-left: 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  .q-foot {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    flex-wrap: wrap;
-  }
-  .q-foot:empty {
-    display: none;
-  }
-
-  .verdict {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 0.85rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    align-items: flex-start;
-  }
-  .verdict.ok {
-    border-color: var(--success-border);
-    background: var(--success-soft);
-  }
-  .verdict.no {
-    border-color: var(--danger-border);
-    background: var(--danger-soft);
-  }
-
-  .verdict-head {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.95rem;
-  }
-
-  .verdict-icon {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 900;
-    color: var(--bg-elevated);
-  }
-  .verdict.ok .verdict-icon {
-    background: var(--success);
-  }
-  .verdict.no .verdict-icon {
-    background: var(--danger);
-  }
-
-  .explanation {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.55;
-  }
-
-  .verdict p:last-of-type {
-    margin-bottom: 0;
   }
 
   @media (max-width: 560px) {
     .match {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---- ordering ---- */
+
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.1rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+  }
+  .order-item.right {
+    border-color: var(--success-edge);
+    background: var(--success-soft);
+  }
+  .order-item.wrong {
+    border-color: var(--danger-edge);
+    background: var(--danger-soft);
+  }
+  .order-index {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+  .order-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .order-controls {
+    display: flex;
+    flex-shrink: 0;
+  }
+  .order-controls :global(.flip) {
+    rotate: 180deg;
+  }
+  .order-controls .icon-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .correct-order {
+    margin: 0;
+  }
+
+  .q-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* ---- marking ---- */
+
+  .verdict {
+    padding: 1.1rem 1.2rem 1.2rem;
+    border: 1px solid var(--danger-edge);
+    border-radius: var(--radius-lg);
+    background: var(--danger-soft);
+  }
+  .verdict.ok {
+    border-color: var(--success-edge);
+    background: var(--success-soft);
+  }
+  .verdict:focus {
+    outline: none;
+  }
+  .verdict:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .verdict-head {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.5rem;
+    color: var(--danger);
+    font-size: 1.05rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .verdict.ok .verdict-head {
+    color: var(--success);
+  }
+  .verdict-mark {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--danger);
+    color: var(--surface);
+  }
+  .verdict.ok .verdict-mark {
+    background: var(--success);
+  }
+
+  .explanation {
+    margin: 0 0 0.65rem;
+  }
+
+  .source {
+    margin: 0;
+  }
+  .source a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    font-weight: 550;
+  }
+  .source :global(.icon) {
+    align-self: center;
+  }
+
+  .verdict-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  @media (hover: none) {
+    .key-hint {
+      display: none;
     }
   }
 </style>

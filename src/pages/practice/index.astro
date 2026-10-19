@@ -1,16 +1,17 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PracticeHub from '../../components/PracticeHub.svelte';
+import { moduleCoverage, questionRefs } from '../../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
 ---
 
 <Base
-  title="Practice - AI-901 Exam Prep"
-  description="Spaced-repetition practice for Exam AI-901: mixed sets, rapid fire, weak areas and your past mistakes."
+  title="Practice"
+  description="Spaced-repetition practice for Exam AI-901: quick sets, rapid fire, single topics, your weakest areas and the questions you got wrong."
   active="practice"
 >
   <div class="wrap">
-    <PracticeHub client:only="svelte" base={base} />
+    <PracticeHub client:load {base} refs={questionRefs} modules={moduleCoverage} />
   </div>
 </Base>

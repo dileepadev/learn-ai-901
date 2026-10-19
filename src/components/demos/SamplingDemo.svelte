@@ -147,7 +147,7 @@
     font-family: var(--mono);
     font-size: 0.9rem;
     padding: 0.55rem 0.7rem;
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -176,7 +176,7 @@
     justify-content: space-between;
     font-family: var(--mono);
     font-size: 0.78rem;
-    color: var(--fg-muted);
+    color: var(--ink-2);
   }
   .ctl-head strong {
     color: var(--accent);
@@ -228,7 +228,7 @@
     display: block;
     height: 14px;
     border-radius: 4px;
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     overflow: hidden;
   }
@@ -243,7 +243,7 @@
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
     text-align: right;
-    color: var(--fg-muted);
+    color: var(--ink-2);
   }
 
   .verdict {
@@ -253,18 +253,18 @@
     padding: 0.65rem 0.8rem;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
   }
   .verdict.focus {
-    border-color: var(--info-border);
-    background: var(--info-soft);
+    border-color: var(--border);
+    background: var(--accent-soft);
   }
   .verdict.balanced {
-    border-color: var(--success-border);
+    border-color: var(--success-edge);
     background: var(--success-soft);
   }
   .verdict.creative {
-    border-color: var(--warn-border);
+    border-color: var(--warn-edge);
     background: var(--warn-soft);
   }
 

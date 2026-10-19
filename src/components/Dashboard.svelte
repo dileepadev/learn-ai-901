@@ -1,531 +1,506 @@
 <script lang="ts">
   /**
-   * The dashboard answers one question above all: "I have N minutes right now,
-   * what should I do?" Everything else on the page supports that answer.
+   * The returning visitor's home page. It answers one question above all:
+   * "I have this much time right now - what should I do?"
+   *
+   * New visitors never see this island: the page shows them a static
+   * introduction instead (see pages/index.astro).
    */
-  import { progress, setExamDate, emptyProgress, get } from '../lib/store';
+  import { setExamDate } from '../lib/store';
   import { computeOverall, computeReadiness, daysUntilExam } from '../lib/scoring';
-  import { recommend, TIME_BUDGETS, type Recommendation } from '../lib/recommend';
-  import { ALL_QUESTIONS } from '../data/questions';
-  import { MODULES, TOTAL_LESSON_MINUTES } from '../data/modules';
-  import { EXAM } from '../data/exam';
-  import type { Progress } from '../data/types';
+  import { recommend, TIME_BUDGETS, type ActionKind } from '../lib/recommend';
+  import { decodeQuestionRefs, type ModuleRef } from '../lib/catalog';
+  import { liveProgress } from '../lib/live.svelte';
+  import { answeredCount, loadAttempt, secondsLeft, type ExamAttempt } from '../lib/examSession';
+  import type { IconName } from '../lib/icons';
   import ReadinessRing from './ReadinessRing.svelte';
   import TopicBars from './TopicBars.svelte';
+  import Icon from './Icon.svelte';
 
   interface Props {
     base: string;
+    refs: string;
+    modules: ModuleRef[];
+    resourceCount: number;
   }
-  let { base }: Props = $props();
+
+  let { base, refs, modules, resourceCount }: Props = $props();
 
   const link = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+  const questions = $derived(decodeQuestionRefs(refs));
+  const live = liveProgress();
+  const p = $derived(live.value);
 
-  let p = $state<Progress>(get());
-  let ready = $state(true);
-  let budget = $state(
-    typeof localStorage !== 'undefined'
-      ? Number(localStorage.getItem('ai901:budget')) || 30
-      : 30,
-  );
+  let budget = $state(30);
+  let attempt = $state<ExamAttempt | null>(null);
 
-  $effect(() =>
-    progress.subscribe((next) => {
-      p = next;
-      ready = true;
-    }),
-  );
+  $effect(() => {
+    try {
+      const stored = Number(localStorage.getItem('ai901:budget'));
+      if (TIME_BUDGETS.some((t) => t.minutes === stored)) budget = stored;
+    } catch {
+      /* keep the default */
+    }
+    attempt = loadAttempt();
+  });
 
   function setBudget(minutes: number) {
     budget = minutes;
     try {
       localStorage.setItem('ai901:budget', String(minutes));
     } catch {
-      /* ignore */
+      /* the choice still applies to this visit */
     }
   }
 
-  const readiness = $derived(computeReadiness(p, ALL_QUESTIONS, MODULES));
-  const overall = $derived(computeOverall(p, ALL_QUESTIONS, MODULES));
+  const readiness = $derived(computeReadiness(p, questions, modules));
+  const overall = $derived(computeOverall(p, questions, modules));
   const daysLeft = $derived(daysUntilExam(p));
-
-  const recs = $derived<Recommendation[]>(
-    recommend({ progress: p, modules: MODULES, questions: ALL_QUESTIONS, budget, base }),
-  );
+  const recs = $derived(recommend({ progress: p, modules, questions, budget, base }));
   const primary = $derived(recs[0]);
   const rest = $derived(recs.slice(1));
+  const accuracyPct = $derived(overall.accuracy === null ? null : Math.round(overall.accuracy * 100));
 
-  const isNew = $derived(overall.distinctAnswered === 0 && overall.modulesComplete === 0);
-
-  const kindIcon: Record<string, string> = {
-    learn: '📘',
-    practice: '✏️',
-    weak: '🎯',
-    mistakes: '🔁',
-    exam: '⏱️',
-    review: '⚡',
-    cram: '🔥',
-    flashcards: '⚡',
-  };
-
-  let examDateInput = $state('');
-  $effect(() => {
-    examDateInput = p.examDate ?? '';
+  const resume = $derived.by(() => {
+    const last = p.lastVisited;
+    if (!last) return null;
+    const ageDays = (Date.now() - last.at) / 86_400_000;
+    return ageDays <= 21 ? last : null;
   });
 
-  function saveExamDate(value: string) {
-    setExamDate(value || undefined);
+  const examLeft = $derived(attempt ? secondsLeft(attempt) : null);
+
+  const ICON: Record<ActionKind, IconName> = {
+    learn: 'learn',
+    practice: 'practice',
+    weak: 'target',
+    mistakes: 'retry',
+    exam: 'exam',
+    review: 'clock',
+    cram: 'cram',
+    flashcards: 'review',
+  };
+
+  function minutesText(m: number): string {
+    return m >= 60 ? `${Math.round((m / 60) * 10) / 10} h` : `${m} min`;
   }
 
-  const accuracyPct = $derived(
-    overall.accuracy === null ? null : Math.round(overall.accuracy * 100),
-  );
+  function countdown(days: number): string {
+    if (days === 0) return 'Your exam is today';
+    if (days === 1) return 'Your exam is tomorrow';
+    return `${days} days until your exam`;
+  }
 </script>
 
-{#if !ready}
-  <div class="card skeleton" aria-hidden="true"></div>
+{#if !live.ready}
+  <div class="loading" aria-hidden="true">
+    <div class="skeleton" style="height: 2.5rem; width: 18rem"></div>
+    <div class="skeleton" style="height: 12rem"></div>
+  </div>
 {:else}
-  <!-- ---------------- Hero: readiness + next action ---------------- -->
-  <section class="hero card">
-    <div class="hero-ring">
-      <ReadinessRing
-        value={readiness.overall}
-        label={readiness.label}
-        caption={readiness.overall > 0 ? `pass mark ≈ 70%` : undefined}
-      />
-    </div>
-
-    <div class="hero-main">
-      {#if isNew}
-        <h1>Let's get you through AI-901.</h1>
-        <p class="lead muted">
-          {MODULES.length} focused lessons ({Math.round(TOTAL_LESSON_MINUTES / 60 * 10) / 10} hours),
-          {ALL_QUESTIONS.length} questions with explanations, weak-area drilling and a timed exam simulator.
-          Everything is built against the current skills measured ({EXAM.skillsMeasuredDate}).
-        </p>
-      {:else}
+  <div class="dash">
+    <div class="main">
+      <header class="hello">
         <h1>What to do next</h1>
-        <p class="lead muted">
+        <p class="muted">
           {#if daysLeft !== null && daysLeft >= 0}
-            <strong
-              >{daysLeft === 0 ? 'Exam is today' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`}</strong
-            > &middot;
+            {countdown(daysLeft)}.
           {/if}
-          {overall.modulesComplete}/{overall.moduleCount} lessons &middot;
-          {overall.distinctAnswered}/{overall.bankSize} questions tried
-          {#if accuracyPct !== null}&middot; {accuracyPct}% accuracy{/if}
+          Pick how long you have, and the most useful thing for that time comes first.
         </p>
-      {/if}
+      </header>
 
-      <div class="budget" role="group" aria-label="How much time do you have?">
-        <span class="tiny subtle budget-label">I have</span>
-        {#each TIME_BUDGETS as t (t.minutes)}
-          <button
-            type="button"
-            class="budget-btn"
-            class:active={budget === t.minutes}
-            aria-pressed={budget === t.minutes}
-            onclick={() => setBudget(t.minutes)}
-          >
-            {t.label}
-          </button>
-        {/each}
-      </div>
-
-      {#if primary}
-        <a class="next-primary" href={primary.href}>
-          <span class="next-icon" aria-hidden="true">{kindIcon[primary.kind] ?? '▶'}</span>
-          <span class="next-body">
-            <span class="next-title">{primary.title}</span>
-            <span class="next-why">{primary.why}</span>
+      {#if attempt}
+        <a class="resume sheet exam-resume" href={link('/exam/')}>
+          <Icon name="exam" size={22} />
+          <span>
+            <strong>Resume your practice exam</strong>
+            <span class="small muted num">
+              {answeredCount(attempt)} of {attempt.ids.length} answered{examLeft !== null
+                ? `, ${Math.ceil(examLeft / 60)} minutes left on the clock`
+                : ''}
+            </span>
           </span>
-          <span class="next-meta">
-            <span class="chip chip-accent">{primary.minutes} min</span>
-            <span class="next-cta">{primary.cta} →</span>
+        </a>
+      {:else if resume}
+        <a class="resume sheet" href={resume.path}>
+          <Icon name="learn" size={22} />
+          <span>
+            <strong>Continue: {resume.label}</strong>
+            <span class="small muted">Pick up the lesson where you left it</span>
           </span>
         </a>
       {/if}
-    </div>
-  </section>
 
-  <!-- ---------------- Other options ---------------- -->
-  {#if rest.length}
-    <section class="section">
-      <h2 class="section-title">Or…</h2>
-      <div class="grid rec-grid">
-        {#each rest as r (r.href + r.title)}
-          <a class="card card-tight rec" href={r.href}>
-            <span class="rec-icon" aria-hidden="true">{kindIcon[r.kind] ?? '▶'}</span>
-            <span class="rec-body">
-              <strong class="rec-title">{r.title}</strong>
-              <span class="tiny muted">{r.why}</span>
-            </span>
-            <span class="chip">{r.minutes}m</span>
-          </a>
-        {/each}
-      </div>
-    </section>
-  {/if}
-
-  <!-- ---------------- Stats ---------------- -->
-  <section class="section">
-    <div class="grid stat-grid">
-      <div class="card card-tight stat">
-        <span class="stat-value">{overall.modulesComplete}<span class="stat-of">/{overall.moduleCount}</span></span>
-        <span class="tiny muted">Lessons complete</span>
-      </div>
-      <div class="card card-tight stat">
-        <span class="stat-value">{overall.distinctAnswered}<span class="stat-of">/{overall.bankSize}</span></span>
-        <span class="tiny muted">Questions tried</span>
-      </div>
-      <div class="card card-tight stat">
-        <span class="stat-value">{accuracyPct === null ? '-' : `${accuracyPct}%`}</span>
-        <span class="tiny muted">Accuracy</span>
-      </div>
-      <div class="card card-tight stat">
-        <span class="stat-value">{overall.mistakeIds.length}</span>
-        <span class="tiny muted">To fix</span>
-      </div>
-      <div class="card card-tight stat">
-        <span class="stat-value">{overall.streak}<span class="stat-of">d</span></span>
-        <span class="tiny muted">Streak</span>
-      </div>
-      <div class="card card-tight stat">
-        <span class="stat-value">{overall.bestExamScore === null ? '-' : `${overall.bestExamScore}%`}</span>
-        <span class="tiny muted">Best exam</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ---------------- Topic readiness ---------------- -->
-  <section class="section">
-    <div class="spread">
-      <h2 class="section-title">Readiness by exam topic</h2>
-      <a class="tiny" href={link('/progress/')}>Full breakdown →</a>
-    </div>
-    <div class="card">
-      <TopicBars stats={readiness.byTopic} {base} />
-    </div>
-  </section>
-
-  <!-- ---------------- Official Resources & Links ---------------- -->
-  <section class="section">
-    <div class="card resources-spotlight">
-      <div class="res-spotlight-content">
-        <div class="res-spotlight-header">
-          <span class="chip chip-accent">Official Microsoft Links</span>
-          <span class="tiny subtle">24 verified resources</span>
+      <div class="budget">
+        <span id="budget-label" class="small muted">I have</span>
+        <div class="segmented" role="group" aria-labelledby="budget-label">
+          {#each TIME_BUDGETS as t (t.minutes)}
+            <button type="button" aria-pressed={budget === t.minutes} onclick={() => setBudget(t.minutes)}>
+              {t.label}
+            </button>
+          {/each}
         </div>
-        <h3 class="res-spotlight-title">Study Guides, Portals &amp; Official Practice Tests</h3>
-        <p class="tiny muted res-spotlight-desc">
-          Access verified Microsoft Learn guides, Microsoft Foundry portals, official free practice tests, and GitHub code labs.
-        </p>
       </div>
-      <a class="btn btn-secondary res-spotlight-btn" href={link('/resources/')}>
-        View all resources →
-      </a>
-    </div>
-  </section>
 
-  <!-- ---------------- Exam date ---------------- -->
-  <section class="section">
-    <div class="card exam-date">
-      <div>
-        <strong>When is your exam?</strong>
-        <p class="tiny muted">
-          Setting a date switches on the countdown and unlocks cram mode on the final day.
+      {#if primary}
+        <a class="primary sheet" href={primary.href}>
+          <span class="primary-icon" aria-hidden="true"><Icon name={ICON[primary.kind]} size={24} /></span>
+          <span class="primary-body">
+            <span class="primary-title">{primary.title}</span>
+            <span class="muted">{primary.why}</span>
+            <span class="primary-meta small">
+              <span class="chip chip-accent num">{minutesText(primary.minutes)}</span>
+              <span class="cta">{primary.cta}</span>
+            </span>
+          </span>
+        </a>
+      {/if}
+
+      {#if rest.length}
+        <h2 class="h-sm">Or, with the same time</h2>
+        <ul class="recs">
+          {#each rest as r (r.href + r.title)}
+            <li>
+              <a class="rec" href={r.href}>
+                <Icon name={ICON[r.kind]} />
+                <span class="rec-body">
+                  <span class="rec-title">{r.title}</span>
+                  <span class="small muted">{r.why}</span>
+                </span>
+                <span class="chip num">{minutesText(r.minutes)}</span>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+
+      <section class="topics" aria-labelledby="topics-title">
+        <div class="spread">
+          <h2 id="topics-title" class="h-sm">Readiness by exam topic</h2>
+          <a class="small" href={link('/progress/')}>Full progress report</a>
+        </div>
+        <div class="sheet">
+          <TopicBars stats={readiness.byTopic} {base} />
+        </div>
+      </section>
+    </div>
+
+    <aside class="side">
+      <div class="sheet ready-card">
+        <ReadinessRing value={readiness.overall} label={readiness.label} />
+        <p class="small muted">
+          Readiness blends lessons finished with questions answered correctly, weighted by the exam
+          blueprint. The tick marks 80%, where this app calls you exam ready.
         </p>
       </div>
-      <label class="row">
-        <span class="visually-hidden">Exam date</span>
-        <input
-          type="date"
-          value={examDateInput}
-          onchange={(e) => saveExamDate(e.currentTarget.value)}
-        />
-      </label>
-    </div>
-  </section>
+
+      <dl class="stats sheet">
+        <div>
+          <dt>Lessons complete</dt>
+          <dd class="num">{overall.modulesComplete} of {overall.moduleCount}</dd>
+        </div>
+        <div>
+          <dt>Questions tried</dt>
+          <dd class="num">{overall.distinctAnswered} of {overall.bankSize}</dd>
+        </div>
+        <div>
+          <dt>Accuracy</dt>
+          <dd class="num">{accuracyPct === null ? 'None yet' : `${accuracyPct}%`}</dd>
+        </div>
+        <div>
+          <dt>Waiting to be fixed</dt>
+          <dd class="num">
+            {#if overall.mistakeIds.length}
+              <a href={link('/practice/mistakes/')}>{overall.mistakeIds.length} questions</a>
+            {:else}
+              None
+            {/if}
+          </dd>
+        </div>
+        <div>
+          <dt>Study streak</dt>
+          <dd class="num">{overall.streak} {overall.streak === 1 ? 'day' : 'days'}</dd>
+        </div>
+        <div>
+          <dt>Best practice exam</dt>
+          <dd class="num">{overall.bestExamScore === null ? 'Not taken' : `${overall.bestExamScore}%`}</dd>
+        </div>
+      </dl>
+
+      <div class="sheet exam-date">
+        <label class="field">
+          <span>Exam date</span>
+          <input
+            class="input"
+            type="date"
+            value={p.examDate ?? ''}
+            onchange={(e) => setExamDate(e.currentTarget.value || undefined)}
+          />
+        </label>
+        <p class="small subtle">
+          {#if p.examDate}
+            On the last day the dashboard switches you to the cram sheet.
+          {:else}
+            Set it to get a countdown and a last-day switch to the cram sheet.
+          {/if}
+        </p>
+      </div>
+
+      <a class="sheet side-link" href={link('/resources/')}>
+        <Icon name="resources" />
+        <span>
+          <strong>Official resources</strong>
+          <span class="small muted num">{resourceCount} links to Microsoft Learn, the exam sandbox and the labs</span>
+        </span>
+      </a>
+    </aside>
+  </div>
 {/if}
 
 <style>
-  .skeleton {
-    height: 260px;
-    background: linear-gradient(90deg, var(--bg-elevated), var(--bg-hover), var(--bg-elevated));
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-  }
-  @keyframes shimmer {
-    to {
-      background-position: -200% 0;
-    }
+  .loading {
+    display: grid;
+    gap: 1rem;
   }
 
-  .hero {
-    display: flex;
-    align-items: center;
-    gap: 1.8rem;
-    padding: 1.5rem;
+  .dash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    align-items: start;
   }
 
-  .hero-ring {
-    flex-shrink: 0;
-  }
-
-  .hero-main {
-    flex: 1;
+  .main {
+    display: grid;
+    gap: 1.25rem;
     min-width: 0;
   }
 
-  .hero h1 {
-    margin-bottom: 0.25rem;
+  .hello h1 {
+    margin-bottom: 0.4rem;
+  }
+  .hello p {
+    margin: 0;
   }
 
-  .lead {
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-    max-width: 62ch;
+  .resume {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: inherit;
+  }
+  .resume > span {
+    display: grid;
+  }
+  .resume :global(.icon) {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .exam-resume {
+    border-color: var(--warn-edge);
+    background: var(--warn-soft);
+  }
+  .exam-resume :global(.icon) {
+    color: var(--warn);
   }
 
   .budget {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    margin-bottom: 0.9rem;
-  }
-  .budget-label {
-    margin-right: 0.15rem;
   }
 
-  .budget-btn {
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.28rem 0.62rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg-muted);
-    cursor: pointer;
-    transition:
-      background 0.13s,
-      color 0.13s,
-      border-color 0.13s;
-  }
-  .budget-btn:hover {
-    background: var(--bg-hover);
-    color: var(--fg);
-  }
-  .budget-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-fg);
-  }
-
-  .next-primary {
+  .primary {
     display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 0.95rem 1.05rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--accent);
-    background: var(--accent-soft);
-    text-decoration: none;
-    color: var(--fg);
-    transition:
-      transform 0.14s,
-      box-shadow 0.14s;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
-  .next-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-    color: var(--fg);
+  .primary:hover {
+    border-color: var(--accent-edge);
   }
-
-  .next-icon {
-    font-size: 1.5rem;
-    line-height: 1;
+  .primary-icon {
+    display: grid;
+    place-items: center;
     flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-lg);
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-accent);
   }
-
-  .next-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-    flex: 1;
+  .primary-body {
+    display: grid;
+    gap: 0.35rem;
   }
-  .next-title {
-    font-weight: 660;
-    font-size: 1.02rem;
+  .primary-title {
+    font-size: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
     line-height: 1.3;
   }
-  .next-why {
-    font-size: 0.84rem;
-    color: var(--fg-muted);
-    line-height: 1.4;
-  }
-
-  .next-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.3rem;
-    flex-shrink: 0;
-  }
-  .next-cta {
-    font-size: 0.85rem;
-    font-weight: 650;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .section {
-    margin-top: 1.6rem;
-  }
-  .section-title {
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--fg-subtle);
-    font-weight: 700;
-    margin-bottom: 0.6rem;
-  }
-
-  .rec-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-
-  .rec {
+  .primary-meta {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
   }
-  .rec-icon {
-    font-size: 1.1rem;
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius);
+    background: var(--accent);
+    box-shadow: var(--shadow-accent);
+    color: var(--on-accent);
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+  .primary:hover .cta {
+    background: var(--accent-hover);
+  }
+
+  .h-sm {
+    margin: 1rem 0 0;
+    font-size: 1.0625rem;
+    letter-spacing: -0.012em;
+  }
+
+  .recs {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .recs li {
+    margin: 0;
+  }
+  .recs li + li {
+    border-top: 1px solid var(--border);
+  }
+  .rec {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .rec:hover {
+    background: var(--surface-2);
+    color: inherit;
+  }
+  .rec:hover .rec-title {
+    color: var(--accent);
+  }
+  .rec > :global(.icon) {
     flex-shrink: 0;
+    box-sizing: content-box;
+    padding: 0.4rem;
+    margin-top: -0.2rem;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink-2);
   }
   .rec-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    min-width: 0;
+    display: grid;
+    gap: 0.15rem;
     flex: 1;
   }
   .rec-title {
-    font-size: 0.91rem;
-    font-weight: 620;
-    line-height: 1.3;
-  }
-
-  .stat-grid {
-    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-    gap: 0.6rem;
-  }
-  .stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.05rem;
-    text-align: center;
-    padding: 0.7rem 0.5rem;
-  }
-  .stat-value {
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.15;
-  }
-  .stat-of {
-    font-size: 0.7em;
-    color: var(--fg-subtle);
     font-weight: 600;
   }
 
-  .exam-date {
+  .topics {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .topics .h-sm {
+    margin: 0;
+  }
+
+  .side {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .ready-card {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+  .ready-card p {
+    margin: 0;
+  }
+
+  .stats {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0.4rem 1rem;
+  }
+  .stats div {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    flex-wrap: wrap;
+    padding: 0.65rem 0;
+    font-size: 0.94rem;
+  }
+  .stats div + div {
+    border-top: 1px solid var(--border);
+  }
+  .stats dt {
+    color: var(--ink-2);
+  }
+  .stats dd {
+    margin: 0;
+    font-weight: 650;
+    text-align: right;
+  }
+
+  .exam-date {
+    display: grid;
+    gap: 0.5rem;
   }
   .exam-date p {
-    margin: 0.15rem 0 0;
-    max-width: 46ch;
-  }
-
-  input[type='date'] {
-    font: inherit;
-    font-size: 0.9rem;
-    padding: 0.45rem 0.6rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-strong);
-    background: var(--bg-elevated);
-    color: var(--fg);
-  }
-
-  @media (max-width: 720px) {
-    .hero {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1.1rem;
-    }
-    .hero-ring {
-      align-self: center;
-    }
-    .next-primary {
-      flex-wrap: wrap;
-    }
-    .next-meta {
-      flex-direction: row;
-      align-items: center;
-      width: 100%;
-      justify-content: space-between;
-    }
-  }
-
-  .resources-spotlight {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.2rem;
-    padding: 1.15rem 1.4rem;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 40%, var(--bg-elevated)) 0%, var(--bg-elevated) 100%);
-    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
-  }
-  .res-spotlight-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    min-width: 0;
-  }
-  .res-spotlight-header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  .res-spotlight-title {
     margin: 0;
-    font-size: 1.05rem;
   }
-  .res-spotlight-desc {
-    margin: 0;
-    max-width: 65ch;
+
+  .side-link {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
   }
-  .res-spotlight-btn {
+  .side-link > span {
+    display: grid;
+  }
+  .side-link :global(.icon) {
     flex-shrink: 0;
-    white-space: nowrap;
+    box-sizing: content-box;
+    padding: 0.45rem;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    color: var(--accent);
   }
-  @media (max-width: 640px) {
-    .resources-spotlight {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.9rem;
-      padding: 1.1rem;
+
+  @media (max-width: 960px) {
+    .dash {
+      grid-template-columns: minmax(0, 1fr);
     }
-    .res-spotlight-btn {
-      text-align: center;
-      justify-content: center;
+    .side {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
     }
   }
 </style>

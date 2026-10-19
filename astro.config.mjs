@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import sitemap from '@astrojs/sitemap';
 
@@ -15,6 +15,23 @@ export default defineConfig({
   trailingSlash: 'always',
   output: 'static',
   integrations: [svelte(), sitemap()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
+  fonts: [
+    {
+      // One variable family for everything: crisp at UI sizes, comfortable
+      // for long lessons, with real italics. Code uses the system mono.
+      provider: fontProviders.google(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['sans-serif'],
+    },
+  ],
   build: {
     // Emit /page/index.html so GitHub Pages serves clean URLs without a server.
     format: 'directory',

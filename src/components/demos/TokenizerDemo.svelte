@@ -108,8 +108,8 @@
     padding: 0.6rem 0.7rem;
     border-radius: var(--radius);
     border: 1px solid var(--border-strong);
-    background: var(--bg-elevated);
-    color: var(--fg);
+    background: var(--surface);
+    color: var(--ink);
     resize: vertical;
     width: 100%;
   }
@@ -130,7 +130,7 @@
     gap: 3px;
     padding: 0.7rem;
     border-radius: var(--radius);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     min-height: 3rem;
   }
@@ -166,14 +166,12 @@
     text-align: center;
     padding: 0.45rem 0.3rem;
     border-radius: var(--radius-sm);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
   }
   dt {
-    font-size: 0.7rem;
-    color: var(--fg-subtle);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+    color: var(--ink-3);
   }
   dd {
     margin: 0;

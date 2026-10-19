@@ -54,14 +54,13 @@
 </script>
 
 <div class="demo">
-  <div class="tabs" role="tablist" aria-label="System message">
+  <div class="tabs" role="group" aria-label="System message">
     {#each PRESETS as preset (preset.id)}
       <button
         type="button"
-        role="tab"
         class="tab"
         class:active={selected === preset.id}
-        aria-selected={selected === preset.id}
+        aria-pressed={selected === preset.id}
         onclick={() => (selected = preset.id)}>{preset.label}</button
       >
     {/each}
@@ -77,7 +76,7 @@
       <p>{USER}</p>
     </div>
     {#key current.id}
-      <div class="msg assistant pop-in {current.tone}">
+      <div class="msg assistant rise-in {current.tone}">
         <span class="role">assistant</span>
         <p>{current.reply}</p>
       </div>
@@ -106,18 +105,18 @@
     padding: 0.28rem 0.6rem;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg-muted);
+    background: var(--surface);
+    color: var(--ink-2);
     cursor: pointer;
   }
   .tab:hover {
-    background: var(--bg-hover);
-    color: var(--fg);
+    background: var(--hover);
+    color: var(--ink);
   }
   .tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--accent-fg);
+    color: var(--on-accent);
   }
 
   .chat {
@@ -130,7 +129,7 @@
     border-radius: var(--radius);
     border: 1px solid var(--border);
     padding: 0.55rem 0.7rem;
-    background: var(--bg-elevated);
+    background: var(--surface);
   }
   .msg p {
     margin: 0;
@@ -141,19 +140,17 @@
   .role {
     display: block;
     font-family: var(--mono);
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--fg-subtle);
+    font-size: 0.75rem;
+    color: var(--ink-3);
     margin-bottom: 0.2rem;
   }
 
   .system {
-    background: var(--bg-sunken);
-    border-left: 3px solid var(--fg-subtle);
+    background: var(--surface-2);
+    border-left: 3px solid var(--ink-3);
   }
   .user {
-    border-left: 3px solid var(--info);
+    border-left: 3px solid var(--accent);
   }
   .assistant {
     border-left: 3px solid var(--accent);
@@ -171,15 +168,15 @@
     line-height: 1.5;
     padding: 0.55rem 0.7rem;
     border-radius: var(--radius);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
   }
   .notes.bad {
     background: var(--danger-soft);
-    border-color: var(--danger-border);
+    border-color: var(--danger-edge);
   }
   .notes.good {
     background: var(--success-soft);
-    border-color: var(--success-border);
+    border-color: var(--success-edge);
   }
 </style>

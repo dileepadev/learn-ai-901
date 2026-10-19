@@ -1,87 +1,76 @@
 <script lang="ts">
-  /** Full progress breakdown, achievements, session history and data controls. */
-  import { ALL_QUESTIONS } from '../data/questions';
-  import { MODULES } from '../data/modules';
-  import { EXAM, TOPICS, topicLabel } from '../data/exam';
-  import { computeOverall, computeReadiness, daysUntilExam } from '../lib/scoring';
+  /** The full progress report: readiness, retention, milestones, history and your data. */
+  import { computeOverall, computeReadiness, daysUntilExam, type ScoredModule } from '../lib/scoring';
   import { MASTERED_BOX } from '../lib/srs';
-  import {
-    progress,
-    emptyProgress,
-    get,
-    resetAll,
-    exportJSON,
-    importJSON,
-  } from '../lib/store';
-  import type { Progress } from '../data/types';
+  import { exportJSON, importJSON, resetAll } from '../lib/store';
+  import { clearAttempt } from '../lib/examSession';
+  import { decodeQuestionRefs } from '../lib/catalog';
+  import { liveProgress } from '../lib/live.svelte';
   import ReadinessRing from './ReadinessRing.svelte';
   import TopicBars from './TopicBars.svelte';
+  import Icon from './Icon.svelte';
 
   interface Props {
     base: string;
+    refs: string;
+    modules: ScoredModule[];
   }
-  let { base }: Props = $props();
 
-  const link = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+  let { base, refs, modules }: Props = $props();
 
-  let p = $state<Progress>(get());
-  let ready = $state(true);
-  $effect(() =>
-    progress.subscribe((next) => {
-      p = next;
-      ready = true;
-    }),
-  );
+  const questions = $derived(decodeQuestionRefs(refs));
+  const live = liveProgress();
+  const p = $derived(live.value);
 
-  const readiness = $derived(computeReadiness(p, ALL_QUESTIONS, MODULES));
-  const overall = $derived(computeOverall(p, ALL_QUESTIONS, MODULES));
+  const readiness = $derived(computeReadiness(p, questions, modules));
+  const overall = $derived(computeOverall(p, questions, modules));
   const daysLeft = $derived(daysUntilExam(p));
+  const recentSessions = $derived([...p.sessions].reverse().slice(0, 15));
 
-  const recentSessions = $derived([...p.sessions].reverse().slice(0, 12));
-
-  /** Milestones, computed from progress rather than stored, so they cannot drift. */
-  const ACHIEVEMENTS = $derived([
-    { id: 'first-lesson', icon: '📘', label: 'First lesson complete', got: overall.modulesComplete >= 1 },
-    { id: 'half-lessons', icon: '📗', label: 'Half the lessons done', got: overall.modulesComplete >= Math.ceil(MODULES.length / 2) },
-    { id: 'all-lessons', icon: '🎓', label: 'Every lesson complete', got: overall.modulesComplete >= MODULES.length },
-    { id: 'first-50', icon: '✏️', label: '50 questions answered', got: overall.questionsAnswered >= 50 },
-    { id: 'first-150', icon: '📝', label: '150 questions answered', got: overall.questionsAnswered >= 150 },
-    { id: 'whole-bank', icon: '📚', label: 'Every question tried once', got: overall.distinctAnswered >= overall.bankSize },
-    { id: 'accuracy-70', icon: '🎯', label: '70% overall accuracy', got: (overall.accuracy ?? 0) >= 0.7 },
-    { id: 'accuracy-85', icon: '🏹', label: '85% overall accuracy', got: (overall.accuracy ?? 0) >= 0.85 },
-    { id: 'first-exam', icon: '⏱️', label: 'First practice exam', got: overall.examsTaken >= 1 },
-    { id: 'passed-exam', icon: '🏆', label: 'Passed a practice exam', got: (overall.bestExamScore ?? 0) >= 70 },
-    { id: 'no-mistakes', icon: '🧹', label: 'No outstanding mistakes', got: overall.distinctAnswered > 20 && overall.mistakeIds.length === 0 },
-    { id: 'streak-3', icon: '🔥', label: '3-day streak', got: overall.bestStreak >= 3 },
+  /** Milestones are worked out from progress, never stored, so they cannot drift. */
+  const milestones = $derived([
+    { label: 'First lesson complete', got: overall.modulesComplete >= 1 },
+    { label: 'Half the lessons complete', got: overall.modulesComplete >= Math.ceil(modules.length / 2) },
+    { label: 'Every lesson complete', got: overall.modulesComplete >= modules.length },
+    { label: '50 answers given', got: overall.questionsAnswered >= 50 },
+    { label: '150 answers given', got: overall.questionsAnswered >= 150 },
+    { label: 'Every question tried once', got: overall.distinctAnswered >= overall.bankSize },
+    { label: '70% accuracy overall', got: (overall.accuracy ?? 0) >= 0.7 },
+    { label: '85% accuracy overall', got: (overall.accuracy ?? 0) >= 0.85 },
+    { label: 'First practice exam', got: overall.examsTaken >= 1 },
+    { label: '80% or more on a practice exam', got: (overall.bestExamScore ?? 0) >= 80 },
+    { label: 'Nothing left to fix', got: overall.distinctAnswered > 20 && overall.mistakeIds.length === 0 },
+    { label: 'Three-day streak', got: overall.bestStreak >= 3 },
   ]);
+  const unlocked = $derived(milestones.filter((m) => m.got).length);
 
-  const unlocked = $derived(ACHIEVEMENTS.filter((a) => a.got).length);
-
-  /* ---- SRS distribution ---- */
+  const BOX_LABELS = ['Just missed', 'Shaky', 'Getting there', 'Probably solid', 'Solid', 'Mastered'];
   const boxes = $derived.by(() => {
     const counts = [0, 0, 0, 0, 0, 0];
-    for (const q of ALL_QUESTIONS) {
+    for (const q of questions) {
       const s = p.questions[q.id];
-      if (s?.seen) counts[Math.min(5, s.box)] = (counts[Math.min(5, s.box)] ?? 0) + 1;
+      if (s?.seen) counts[Math.min(5, s.box)]! += 1;
     }
     return counts;
   });
   const maxBox = $derived(Math.max(...boxes, 1));
 
-  /* ---- data controls ---- */
-  let confirmingReset = $state(false);
-  let importMessage = $state('');
+  /* ---- your data ---- */
+
+  let resetDialog = $state<HTMLDialogElement | null>(null);
+  let message = $state('');
 
   function download() {
     const blob = new Blob([exportJSON()], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ai901-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `learn-ai-901-progress-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    message = 'Backup downloaded.';
   }
 
   function handleImport(event: Event) {
@@ -90,8 +79,9 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const ok = importJSON(String(reader.result));
-      importMessage = ok ? 'Progress restored.' : 'That file could not be read as progress data.';
+      message = importJSON(String(reader.result))
+        ? 'Progress restored from your backup.'
+        : 'That file is not a Learn AI-901 backup, so nothing was changed.';
     };
     reader.readAsText(file);
     input.value = '';
@@ -99,332 +89,289 @@
 
   function doReset() {
     resetAll();
-    confirmingReset = false;
+    clearAttempt();
+    resetDialog?.close();
+    message = 'All progress deleted. You are starting fresh.';
   }
 
-  function formatDate(ts: number): string {
-    return new Date(ts).toLocaleString(undefined, {
-      month: 'short',
+  function when(ts: number): string {
+    return new Date(ts).toLocaleString('en-GB', {
       day: 'numeric',
+      month: 'short',
       hour: '2-digit',
       minute: '2-digit',
     });
   }
 
-  const modeLabel: Record<string, string> = {
+  const MODE_LABEL: Record<string, string> = {
     'module-quiz': 'Lesson quiz',
-    practice: 'Practice',
-    'weak-areas': 'Weak areas',
-    mistakes: 'Mistakes',
+    practice: 'Practice set',
+    'weak-areas': 'Topic practice',
+    mistakes: 'Questions I got wrong',
     'rapid-fire': 'Rapid fire',
     exam: 'Practice exam',
     'mini-exam': 'Mini exam',
   };
 </script>
 
-{#if ready}
-  <div class="report">
-    <header class="head">
-      <ReadinessRing value={readiness.overall} label={readiness.label} size={140} />
-      <div class="head-body">
-        <h1>Your progress</h1>
-        <p class="muted">
-          Readiness blends what you have <strong>covered</strong> ({readiness.fromCoverage}% of
-          lessons, weighted by exam topic) with what you have <strong>proven</strong> ({readiness.fromAccuracy}%
-          weighted accuracy). Accuracy on a small sample is discounted, so a handful of lucky guesses
-          will not read as mastery.
+<div class="report">
+  <section class="head sheet pv" class:ready={live.ready}>
+    <ReadinessRing value={readiness.overall} label={readiness.label} size={148} />
+    <div>
+      <p>
+        Readiness blends what you have <strong>covered</strong> ({readiness.fromCoverage}% of the lessons,
+        weighted by topic) with what you have <strong>proven</strong> ({readiness.fromAccuracy}% weighted
+        accuracy). Accuracy from only a few answers is discounted, so a handful of lucky guesses does not read
+        as mastery.
+      </p>
+      {#if daysLeft !== null && daysLeft >= 0}
+        <p class="small subtle num">
+          {daysLeft === 0 ? 'Your exam is today.' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} until your exam.`}
         </p>
-        {#if daysLeft !== null}
-          <p class="tiny subtle">
-            {daysLeft <= 0 ? 'Exam is today.' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} until your exam.`}
-          </p>
-        {/if}
-      </div>
-    </header>
+      {/if}
+    </div>
+  </section>
 
-    <section class="grid stat-grid">
-      <div class="card card-tight stat">
-        <strong>{overall.questionsAnswered}</strong><span class="tiny muted">answers given</span>
-      </div>
-      <div class="card card-tight stat">
-        <strong>{overall.distinctAnswered}/{overall.bankSize}</strong
-        ><span class="tiny muted">bank covered</span>
-      </div>
-      <div class="card card-tight stat">
-        <strong>{overall.accuracy === null ? '-' : `${Math.round(overall.accuracy * 100)}%`}</strong
-        ><span class="tiny muted">accuracy</span>
-      </div>
-      <div class="card card-tight stat">
-        <strong>{overall.mastered}</strong><span class="tiny muted">mastered</span>
-      </div>
-      <div class="card card-tight stat">
-        <strong>{overall.studyDays}</strong><span class="tiny muted">study days</span>
-      </div>
-      <div class="card card-tight stat">
-        <strong>{overall.bestStreak}</strong><span class="tiny muted">best streak</span>
-      </div>
-    </section>
+  <dl class="stats sheet pv" class:ready={live.ready}>
+    <div><dt>Answers given</dt><dd class="num">{overall.questionsAnswered}</dd></div>
+    <div><dt>Questions tried</dt><dd class="num">{overall.distinctAnswered} of {overall.bankSize}</dd></div>
+    <div>
+      <dt>Accuracy</dt>
+      <dd class="num">{overall.accuracy === null ? 'None yet' : `${Math.round(overall.accuracy * 100)}%`}</dd>
+    </div>
+    <div><dt>Mastered</dt><dd class="num">{overall.mastered}</dd></div>
+    <div><dt>Study days</dt><dd class="num">{overall.studyDays}</dd></div>
+    <div><dt>Best streak</dt><dd class="num">{overall.bestStreak} {overall.bestStreak === 1 ? 'day' : 'days'}</dd></div>
+  </dl>
 
-    <section class="card">
-      <h2 class="h-sm">By exam topic</h2>
-      <TopicBars stats={readiness.byTopic} {base} />
-    </section>
+  <section class="sheet" aria-labelledby="topic-title">
+    <h2 id="topic-title" class="h-sm">By exam topic</h2>
+    <TopicBars stats={readiness.byTopic} {base} />
+  </section>
 
-    <section class="card">
-      <h2 class="h-sm">Retention - where questions sit in the review schedule</h2>
-      <div class="boxes">
-        {#each boxes as count, i (i)}
-          <div class="box">
-            <div class="box-bar">
-              <span style:height={`${(count / maxBox) * 100}%`} class:mastered={i >= MASTERED_BOX}></span>
-            </div>
-            <span class="tiny">{count}</span>
-            <span class="tiny subtle">
-              {i === 0 ? 'just missed' : i === 5 ? 'mastered' : `box ${i}`}
-            </span>
-          </div>
-        {/each}
-      </div>
-      <p class="tiny subtle">
-        A correct answer moves a question up a box and pushes its next review further out; a miss
-        drops it back so it returns within minutes. Intervals top out at four days, tuned for a short
-        sprint rather than months of study.
-      </p>
-    </section>
-
-    <section class="card">
-      <h2 class="h-sm">Milestones - {unlocked}/{ACHIEVEMENTS.length}</h2>
-      <ul class="achievements">
-        {#each ACHIEVEMENTS as a (a.id)}
-          <li class="ach" class:got={a.got}>
-            <span class="ach-icon" aria-hidden="true">{a.icon}</span>
-            <span class="tiny">{a.label}</span>
-          </li>
-        {/each}
-      </ul>
-    </section>
-
-    {#if recentSessions.length}
-      <section class="card">
-        <h2 class="h-sm">Recent sessions</h2>
-        <div class="table-scroll">
-          <table class="data">
-            <thead>
-              <tr><th>When</th><th>Mode</th><th>Score</th><th>Result</th></tr>
-            </thead>
-            <tbody>
-              {#each recentSessions as s (s.id)}
-                {@const pct = s.total ? Math.round((s.correct / s.total) * 100) : 0}
-                <tr>
-                  <td class="nowrap">{formatDate(s.finishedAt)}</td>
-                  <td>{modeLabel[s.mode] ?? s.mode}</td>
-                  <td class="nowrap">{s.correct}/{s.total}</td>
-                  <td>
-                    <span
-                      class="chip"
-                      class:chip-success={pct >= 70}
-                      class:chip-danger={pct < 50}
-                      class:chip-warn={pct >= 50 && pct < 70}>{pct}%</span
-                    >
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    {/if}
-
-    <section class="card data">
-      <h2 class="h-sm">Your data</h2>
-      <p>
-        Everything is stored in this browser's local storage. Nothing is sent anywhere, there is no
-        account, and clearing your browser data will clear your progress - so export a backup if you
-        are switching devices.
-      </p>
-      <div class="row">
-        <button type="button" class="btn btn-sm" onclick={download}>Export backup</button>
-        <label class="btn btn-sm import">
-          Import backup
-          <input type="file" accept="application/json" onchange={handleImport} />
-        </label>
-        {#if !confirmingReset}
-          <button type="button" class="btn btn-sm btn-ghost danger" onclick={() => (confirmingReset = true)}>
-            Reset everything
-          </button>
-        {:else}
-          <span class="row confirm">
-            <span class="tiny">Delete all progress?</span>
-            <button type="button" class="btn btn-sm danger-solid" onclick={doReset}>Yes, reset</button>
-            <button type="button" class="btn btn-sm btn-ghost" onclick={() => (confirmingReset = false)}>
-              Cancel
-            </button>
+  <section class="sheet" aria-labelledby="ret-title">
+    <h2 id="ret-title" class="h-sm">Where your answered questions sit in the review schedule</h2>
+    <ol class="boxes">
+      {#each boxes as count, i (i)}
+        <li>
+          <span class="box-bar" aria-hidden="true">
+            <span style:height={`${(count / maxBox) * 100}%`} class:mastered={i >= MASTERED_BOX}></span>
           </span>
-        {/if}
-      </div>
-      {#if importMessage}<p class="tiny import-msg">{importMessage}</p>{/if}
-    </section>
+          <strong class="num">{count}</strong>
+          <span class="small subtle">{BOX_LABELS[i]}</span>
+        </li>
+      {/each}
+    </ol>
+    <p class="small subtle">
+      A correct answer moves a question up a box and pushes its next review further out. A miss drops it two
+      boxes, so anything shaky comes back within minutes. Intervals top out at four days, tuned for a short
+      sprint rather than months of study.
+    </p>
+  </section>
 
-    <section class="card sources">
-      <h2 class="h-sm">Where this content comes from</h2>
-      <p>
-        Lessons and questions are written against the skills measured as of
-        <strong>{EXAM.skillsMeasuredDate}</strong>, verified against Microsoft Learn documentation.
-        The
-        {TOPICS.length} topic weights are the midpoints of the published domain ranges, distributed by
-        how many skills-measured bullets each sub-area lists.
-      </p>
-      <ul class="links">
-        <li><a href={EXAM.studyGuideUrl} target="_blank" rel="noopener noreferrer">Official AI-901 study guide ↗</a></li>
-        <li><a href={EXAM.examPageUrl} target="_blank" rel="noopener noreferrer">Exam AI-901 page ↗</a></li>
-        <li><a href={EXAM.practiceAssessmentUrl} target="_blank" rel="noopener noreferrer">Microsoft's own practice assessment ↗</a></li>
-        <li><a href={EXAM.portalUrl} target="_blank" rel="noopener noreferrer">Microsoft Foundry portal ↗</a></li>
-      </ul>
-      <p class="tiny subtle">
-        This is an independent study aid, not a Microsoft product, and its questions are not real
-        exam questions.
-        <a href={link('/')}>Back to the dashboard</a>
-      </p>
+  <section class="sheet" aria-labelledby="ms-title">
+    <h2 id="ms-title" class="h-sm num">Milestones: {unlocked} of {milestones.length}</h2>
+    <ul class="milestones">
+      {#each milestones as m (m.label)}
+        <li class:got={m.got}>
+          <span class="bubble" aria-hidden="true">{#if m.got}<Icon name="check" size={14} />{/if}</span>
+          {m.label}
+          {#if m.got}<span class="visually-hidden">(reached)</span>{/if}
+        </li>
+      {/each}
+    </ul>
+  </section>
+
+  {#if recentSessions.length}
+    <section class="sheet" aria-labelledby="hist-title">
+      <h2 id="hist-title" class="h-sm">Recent sessions</h2>
+      <!-- A scrollable table must be reachable by keyboard (WCAG 2.1.1). -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+      <div class="table-scroll" role="region" tabindex="0" aria-labelledby="hist-title">
+        <table class="data">
+          <thead>
+            <tr><th scope="col">When</th><th scope="col">Session</th><th scope="col">Score</th></tr>
+          </thead>
+          <tbody>
+            {#each recentSessions as s (s.id)}
+              {@const pct = s.total ? Math.round((s.correct / s.total) * 100) : 0}
+              <tr>
+                <td class="nowrap num">{when(s.finishedAt)}</td>
+                <td>{MODE_LABEL[s.mode] ?? s.mode}</td>
+                <td class="nowrap num">
+                  {s.correct} of {s.total}
+                  <span class="chip" class:chip-success={pct >= 75} class:chip-danger={pct < 50} class:chip-warn={pct >= 50 && pct < 75}
+                    >{pct}%</span
+                  >
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </section>
-  </div>
-{/if}
+  {/if}
+
+  <section class="sheet data" aria-labelledby="data-title">
+    <h2 id="data-title" class="h-sm">Your data</h2>
+    <p>
+      Everything is kept in this browser. Nothing is sent anywhere and there is no account, so clearing your
+      browser data clears your progress too. Download a backup before you switch devices.
+    </p>
+    <div class="row">
+      <button type="button" class="btn" onclick={download}><Icon name="download" /> Download a backup</button>
+      <label class="btn import">
+        <Icon name="upload" /> Restore from a backup
+        <input type="file" accept="application/json,.json" onchange={handleImport} />
+      </label>
+      <button type="button" class="btn btn-danger" onclick={() => resetDialog?.showModal()}>
+        <Icon name="trash" /> Delete all progress
+      </button>
+    </div>
+    <p class="small message" role="status">{message}</p>
+  </section>
+
+  <dialog bind:this={resetDialog} class="confirm" aria-labelledby="reset-title">
+    <h2 id="reset-title">Delete all progress?</h2>
+    <p class="muted">
+      This removes every answer, lesson, session and setting stored in this browser, including an exam in
+      progress. It cannot be undone, so download a backup first if you might want it.
+    </p>
+    <div class="row">
+      <button type="button" class="btn btn-danger" onclick={doReset}>Delete everything</button>
+      <button type="button" class="btn" onclick={() => resetDialog?.close()}>Keep my progress</button>
+    </div>
+  </dialog>
+</div>
 
 <style>
   .report {
-    max-width: 860px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .h-sm {
+    font-size: 1.1875rem;
+    margin-bottom: 1.1rem;
   }
 
   .head {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
+    gap: 1.5rem;
     flex-wrap: wrap;
   }
-  .head-body {
+  .head > div {
     flex: 1;
-    min-width: 260px;
+    min-width: 16rem;
   }
-  .head-body h1 {
-    margin-bottom: 0.3rem;
-  }
-  .head-body p {
-    max-width: 62ch;
-    font-size: 0.93rem;
-    margin-bottom: 0.4rem;
+  .head p {
+    max-width: var(--measure);
   }
 
-  .stat-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.6rem;
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
   }
-  .stat {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    padding: 0.7rem 0.4rem;
+  /* Hairlines between cells however the grid wraps; the card clips the outer ones. */
+  .stats > div {
+    padding: 1.05rem 1.25rem 1.15rem;
+    box-shadow:
+      1px 0 0 var(--border),
+      0 1px 0 var(--border);
   }
-  .stat strong {
-    font-size: 1.3rem;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.2;
+  .stats dt {
+    color: var(--ink-3);
+    font-size: 0.85rem;
+    font-weight: 550;
   }
-
-  .h-sm {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--fg-subtle);
+  .stats dd {
+    margin: 0.25rem 0 0;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.7rem;
+    letter-spacing: -0.035em;
   }
 
   .boxes {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.4rem;
-    align-items: end;
-    height: 130px;
-    margin-bottom: 0.6rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
   }
-  .box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.15rem;
-    height: 100%;
-    justify-content: flex-end;
+  .boxes li {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    text-align: center;
   }
   .box-bar {
-    width: 100%;
-    flex: 1;
     display: flex;
     align-items: flex-end;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    min-height: 20px;
-  }
-  .box-bar > span {
     width: 100%;
-    background: var(--warn);
-    border-radius: inherit;
-    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    min-height: 2px;
+    max-width: 3.5rem;
+    height: 6rem;
+    padding: 3px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
   }
-  .box-bar > span.mastered {
+  .box-bar span {
+    width: 100%;
+    min-height: 3px;
+    border-radius: 6px;
+    background: var(--accent);
+    opacity: 0.75;
+  }
+  .box-bar span.mastered {
     background: var(--success);
+    opacity: 1;
   }
 
-  .achievements {
-    list-style: none;
+  .milestones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.5rem 1rem;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.45rem;
+    list-style: none;
   }
-  .ach {
+  .milestones li {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.5rem 0.6rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--bg-sunken);
-    opacity: 0.45;
-    filter: grayscale(1);
-    transition:
-      opacity 0.2s,
-      filter 0.2s;
+    gap: 0.6rem;
+    margin: 0;
+    color: var(--ink-3);
   }
-  .ach.got {
-    opacity: 1;
-    filter: none;
-    background: var(--accent-soft);
-    border-color: var(--accent);
+  .milestones li.got {
+    color: var(--ink);
+    font-weight: 550;
   }
-  .ach-icon {
-    font-size: 1.15rem;
-    line-height: 1;
+  .bubble {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 1px dashed var(--border-strong);
+    border-radius: 50%;
   }
-
-  .data p,
-  .sources p {
-    font-size: 0.9rem;
-    max-width: 66ch;
-    line-height: 1.6;
+  .got .bubble {
+    border: 0;
+    background: var(--success);
+    color: var(--surface);
   }
 
+  .data p {
+    max-width: var(--measure);
+  }
   .import {
     position: relative;
     overflow: hidden;
-    cursor: pointer;
   }
   .import input {
     position: absolute;
@@ -432,35 +379,38 @@
     opacity: 0;
     cursor: pointer;
   }
-
-  .danger {
-    color: var(--danger);
+  .import:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
-  .danger-solid {
-    background: var(--danger);
-    border-color: var(--danger);
-    color: #fff;
-  }
-  .confirm {
-    gap: 0.4rem;
-  }
-  .import-msg {
-    margin: 0.5rem 0 0;
-    color: var(--fg-muted);
+  .message {
+    min-height: 1.4em;
+    margin: 0.75rem 0 0;
+    color: var(--success);
+    font-weight: 600;
   }
 
-  .links {
-    margin: 0 0 0.6rem;
-    padding-left: 1.1rem;
-    font-size: 0.9rem;
+  dialog.confirm {
+    width: min(30rem, calc(100vw - 2rem));
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
   }
-  .links li + li {
-    margin-top: 0.2rem;
+  dialog.confirm::backdrop {
+    background: rgb(11 13 19 / 0.4);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  dialog.confirm h2 {
+    font-size: 1.25rem;
   }
 
   @media (max-width: 560px) {
     .boxes {
-      height: 100px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 </style>

@@ -1,16 +1,379 @@
 ---
 import Base from '../layouts/Base.astro';
-import CramSheet from '../components/CramSheet.svelte';
+import CramStatus from '../components/CramStatus.svelte';
+import Icon from '../components/Icon.astro';
+import { MODULES } from '../data/modules';
+import { COMPARISONS, QUICK_FACTS } from '../data/review';
+import { EXAM_DAY_TIPS } from '../data/roadmap';
+import { EXAM, TOPICS } from '../data/exam';
+import { inlineMarkdown } from '../lib/markdown';
+import { moduleCoverage, questionRefs } from '../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
+const href = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+const md = (t: string) => inlineMarkdown(t);
+
+type Note = { title: string; body: string; moduleId: string; moduleTitle: string };
+const keys: Note[] = [];
+const traps: Note[] = [];
+const changed: Note[] = [];
+for (const m of MODULES) {
+  for (const section of m.sections) {
+    for (const block of section.blocks) {
+      const note = { moduleId: m.id, moduleTitle: m.title };
+      if (block.t === 'key') keys.push({ ...note, title: block.title, body: block.body });
+      if (block.t === 'trap') traps.push({ ...note, title: block.title, body: block.body });
+      if (block.t === 'changed') changed.push({ ...note, title: block.title, body: block.body });
+    }
+  }
+}
+const keysByModule = MODULES.map((m) => ({ module: m, notes: keys.filter((k) => k.moduleId === m.id) })).filter(
+  (g) => g.notes.length > 0,
+);
+const topics = [...TOPICS].sort((a, b) => b.weight - a.weight);
+const maxWeight = Math.max(...topics.map((t) => t.weight));
 ---
 
 <Base
-  title="Cram sheet - AI-901 Exam Prep"
-  description="Final-day revision for Exam AI-901: every know-this fact, exam trap and changed-since-AI-900 note in one pass."
-  active="review"
+  title="Cram sheet"
+  description="The last-day revision sheet for Exam AI-901: every key fact, exam trap, renamed product and comparison in one printable pass."
+  active="cram"
 >
-  <div class="wrap">
-    <CramSheet client:only="svelte" base={base} />
+  <div class="wrap cram">
+    <header class="page-head head">
+      <div>
+        <h1>Cram sheet</h1>
+        <p>
+          Everything marked as key across the lessons, in one pass, for the day before and the morning of.
+          No new material. It prints cleanly, too.
+        </p>
+      </div>
+      <button class="btn no-print" type="button" data-print><Icon name="print" /> Print it</button>
+    </header>
+
+    <CramStatus client:idle {base} refs={questionRefs} modules={moduleCoverage} />
+
+    <nav class="jump no-print" aria-label="On this sheet">
+      <a href="#weights">Where the marks are</a>
+      <a href="#key">Know this ({keys.length})</a>
+      <a href="#traps">Traps ({traps.length})</a>
+      <a href="#changed">Changed ({changed.length})</a>
+      <a href="#compare">Comparisons ({COMPARISONS.length})</a>
+      <a href="#facts">One-liners ({QUICK_FACTS.length})</a>
+      <a href="#tips">Sitting the exam</a>
+    </nav>
+
+    <section id="weights" class="block">
+      <h2>Where the marks are</h2>
+      <ul class="weights sheet">
+        {
+          topics.map((t) => (
+            <li>
+              <span class="w-label">{t.label}</span>
+              <span class="w-bar" aria-hidden="true">
+                <span style={`width: ${(t.weight / maxWeight) * 100}%`} />
+              </span>
+              <strong class="num">about {t.weight}%</strong>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="small subtle">
+        Topic shares are this guide's estimate, spread from the official domain ranges. Pass mark{' '}
+        {EXAM.passingScore} on a scale of 1 to {EXAM.scoreScale.toLocaleString('en-GB')}.
+      </p>
+    </section>
+
+    <section id="key" class="block">
+      <h2>Know this</h2>
+      <div class="key-groups">
+        {
+          keysByModule.map((g) => (
+            <div class="sheet key-group">
+              <h3>
+                <a href={href(`/learn/${g.module.id}/`)}>{g.module.title}</a>
+              </h3>
+              <ul>
+                {g.notes.map((k) => (
+                  <li>
+                    <strong class="mark">{k.title}.</strong> <span set:html={md(k.body)} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="traps" class="block">
+      <h2>Exam traps</h2>
+      <div class="notes">
+        {
+          traps.map((t) => (
+            <div class="callout callout-trap" role="note">
+              <p class="callout-title">
+                <Icon name="trap" />
+                {t.title}
+              </p>
+              <div class="callout-body">
+                <p set:html={md(t.body)} />
+                <p class="small subtle from">From {t.moduleTitle}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="changed" class="block">
+      <h2>Changed or renamed</h2>
+      <p class="muted intro">If your notes say otherwise, these are the current facts.</p>
+      <div class="notes">
+        {
+          changed.map((c) => (
+            <div class="callout callout-changed" role="note">
+              <p class="callout-title">
+                <Icon name="changed" />
+                {c.title}
+              </p>
+              <div class="callout-body">
+                <p set:html={md(c.body)} />
+                <p class="small subtle from">From {c.moduleTitle}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="compare" class="block">
+      <h2>Comparisons, in one line each</h2>
+      <ul class="sheet lines">
+        {
+          COMPARISONS.map((c) => (
+            <li>
+              <strong>{c.title}.</strong> <span set:html={md(c.bottomLine)} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="small"><a class="no-print" href={href('/review/')}>Drill the full comparison tables</a></p>
+    </section>
+
+    <section id="facts" class="block">
+      <h2>One-liners</h2>
+      <ul class="sheet lines facts">
+        {QUICK_FACTS.map((f) => <li set:html={md(f.fact)} />)}
+      </ul>
+    </section>
+
+    <section id="tips" class="block">
+      <h2>Sitting the exam</h2>
+      <ol class="tips">
+        {
+          EXAM_DAY_TIPS.map((tip) => (
+            <li class="sheet">
+              <strong>{tip.title}</strong>
+              <p>{tip.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="small">
+        <a href={EXAM.examExperienceUrl}>Microsoft's page on exam duration and the exam experience</a>
+      </p>
+    </section>
   </div>
 </Base>
+
+<script>
+  document.addEventListener('click', (event) => {
+    if (event.target instanceof Element && event.target.closest('[data-print]')) window.print();
+  });
+</script>
+
+<style>
+  .cram {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-width: none;
+    margin-bottom: 0;
+  }
+  .head > div {
+    max-width: var(--measure);
+  }
+
+  .jump {
+    position: sticky;
+    top: calc(var(--header-h) + 0.5rem);
+    z-index: 5;
+    display: flex;
+    gap: 0.25rem;
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    box-shadow: var(--shadow-sm);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    backdrop-filter: saturate(1.6) blur(14px);
+    font-size: 0.875rem;
+    font-weight: 550;
+  }
+  .jump :global(a) {
+    flex-shrink: 0;
+    padding: 0.3rem 0.8rem;
+    white-space: nowrap;
+    border-radius: 999px;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  .jump :global(a:hover) {
+    background: var(--hover);
+    color: var(--ink);
+  }
+
+  .block {
+    scroll-margin-top: calc(var(--header-h) + 4rem);
+    margin-top: 1.5rem;
+  }
+  .block h2 {
+    margin-bottom: 0.9rem;
+  }
+  .intro {
+    margin-top: -0.4rem;
+  }
+
+  .weights {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0 0 0.6rem;
+    list-style: none;
+  }
+  .weights li {
+    display: grid;
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) 6.5rem;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+  }
+  .w-bar {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--track);
+    overflow: hidden;
+  }
+  .w-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+  }
+  .weights strong {
+    text-align: right;
+  }
+
+  .key-groups {
+    columns: 2 22rem;
+    column-gap: 1rem;
+  }
+  .key-group {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  .key-group h3 {
+    font-size: 1.05rem;
+  }
+  .key-group h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .key-group h3 a:hover {
+    color: var(--accent);
+  }
+  .key-group ul {
+    margin: 0;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 0.75rem;
+  }
+  .notes .callout-body p {
+    margin: 0;
+  }
+  .from {
+    margin-top: 0.4rem !important;
+  }
+
+  .lines {
+    display: grid;
+    gap: 0;
+    margin: 0 0 0.5rem;
+    padding: 0.25rem 1.1rem;
+    list-style: none;
+  }
+  .lines li {
+    margin: 0;
+    padding: 0.6rem 0;
+  }
+  .lines li + li {
+    border-top: 1px solid var(--border);
+  }
+  .facts :global(strong) {
+    font-weight: 650;
+  }
+
+  .tips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 0.75rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+  .tips li {
+    margin: 0;
+  }
+  .tips p {
+    margin: 0.3rem 0 0;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 640px) {
+    .weights li {
+      grid-template-columns: 1fr auto;
+    }
+    .w-bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  @media print {
+    .jump {
+      display: none;
+    }
+    .key-groups {
+      columns: 2;
+    }
+    .block {
+      margin-top: 0.75rem;
+    }
+  }
+</style>

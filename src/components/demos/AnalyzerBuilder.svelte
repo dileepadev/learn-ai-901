@@ -77,14 +77,13 @@
 </script>
 
 <div class="demo">
-  <div class="tabs" role="tablist" aria-label="Content modality">
+  <div class="tabs" role="group" aria-label="Content modality">
     {#each MODALITIES as m (m.id)}
       <button
         type="button"
-        role="tab"
         class="tab"
         class:active={modality === m.id}
-        aria-selected={modality === m.id}
+        aria-pressed={modality === m.id}
         onclick={() => (modality = m.id)}>{m.label}</button
       >
     {/each}
@@ -143,18 +142,18 @@
     padding: 0.28rem 0.65rem;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg-muted);
+    background: var(--surface);
+    color: var(--ink-2);
     cursor: pointer;
   }
   .tab:hover {
-    background: var(--bg-hover);
-    color: var(--fg);
+    background: var(--hover);
+    color: var(--ink);
   }
   .tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--accent-fg);
+    color: var(--on-accent);
   }
 
   .split {
@@ -182,7 +181,7 @@
     padding: 0.5rem 0.6rem;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
+    background: var(--surface);
     cursor: pointer;
     transition:
       border-color 0.13s,
@@ -222,18 +221,18 @@
     padding: 0.08rem 0.35rem;
   }
   .method.extract {
-    background: var(--info-soft);
-    border-color: var(--info-border);
-    color: var(--info);
+    background: var(--accent-soft);
+    border-color: var(--border);
+    color: var(--accent);
   }
   .method.classify {
     background: var(--warn-soft);
-    border-color: var(--warn-border);
+    border-color: var(--warn-edge);
     color: var(--warn);
   }
   .method.generate {
     background: var(--success-soft);
-    border-color: var(--success-border);
+    border-color: var(--success-edge);
     color: var(--success);
   }
 
@@ -241,7 +240,7 @@
     font-size: 0.72rem;
     padding: 0.65rem;
     border-radius: var(--radius-sm);
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     max-height: 320px;
     overflow: auto;
@@ -252,7 +251,7 @@
     padding: 0.45rem 0.6rem;
     border-radius: var(--radius-sm);
     background: var(--warn-soft);
-    border: 1px solid var(--warn-border);
+    border: 1px solid var(--warn-edge);
     line-height: 1.5;
   }
 

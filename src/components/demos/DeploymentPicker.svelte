@@ -7,11 +7,21 @@
   const result = $derived.by(() => {
     if (modelKind === 'oss') {
       return {
-        option: 'Managed compute',
+        option: 'Managed compute (preview)',
         type: '-',
         billing: 'Hourly, per accelerator SKU',
         note: 'Open-source, partner and custom models that need dedicated GPU capacity use managed compute. Data processing is global, and content filtering is not available in public preview.',
         tone: 'warn',
+      };
+    }
+
+    if (traffic === 'offline' && residency === 'geo') {
+      return {
+        option: 'Serverless API',
+        type: 'Standard',
+        billing: 'Pay per token, no batch discount',
+        note: 'Batch only comes as Global Batch or Data Zone Batch. If processing must stay inside one Azure geography, use Standard and send the jobs yourself - you give up the batch discount to keep the residency.',
+        tone: 'info',
       };
     }
 
@@ -118,6 +128,10 @@
     {#if modelKind !== 'oss'}
       <p class="tiny subtle">{residencyNote[residency]} Data at rest always stays in the designated geography.</p>
     {/if}
+    <p class="tiny subtle">
+      Only trying out a supported model? Instant access (preview) lets you call it by name with no
+      deployment at all.
+    </p>
   </div>
 </div>
 
@@ -139,11 +153,9 @@
   }
 
   legend {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--fg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-2);
     padding: 0;
     margin-bottom: 0.35rem;
   }
@@ -162,7 +174,7 @@
     padding: 0.45rem 0.6rem;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
+    background: var(--surface);
     cursor: pointer;
     transition: border-color 0.13s;
   }
@@ -181,19 +193,18 @@
   }
 
   .result {
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--success);
-    border-radius: var(--radius);
-    padding: 0.85rem 0.95rem;
+    border: 1px solid var(--success-edge);
+    border-radius: var(--radius-lg);
+    padding: 0.95rem 1.05rem;
     background: var(--success-soft);
   }
   .result.warn {
-    border-left-color: var(--warn);
+    border-color: var(--warn-edge);
     background: var(--warn-soft);
   }
   .result.info {
-    border-left-color: var(--info);
-    background: var(--info-soft);
+    border-color: var(--accent-edge);
+    background: var(--accent-soft);
   }
 
   dl {
@@ -203,10 +214,8 @@
     margin: 0 0 0.6rem;
   }
   dt {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--fg-muted);
+    font-size: 0.8rem;
+    color: var(--ink-3);
   }
   dd {
     margin: 0;

@@ -139,8 +139,8 @@
     </div>
 
     {#if picked}
-      <div class="feedback pop-in" class:ok={correct}>
-        <strong>{correct ? '✓ Correct' : `✕ It's ${current.answer}`}</strong>
+      <div class="feedback rise-in" class:ok={correct}>
+        <strong>{correct ? 'Correct' : `Not quite: it is ${current.answer}`}</strong>
         <p>{current.why}</p>
         <button type="button" class="btn btn-sm btn-primary" onclick={next}>
           {index + 1 >= ITEMS.length ? 'See score' : 'Next scenario'}
@@ -169,7 +169,7 @@
     font-weight: 600;
     line-height: 1.45;
     padding: 0.75rem 0.9rem;
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -187,8 +187,8 @@
     padding: 0.6rem 0.5rem;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg);
+    background: var(--surface);
+    color: var(--ink);
     cursor: pointer;
     transition:
       background 0.13s,
@@ -196,7 +196,7 @@
   }
   .choice:hover:not(:disabled) {
     border-color: var(--accent);
-    background: var(--bg-hover);
+    background: var(--hover);
   }
   .choice:disabled {
     cursor: default;
@@ -217,7 +217,7 @@
 
   .feedback {
     border-radius: var(--radius);
-    border: 1px solid var(--danger-border);
+    border: 1px solid var(--danger-edge);
     background: var(--danger-soft);
     padding: 0.7rem 0.85rem;
     display: flex;
@@ -226,7 +226,7 @@
     gap: 0.35rem;
   }
   .feedback.ok {
-    border-color: var(--success-border);
+    border-color: var(--success-edge);
     background: var(--success-soft);
   }
   .feedback p {
