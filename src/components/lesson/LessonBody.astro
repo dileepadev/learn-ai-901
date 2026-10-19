@@ -1,0 +1,369 @@
+---
+/**
+ * A lesson's sections and blocks, rendered to static HTML at build time.
+ * Only the interactive blocks - knowledge checks and demos - become islands,
+ * and they hydrate when they scroll into view.
+ */
+import type { Module } from '../../data/types';
+import { QUESTION_BY_ID } from '../../data/questions';
+import { COMPARISONS } from '../../data/review';
+import { inlineMarkdown } from '../../lib/markdown';
+import Icon from '../Icon.astro';
+import KnowledgeCheck from './KnowledgeCheck.svelte';
+import TokenizerDemo from '../demos/TokenizerDemo.svelte';
+import SamplingDemo from '../demos/SamplingDemo.svelte';
+import VisionTasksDemo from '../demos/VisionTasksDemo.svelte';
+import RagPipelineDemo from '../demos/RagPipelineDemo.svelte';
+import PromptRolesDemo from '../demos/PromptRolesDemo.svelte';
+import DeploymentPicker from '../demos/DeploymentPicker.svelte';
+import WorkloadRouter from '../demos/WorkloadRouter.svelte';
+import AnalyzerBuilder from '../demos/AnalyzerBuilder.svelte';
+
+interface Props {
+  module: Module;
+}
+
+const { module: mod } = Astro.props;
+const md = (text: string) => inlineMarkdown(text);
+---
+
+{
+  mod.sections.map((section, sectionIndex) => (
+    <section class="lesson-section" id={section.id} data-section={section.id}>
+      <h2>
+        <span class="section-no num" aria-hidden="true">
+          {sectionIndex + 1}
+        </span>
+        {section.title}
+      </h2>
+      <div class="prose">
+        {section.blocks.map((block) => {
+          switch (block.t) {
+            case 'p':
+              return <p set:html={md(block.md)} />;
+            case 'h':
+              return <h3 id={block.id}>{block.text}</h3>;
+            case 'list':
+              return block.ordered ? (
+                <ol>
+                  {block.items.map((item) => (
+                    <li set:html={md(item)} />
+                  ))}
+                </ol>
+              ) : (
+                <ul>
+                  {block.items.map((item) => (
+                    <li set:html={md(item)} />
+                  ))}
+                </ul>
+              );
+            case 'key':
+              return (
+                <div class="callout callout-key" role="note">
+                  <p class="callout-title">
+                    <Icon name="key" />
+                    <span>
+                      <span class="visually-hidden">Know this: </span>
+                      {block.title}
+                    </span>
+                  </p>
+                  <div class="callout-body">
+                    <p set:html={md(block.body)} />
+                  </div>
+                </div>
+              );
+            case 'trap':
+              return (
+                <div class="callout callout-trap" role="note">
+                  <p class="callout-title">
+                    <Icon name="trap" />
+                    <span>
+                      <span class="visually-hidden">Exam trap: </span>
+                      {block.title}
+                    </span>
+                  </p>
+                  <div class="callout-body">
+                    <p set:html={md(block.body)} />
+                  </div>
+                </div>
+              );
+            case 'changed':
+              return (
+                <div class="callout callout-changed" role="note">
+                  <p class="callout-title">
+                    <Icon name="changed" />
+                    <span>
+                      <span class="visually-hidden">Changed: </span>
+                      {block.title}
+                    </span>
+                  </p>
+                  <div class="callout-body">
+                    <p set:html={md(block.body)} />
+                  </div>
+                </div>
+              );
+            case 'table':
+              return (
+                <div class="table-scroll" role="region" tabindex="0" aria-label={block.caption ?? block.headers.filter(Boolean).join(', ')}>
+                  <table class="data">
+                    {block.caption && <caption set:html={md(block.caption)} />}
+                    <thead>
+                      <tr>
+                        {block.headers.map((header) => (
+                          <th scope="col" set:html={md(header)} />
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {block.rows.map((row) => (
+                        <tr>
+                          {row.map((cell, c) =>
+                            c === 0 ? <th scope="row" set:html={md(cell)} /> : <td set:html={md(cell)} />,
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            case 'code':
+              return (
+                <figure class="codeblock">
+                  {block.caption && <figcaption>{block.caption}</figcaption>}
+                  <pre><code class={`language-${block.lang}`}>{block.code}</code></pre>
+                </figure>
+              );
+            case 'steps':
+              return (
+                <div class="steps">
+                  {block.title && <p class="steps-title">{block.title}</p>}
+                  <ol>
+                    {block.steps.map((step, i) => (
+                      <li>
+                        <details>
+                          <summary>
+                            <span class="step-no num" aria-hidden="true">
+                              {i + 1}
+                            </span>
+                            <span class="step-label">{step.label}</span>
+                            <Icon name="chevron-down" class="step-chevron" />
+                          </summary>
+                          <p set:html={md(step.detail)} />
+                        </details>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            case 'check': {
+              const question = QUESTION_BY_ID[block.qid];
+              return question ? <KnowledgeCheck client:visible question={question} /> : null;
+            }
+            case 'demo':
+              return (
+                <figure class="demo">
+                  <figcaption class="demo-head">
+                    <span class="demo-label">Try it</span>
+                    {block.caption && <span>{block.caption}</span>}
+                  </figcaption>
+                  {block.name === 'tokenizer' && <TokenizerDemo client:visible />}
+                  {block.name === 'sampling' && <SamplingDemo client:visible />}
+                  {block.name === 'vision-tasks' && <VisionTasksDemo client:visible />}
+                  {block.name === 'rag-pipeline' && <RagPipelineDemo client:visible />}
+                  {block.name === 'prompt-roles' && <PromptRolesDemo client:visible />}
+                  {block.name === 'deployment-picker' && <DeploymentPicker client:visible />}
+                  {block.name === 'workload-router' && <WorkloadRouter client:visible />}
+                  {block.name === 'analyzer-builder' && <AnalyzerBuilder client:visible />}
+                </figure>
+              );
+            case 'compare': {
+              const comparison = COMPARISONS.find((c) => c.id === block.id);
+              if (!comparison) return null;
+              return (
+                <div class="table-scroll" role="region" tabindex="0" aria-label={comparison.title}>
+                  <table class="data">
+                    <caption set:html={md(comparison.bottomLine)} />
+                    <thead>
+                      <tr>
+                        {comparison.headers.map((header) => (
+                          <th scope="col" set:html={md(header)} />
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comparison.rows.map((row) => (
+                        <tr>
+                          {row.map((cell, c) =>
+                            c === 0 ? <th scope="row" set:html={md(cell)} /> : <td set:html={md(cell)} />,
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            }
+            default:
+              return null;
+          }
+        })}
+      </div>
+      <span class="section-end" data-section-end={section.id} aria-hidden="true" />
+    </section>
+  ))
+}
+
+<style>
+  .lesson-section {
+    padding-top: 0.5rem;
+  }
+  .lesson-section + .lesson-section {
+    margin-top: 3.5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+    font-size: clamp(1.4rem, 1.25rem + 0.6vw, 1.75rem);
+    letter-spacing: -0.028em;
+  }
+
+  .section-no {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent-edge);
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 650;
+    letter-spacing: 0;
+    translate: 0 -0.15rem;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.75rem;
+  }
+
+  .table-scroll:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .steps {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .steps-title {
+    margin: 0;
+    padding: 0.75rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .steps ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .steps li {
+    margin: 0;
+  }
+  .steps li + li {
+    border-top: 1px solid var(--border);
+  }
+  .steps summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.1rem;
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 550;
+    transition: background 0.15s ease;
+  }
+  .steps summary::-webkit-details-marker {
+    display: none;
+  }
+  .steps summary:hover {
+    background: var(--surface-2);
+  }
+  .step-no {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+  .steps details[open] .step-no {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .step-label {
+    flex: 1;
+  }
+  .steps :global(.step-chevron) {
+    color: var(--ink-3);
+    transition: rotate 0.2s var(--ease);
+  }
+  .steps details[open] :global(.step-chevron) {
+    rotate: 180deg;
+  }
+  .steps details p {
+    margin: 0;
+    padding: 0 1.1rem 1rem 3.45rem;
+    color: var(--ink-2);
+  }
+
+  .demo {
+    margin: 0;
+    padding: clamp(1.1rem, 0.85rem + 1vw, 1.6rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .demo-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.9rem;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+  .demo-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .section-end {
+    display: block;
+    height: 1px;
+  }
+</style>
