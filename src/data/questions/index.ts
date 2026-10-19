@@ -24,33 +24,39 @@ const authored: AuthoredQuestion[] = [
 ];
 
 /**
- * Fails the build rather than shipping a bank with duplicate ids or a question
- * that can never be answered correctly.
+ * Fails the build rather than shipping a bank with duplicate ids, a question
+ * that can never be answered correctly, or one the learner cannot verify.
  */
 function validate(questions: Question[]): Question[] {
   const seen = new Set<string>();
-  for (const q of questions) {
-    if (seen.has(q.id)) throw new Error(`Duplicate question id: ${q.id}`);
-    seen.add(q.id);
+  const fail = (id: string, message: string): never => {
+    throw new Error(`Question ${id}: ${message}`);
+  };
 
-    if (q.type === 'single') {
+  for (const q of questions) {
+    if (seen.has(q.id)) fail(q.id, 'duplicate id');
+    seen.add(q.id);
+    // Ids travel in a compact "id.topic.kind" encoding, so keep them simple.
+    if (!/^[a-z0-9-]+$/.test(q.id)) fail(q.id, 'ids may only contain a-z, 0-9 and hyphens');
+    if (!q.reference?.url.startsWith('https://')) fail(q.id, 'needs a reference with an https URL');
+
+    if (q.type === 'single' || q.type === 'multi') {
+      const ids = new Set(q.options.map((o) => o.id));
+      if (ids.size !== q.options.length) fail(q.id, 'option ids must be unique');
       const correct = q.options.filter((o) => o.correct).length;
-      if (correct !== 1) {
-        throw new Error(`Question ${q.id} is single-answer but has ${correct} correct options`);
+      if (q.type === 'single' && correct !== 1) {
+        fail(q.id, `single-answer but has ${correct} correct options`);
+      }
+      if (q.type === 'multi' && correct < 2) {
+        fail(q.id, `multi-answer but has ${correct} correct options`);
+      }
+      if (q.options.length - correct < 1) fail(q.id, 'needs at least one wrong option');
+      for (const o of q.options) {
+        if (!o.correct && !o.why) fail(q.id, `wrong option "${o.id}" needs a "why"`);
       }
     }
-    if (q.type === 'multi') {
-      const correct = q.options.filter((o) => o.correct).length;
-      if (correct < 2) {
-        throw new Error(`Question ${q.id} is multi-answer but has ${correct} correct options`);
-      }
-    }
-    if (q.type === 'match' && q.pairs.length < 2) {
-      throw new Error(`Question ${q.id} needs at least two pairs`);
-    }
-    if (q.type === 'order' && q.items.length < 3) {
-      throw new Error(`Question ${q.id} needs at least three items to order`);
-    }
+    if (q.type === 'match' && q.pairs.length < 2) fail(q.id, 'needs at least two pairs');
+    if (q.type === 'order' && q.items.length < 3) fail(q.id, 'needs at least three items to order');
   }
   return questions;
 }

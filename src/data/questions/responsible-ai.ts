@@ -287,24 +287,24 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The model will learn historical bias from the training data; audit the data for representation and compare error rates across groups.',
+        text: 'It will learn the historical bias; audit the data and compare error rates per group',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The model will be unreliable; increase the size of the training set.',
+        text: 'It will be unreliable; add more years of the same hiring data to the training set',
         correct: false,
         why: 'More of the same biased data amplifies the problem rather than fixing it. Volume is not the issue - representativeness is.',
       },
       {
         id: 'c',
-        text: 'The model will leak candidate data; encrypt the training set.',
+        text: 'It will leak candidate data; encrypt the training set before the next training run',
         correct: false,
         why: 'Encryption addresses privacy and security, which is not the risk described here.',
       },
       {
         id: 'd',
-        text: 'The model will be opaque; publish the model weights.',
+        text: 'It will be opaque; publish the model weights so anyone can inspect them',
         correct: false,
         why: 'Publishing weights does not make outcomes fair, and transparency in the responsible AI sense means disclosure and explanation to affected people, not open-sourcing.',
       },
@@ -371,24 +371,24 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Citations linking each claim back to its source document, plus a note that answers are AI-generated',
+        text: 'Citations to source documents, plus a note that answers are AI-generated',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Vector search over embeddings, plus semantic reranking',
+        text: 'Vector search over embeddings, plus semantic reranking of the results',
         correct: false,
         why: 'Those improve retrieval relevance - an accuracy benefit, not a transparency one.',
       },
       {
         id: 'c',
-        text: 'Content filters for hate and violence, plus rate limiting',
+        text: 'Content filters for hate and violence, plus per-user rate limiting',
         correct: false,
         why: 'Those serve reliability and safety.',
       },
       {
         id: 'd',
-        text: 'Encryption at rest, plus a private endpoint',
+        text: 'Encryption at rest, plus a private endpoint for the search index',
         correct: false,
         why: 'Those serve privacy and security.',
       },
@@ -448,10 +448,10 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Content safety guardrails keep the system behaving safely across expected and adversarial inputs, which is reliability and safety. In Foundry, these are the built-in content filters available on Serverless API deployments, configurable per deployment.',
+      'Content safety controls keep the system behaving safely across expected and adversarial inputs, which is reliability and safety. In Foundry these controls live in **guardrails**: models get the default `Microsoft.DefaultV2` guardrail, and you can assign a custom guardrail to a deployment or an agent.',
     reference: {
-      label: 'Content filtering in Microsoft Foundry',
-      url: 'https://learn.microsoft.com/azure/ai-foundry/openai/concepts/content-filter',
+      label: 'Guardrails and controls overview in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview',
     },
     tags: ['reliability', 'content-safety'],
   },
@@ -467,24 +467,24 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Inclusiveness asks whether the system engages people across abilities, languages and cultures - limiting support to one region leaves whole populations unable to benefit.',
+        text: 'It asks whether people across abilities, languages and cultures can benefit - one region is not enough',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Inclusiveness is satisfied as long as the model is accurate for the languages it does support.',
+        text: 'It is satisfied as long as the model is accurate for every language it does support',
         correct: false,
         why: 'That is a reliability argument. Accuracy for the included group says nothing about the excluded one.',
       },
       {
         id: 'c',
-        text: 'Inclusiveness only applies to physical accessibility such as screen readers.',
+        text: 'It only covers physical accessibility, such as screen readers and keyboard navigation',
         correct: false,
         why: 'Accessibility is part of inclusiveness, but the principle explicitly covers language and cultural reach as well.',
       },
       {
         id: 'd',
-        text: 'Inclusiveness is a subset of fairness and needs no separate consideration.',
+        text: 'It is a subset of fairness, so a fair system is automatically inclusive',
         correct: false,
         why: 'They are distinct principles. Fairness is about equitable treatment of those who use the system; inclusiveness is about whether people can participate at all.',
       },
@@ -628,7 +628,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Privacy and security - Foundry IQ enforces permissions at query time so agents return only content the caller is authorised to see',
+        text: 'Privacy and security - Foundry IQ enforces each caller\'s permissions at query time',
         correct: true,
       },
       {
@@ -639,13 +639,13 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'Fairness - all employees get the same answers',
+        text: 'Fairness - every employee gets exactly the same answer to the same question',
         correct: false,
         why: 'The requirement is the opposite: different employees must legitimately get different answers based on their permissions.',
       },
       {
         id: 'd',
-        text: 'Reliability and safety - content filters block sensitive categories',
+        text: 'Reliability and safety - content filters block sensitive document categories',
         correct: false,
         why: 'Content filters block harmful content categories such as hate or violence. They have no concept of who is allowed to see which document.',
       },
@@ -670,24 +670,24 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Hand the conversation to a human agent when the model\'s confidence is low or the topic is high-risk',
+        text: 'Hand over to a human when confidence is low or the topic is high-risk',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Translate the interface into more languages',
+        text: 'Translate the interface into more languages for international customers',
         correct: false,
         why: 'That is inclusiveness.',
       },
       {
         id: 'c',
-        text: 'Add a footer stating who owns the system',
+        text: 'Add a footer naming the team that owns and maintains the system',
         correct: false,
         why: 'That leans towards accountability and transparency.',
       },
       {
         id: 'd',
-        text: 'Reduce the model\'s temperature to zero for all requests',
+        text: 'Reduce the model\'s temperature to zero for every request',
         correct: false,
         why: 'Lower temperature makes output more deterministic, but deterministic wrong answers are still wrong. It is a tuning choice, not a safety control.',
       },
@@ -812,24 +812,24 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'People should know when they are interacting with AI and should be able to understand the system\'s capabilities and limitations.',
+        text: 'People should know they are using AI and understand what it can and cannot do',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Transparency requires publishing the model\'s source code and training data.',
+        text: 'It requires publishing the model\'s source code and its training data',
         correct: false,
         why: 'Open-sourcing is not what the principle asks for. Transparency is about meaningful disclosure to the people affected.',
       },
       {
         id: 'c',
-        text: 'Transparency requires that the model always explain its reasoning token by token.',
+        text: 'It requires the model to explain its reasoning token by token, every time',
         correct: false,
         why: 'Explainability helps, but the principle is about clear communication of what the system is and does, not a mechanical trace of every inference.',
       },
       {
         id: 'd',
-        text: 'Transparency is only required for models that make legally binding decisions.',
+        text: 'It only applies to models that make legally binding decisions about people',
         correct: false,
         why: 'It applies broadly, not only to regulated decisions.',
       },
@@ -838,5 +838,47 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       'Transparency = intelligibility and disclosure: users know AI is involved, and stakeholders understand what the system can and cannot do, plus where its information comes from.',
     reference: REF,
     tags: ['transparency', 'definition'],
+  },
+  {
+    id: 'rai-023',
+    topic: 'responsible-ai',
+    objective: 'Describe considerations for privacy and security in an AI solution',
+    difficulty: 'hard',
+    kind: 'exam',
+    scenario:
+      'An agent can call an external shipping API. The team must stop it from ever sending customers\' personal data to that API.',
+    prompt: 'Where should the personal-data control in the agent\'s guardrail apply?',
+    options: [
+      {
+        id: 'a',
+        text: 'At the tool call, which scans what the agent proposes to send to a tool',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: 'On user input only, checking each message before the agent ever sees it',
+        correct: false,
+        why: 'Personal data can come from a retrieved document or an earlier lookup, not just the user\'s message. Checking input alone leaves the tool call unguarded.',
+      },
+      {
+        id: 'c',
+        text: 'On the final output only, before the reply reaches the user',
+        correct: false,
+        why: 'By the time the reply is checked, the tool call has already happened.',
+      },
+      {
+        id: 'd',
+        text: 'Through a lower temperature on the agent\'s model',
+        correct: false,
+        why: 'Temperature controls randomness. It has nothing to do with what data reaches a tool.',
+      },
+    ],
+    explanation:
+      'Foundry guardrails apply controls at intervention points: user input, output, and - for agents, in preview - the tool call and the tool response. To keep personal data away from a tool, scan the tool call. That is privacy and security in practice.',
+    reference: {
+      label: 'Guardrails and controls overview in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview',
+    },
+    tags: ['privacy', 'guardrails', 'agents', 'currency'],
   },
 ];

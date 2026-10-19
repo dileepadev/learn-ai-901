@@ -26,6 +26,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Text → tokens → vectors → attention → next-token probabilities → sample → repeat. The loop is what makes generation *autoregressive*: each new token is produced with all previous tokens in context.',
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+    },
     tags: ['generative', 'pipeline'],
   },
   {
@@ -44,13 +48,13 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'An authentication credential used to call the model endpoint',
+        text: 'An authentication credential that your app sends each time it calls the model endpoint',
         correct: false,
         why: 'That is an API key or access token - a different meaning of the same word, and a deliberate distractor.',
       },
       {
         id: 'c',
-        text: 'One character of input',
+        text: 'One character of input text, so a 400-character prompt costs exactly 400 tokens',
         correct: false,
         why: 'Tokens are usually larger than a character; roughly four characters of English on average.',
       },
@@ -63,6 +67,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Tokens are the unit models read, generate and bill in. A rough rule of thumb for English: 1 token ≈ 4 characters ≈ ¾ of a word.',
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+    },
     tags: ['generative', 'tokens', 'definition'],
   },
   {
@@ -76,30 +84,34 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A numeric vector capturing semantic meaning, so that similar meanings sit close together in vector space',
+        text: 'A vector of numbers that captures meaning, so similar meanings sit close together',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A compressed copy of the original text that can be decoded exactly',
+        text: 'A compressed copy of the original text that can be decoded back exactly',
         correct: false,
         why: 'Embeddings are lossy semantic representations, not reversible compression.',
       },
       {
         id: 'c',
-        text: 'The model\'s confidence in its answer',
+        text: 'The model\'s confidence score that its answer is correct',
         correct: false,
         why: 'Confidence is a score attached to a prediction, not a vector representation of input.',
       },
       {
         id: 'd',
-        text: 'The number of tokens in a prompt',
+        text: 'The number of tokens the prompt uses, stored for billing',
         correct: false,
         why: 'That is just a count.',
       },
     ],
     explanation:
       'Embeddings turn text (or images) into dense vectors positioned by meaning. That property is what makes vector search work: "annual leave" and "holiday allowance" land near each other even with no words in common - which is why RAG uses embeddings rather than keyword matching alone.',
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+    },
     tags: ['generative', 'embeddings'],
   },
   {
@@ -114,12 +126,12 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Weighing the relationship between every token and every other token in the sequence at once, capturing long-range context',
+        text: 'Weighing how every token relates to every other token at once, capturing long-range context',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Processing words strictly one at a time in order, like earlier recurrent networks',
+        text: 'Processing words strictly one at a time, in order, the way earlier recurrent networks did',
         correct: false,
         why: 'That describes RNNs - exactly what transformers replaced. Parallel processing of the whole sequence is the transformer\'s advantage.',
       },
@@ -138,6 +150,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Self-attention scores how much each token should attend to every other token, so context from far back in the sequence still influences the next prediction - and because it is computed in parallel rather than sequentially, it trains efficiently on large hardware.',
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+    },
     tags: ['generative', 'transformer'],
   },
   {
@@ -172,6 +188,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Temperature controls randomness in token selection. Near 0 the model repeatedly picks the highest-probability token, giving focused, near-deterministic output. Near 1+ it samples more widely, giving creative and varied output.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'temperature'],
   },
   {
@@ -204,7 +224,11 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'max_tokens caps the *completion*. The prompt is constrained separately by the context window, and prompt + completion together must fit inside it.',
+      'max_tokens caps the *completion*. The prompt is constrained separately by the context window, and prompt + completion together must fit inside it. Reasoning models use `max_completion_tokens` (Chat Completions) or `max_output_tokens` (Responses API) for the same job.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'max-tokens', 'trap'],
   },
   {
@@ -228,6 +252,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Two randomness knobs (temperature and top_p - tune one, not both), one length cap, one halt condition, and two repetition penalties that differ in whether they count *how often* a token appeared or merely *whether* it appeared.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'matching', 'cram'],
   },
   {
@@ -241,30 +269,34 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'They are alternative ways of controlling randomness - adjust one and leave the other at its default',
+        text: 'They are alternatives for controlling randomness - adjust one, not both',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Always set both to the same value',
+        text: 'Always set both to the same value so they reinforce each other',
         correct: false,
         why: 'They interact, and tuning both at once makes results hard to reason about.',
       },
       {
         id: 'c',
-        text: 'top_p controls response length; temperature controls randomness',
+        text: 'top_p controls response length, while temperature controls randomness',
         correct: false,
         why: 'Length is max_tokens. top_p is nucleus sampling - it restricts candidates to the smallest set whose probabilities sum to p.',
       },
       {
         id: 'd',
-        text: 'temperature applies to input, top_p applies to output',
+        text: 'temperature applies to the prompt, while top_p applies to the output',
         correct: false,
         why: 'Both apply to how output tokens are selected.',
       },
     ],
     explanation:
       'temperature reshapes the whole probability distribution; top_p truncates it to the most likely candidates whose cumulative probability reaches p. Both dial the same underlying thing, so change one at a time.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'temperature-vs-topp', 'trap', 'hard'],
   },
   {
@@ -281,7 +313,7 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'A small language model (SLM) such as the Phi family', correct: true },
       {
         id: 'b',
-        text: 'A frontier-scale large language model',
+        text: 'A frontier-scale large language model with a very large context window',
         correct: false,
         why: 'Too large for constrained hardware, higher latency and cost, and its extra reasoning ability is not needed for short-text classification.',
       },
@@ -300,6 +332,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'SLMs have far fewer parameters, so they run on modest hardware or at the edge with low latency and cost. Pick an SLM when the task is narrow and the constraints are compute, cost, latency or offline operation; pick an LLM when the task needs broad knowledge or complex multi-step reasoning.',
+    reference: {
+      label: 'Overview of Microsoft Foundry Models',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+    },
     tags: ['model-selection', 'slm-vs-llm'],
   },
   {
@@ -322,6 +358,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Model selection on this exam is almost always a modality question first: what goes in, what must come out. Only then do size, cost and reasoning depth matter.',
+    reference: {
+      label: 'Overview of Microsoft Foundry Models',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+    },
     tags: ['model-selection', 'matching', 'cram'],
   },
   {
@@ -355,7 +395,7 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Foundry offers two deployment options: **Serverless API** (preferred - Microsoft hosts the model, you are billed per token, and it supports the full range of deployment types, content filtering and private networking) and **managed compute** (dedicated GPUs for open-source and custom models, billed by the hour).',
+      'Foundry offers two deployment options: **Serverless API** (preferred - Microsoft hosts the model, you are billed per token or for reserved PTUs, and it supports the full range of deployment types, content filtering and private networking) and **managed compute**, in preview (dedicated GPUs for open-source and custom models, billed by the hour).',
     reference: {
       label: 'Deployment overview for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',
@@ -375,24 +415,24 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A provisioned deployment using provisioned throughput units (PTUs)',
+        text: 'A provisioned type, using reserved PTUs',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Global Standard pay-per-token',
+        text: 'Global Standard, paying per token',
         correct: false,
         why: 'Global Standard gives the highest default quota and is ideal for variable traffic, but customers with high consistent volume can see greater latency variability.',
       },
       {
         id: 'c',
-        text: 'Global Batch',
+        text: 'Global Batch, at the batch discount',
         correct: false,
         why: 'Batch is discounted asynchronous processing for offline workloads - unsuitable for an interactive chat service.',
       },
       {
         id: 'd',
-        text: 'The Developer deployment type',
+        text: 'The Developer type, for evaluation',
         correct: false,
         why: 'Developer deployments exist for evaluating fine-tuned models, not for production traffic.',
       },
@@ -454,30 +494,34 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Serverless API is billed on token usage (or reserved PTUs); managed compute is billed hourly for the accelerator capacity',
+        text: 'Serverless API by tokens (or reserved PTUs); managed compute by the hour',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Both are billed per token',
+        text: 'Both are billed per token, at the same rate for every model',
         correct: false,
         why: 'Managed compute runs on dedicated VMs you keep alive, so you pay for uptime whether or not requests arrive.',
       },
       {
         id: 'c',
-        text: 'Both are billed hourly',
+        text: 'Both are billed by the hour for the capacity you reserve',
         correct: false,
         why: 'Serverless API pay-as-you-go is metered on input and output tokens.',
       },
       {
         id: 'd',
-        text: 'Serverless API is free; you pay only for storage',
+        text: 'Serverless API is free; you pay only for the storage it uses',
         correct: false,
         why: 'Inference is always metered.',
       },
     ],
     explanation:
       'The billing model is the fastest way to tell the options apart: tokens consumed (serverless) versus compute time reserved (managed compute).',
+    reference: {
+      label: 'Deployment overview for Microsoft Foundry Models',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',
+    },
     tags: ['deployment', 'billing'],
   },
   {
@@ -492,30 +536,30 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A catalog of models from Microsoft, OpenAI, Anthropic, Meta, Mistral, Cohere and others, used to compare capabilities and deploy the model you pick',
+        text: 'A catalog of models from many providers, to compare and deploy',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A store of your own fine-tuned models only',
+        text: 'A store that holds only your own fine-tuned models',
         correct: false,
         why: 'Your fine-tuned models live in your project; the catalog is the discovery surface for the wider model ecosystem.',
       },
       {
         id: 'c',
-        text: 'A billing dashboard for model usage',
+        text: 'A billing dashboard showing token usage by model',
         correct: false,
         why: 'Cost management is elsewhere in the portal.',
       },
       {
         id: 'd',
-        text: 'A list of prebuilt agents you can install',
+        text: 'A list of prebuilt agents you can install in a project',
         correct: false,
         why: 'Agents are built in Agent Service; the catalog is about models.',
       },
     ],
     explanation:
-      'The catalog is where you browse and filter models by capability, modality, provider and deployment support, then deploy the one that fits. It now spans well over ten thousand models across first-party, partner and open-source publishers.',
+      'The catalog is where you browse and filter models by capability, modality, provider and deployment support, compare benchmarks, then deploy the one that fits. It holds more than 10,000 models across first-party, partner and open-source publishers, with roughly 50 new ones each month.',
     reference: {
       label: 'Overview of Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
@@ -534,30 +578,34 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'It predicts the most plausible next token from patterns learned in training - plausibility is not the same as truth, and the model has no lookup of facts',
+        text: 'It predicts the most plausible next token, and plausible is not the same as true',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Its training data is encrypted so it cannot read it accurately',
+        text: 'Its training data is encrypted, so it cannot read its sources accurately',
         correct: false,
         why: 'Training data is not stored in the model at all, encrypted or otherwise.',
       },
       {
         id: 'c',
-        text: 'Temperature is always set too high by default',
+        text: 'Temperature is always set too high by default on deployed models',
         correct: false,
         why: 'Temperature affects variability. A model at temperature 0 can still be confidently wrong.',
       },
       {
         id: 'd',
-        text: 'Because the context window is too small',
+        text: 'Its context window is too small to hold the facts it needs',
         correct: false,
         why: 'A larger window helps with long inputs, but does not add facts the model never learned.',
       },
     ],
     explanation:
       'This is *hallucination*, and understanding its cause explains the whole rationale for RAG: give the model retrieved, authoritative content in the prompt so its next-token prediction is anchored to real source material - and cite it so a human can check.',
+    reference: {
+      label: 'RAG and indexes in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+    },
     tags: ['generative', 'hallucination'],
   },
   {
@@ -619,30 +667,189 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'To tell the model to end its response as soon as a specified string appears',
+        text: 'To end the response as soon as a specified string appears',
         correct: true,
       },
       {
         id: 'b',
-        text: 'To block unsafe content categories',
+        text: 'To block unsafe content categories in the model\'s output',
         correct: false,
         why: 'That is content filtering, configured on the deployment.',
       },
       {
         id: 'c',
-        text: 'To cancel an in-flight request from the client',
+        text: 'To cancel an in-flight request from the client application',
         correct: false,
         why: 'That is client-side cancellation, not a model parameter.',
       },
       {
         id: 'd',
-        text: 'To limit how many requests per minute are allowed',
+        text: 'To limit how many requests per minute the client may send',
         correct: false,
         why: 'That is rate limiting.',
       },
     ],
     explanation:
       'Stop sequences are useful when you want structured output to terminate cleanly - for example stopping at `\\n\\n` or at a marker like `END` so the model does not continue past the part you need.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'stop'],
+  },
+  {
+    id: 'mc-019',
+    topic: 'model-components',
+    moduleId: 'ml-and-transformers',
+    objective: 'Describe how generative AI models work',
+    difficulty: 'medium',
+    kind: 'exam',
+    prompt:
+      'A language model writes its reply one token at a time, adding each new token to the sequence before predicting the next. What is this behaviour called?',
+    options: [
+      { id: 'a', text: 'Autoregressive generation', correct: true },
+      {
+        id: 'b',
+        text: 'Retrieval-augmented generation',
+        correct: false,
+        why: 'RAG adds retrieved passages to the prompt. It changes what the model reads, not how it produces tokens.',
+      },
+      {
+        id: 'c',
+        text: 'Fine-tuning',
+        correct: false,
+        why: 'Fine-tuning adjusts the weights before the model is used. It does not describe how a reply is produced.',
+      },
+      {
+        id: 'd',
+        text: 'Diffusion',
+        correct: false,
+        why: 'Diffusion builds an image by repeatedly removing noise. It is not how a language model writes text.',
+      },
+    ],
+    explanation:
+      'The decoder predicts the most probable next token, the token is added to the sequence, and the whole process repeats until the model predicts the end. That loop is what *autoregressive* means - and why replies stream in word by word.',
+    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    tags: ['how-llms-work', 'tokens'],
+  },
+  {
+    id: 'mc-020',
+    topic: 'model-components',
+    moduleId: 'ml-and-transformers',
+    objective: 'Describe how generative AI models work',
+    difficulty: 'easy',
+    kind: 'exam',
+    prompt: 'Which statement about tokens is correct?',
+    options: [
+      {
+        id: 'a',
+        text: 'A token can be a whole word, part of a word such as "un", or punctuation',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: 'A token is always exactly one whole word',
+        correct: false,
+        why: 'Vocabularies also hold sub-words, punctuation and other common character sequences, so long or rare words split into several tokens.',
+      },
+      {
+        id: 'c',
+        text: 'Only generated tokens are billed, because prompt tokens are always free',
+        correct: false,
+        why: 'Serverless deployments bill for inputs and outputs, so prompt tokens count too.',
+      },
+      {
+        id: 'd',
+        text: 'Tokens are assigned at random each time you call the model, so counts vary',
+        correct: false,
+        why: 'Each token gets a fixed ID when the vocabulary is built from training data. The same text always tokenizes the same way for a given model.',
+      },
+    ],
+    explanation:
+      'Models break text into tokens - words, sub-words, punctuation - and each has a fixed ID in the vocabulary. Tokens are the unit models read, generate and bill in; in English, a token averages roughly four characters.',
+    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    tags: ['tokens', 'how-llms-work'],
+  },
+  {
+    id: 'mc-021',
+    topic: 'model-components',
+    moduleId: 'ml-and-transformers',
+    objective: 'Describe how generative AI models work',
+    difficulty: 'medium',
+    kind: 'exam',
+    prompt:
+      'The embeddings for "dog" and "puppy" point in almost the same direction in vector space. What does that tell you?',
+    options: [
+      {
+        id: 'a',
+        text: 'The two words are used in similar contexts, so their meanings are close',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: 'The two words always appear next to each other in the training text',
+        correct: false,
+        why: 'Embeddings capture how tokens are used across many contexts, not whether they sit side by side.',
+      },
+      {
+        id: 'c',
+        text: 'The two words have the same number of characters',
+        correct: false,
+        why: 'Spelling and length play no part in an embedding. "Dog" and "puppy" are different lengths anyway.',
+      },
+      {
+        id: 'd',
+        text: 'The model will treat the two words as the same token',
+        correct: false,
+        why: 'They remain separate tokens with separate IDs. Similar direction means similar meaning, not identity.',
+      },
+    ],
+    explanation:
+      'Embeddings encode meaning as direction in a many-dimensional space, learned from the contexts words appear in. Similar meanings point in similar directions, which you can measure with cosine similarity - the property that powers semantic search and RAG.',
+    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    tags: ['embeddings', 'how-llms-work'],
+  },
+  {
+    id: 'mc-022',
+    topic: 'model-components',
+    moduleId: 'genai-models',
+    objective: 'Identify appropriate model deployment options and configuration parameters',
+    difficulty: 'hard',
+    kind: 'exam',
+    scenario:
+      'A team moves a summarisation feature from gpt-4.1 to a GPT-5 series reasoning model. Requests that set `temperature=0.2` and `max_tokens=400` now fail.',
+    prompt: 'What should they change?',
+    options: [
+      {
+        id: 'a',
+        text: 'Drop temperature, and use max_completion_tokens or max_output_tokens instead',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: 'Keep both parameters, but set temperature to 0, the most deterministic value',
+        correct: false,
+        why: 'Reasoning models do not accept temperature at all - any value is rejected.',
+      },
+      {
+        id: 'c',
+        text: 'Move the deployment to a provisioned type so that every parameter is honoured',
+        correct: false,
+        why: 'The deployment type changes capacity and billing, not which request parameters a model accepts.',
+      },
+      {
+        id: 'd',
+        text: 'Raise max_tokens well above 400 to leave room for the model\'s hidden reasoning',
+        correct: false,
+        why: 'Reasoning models reject max_tokens. The length cap has a different name.',
+      },
+    ],
+    explanation:
+      'Reasoning models do not support `temperature`, `top_p`, the penalties or `max_tokens`. Cap length with `max_completion_tokens` in Chat Completions or `max_output_tokens` in the Responses API, and use `reasoning_effort` to trade depth of thinking for speed.',
+    reference: {
+      label: 'Azure OpenAI reasoning models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/reasoning',
+    },
+    tags: ['parameters', 'reasoning-models', 'currency'],
   },
 ];

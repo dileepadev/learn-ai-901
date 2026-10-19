@@ -50,6 +50,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The model invented a fact because it had neither the data nor an instruction to decline. Both fixes matter: give it access to the truth (a tool), and tell it what to do when it does not have it.',
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+    },
     tags: ['reliability', 'hallucination', 'agents'],
   },
   {
@@ -64,30 +68,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Accuracy and error rates computed separately for each demographic group the system serves',
+        text: 'Accuracy and error rates for each demographic group separately',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The overall F1 score alongside accuracy',
+        text: 'The overall F1 score, alongside the overall accuracy',
         correct: false,
         why: 'A better aggregate metric is still an aggregate. It can hide a large gap between groups.',
       },
       {
         id: 'c',
-        text: 'Inference latency across regions',
+        text: 'Inference latency in each region the system serves',
         correct: false,
         why: 'A performance measure in the engineering sense, unrelated to fairness.',
       },
       {
         id: 'd',
-        text: 'The size of the training dataset',
+        text: 'The size of the training dataset relative to its features',
         correct: false,
         why: 'Volume says nothing about representativeness or about outcomes per group.',
       },
     ],
     explanation:
       'Fairness is a *disaggregated* measurement. A model can be 93% accurate overall while being 70% accurate for one group and 97% for another - and the aggregate will never show it.',
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+    },
     tags: ['fairness', 'evaluation', 'trap'],
   },
   {
@@ -122,6 +130,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Anything that goes into an index can come back out in an answer. Redacting PII before indexing, and enforcing permissions at query time, are the two controls that keep a knowledge base from becoming a data-leak channel.',
+    reference: {
+      label: 'What is PII detection in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/personally-identifiable-information/overview',
+    },
     tags: ['privacy', 'rag', 'pii'],
   },
   {
@@ -141,13 +153,13 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'Build one polished mobile app and promote it heavily',
+        text: 'Build one polished mobile app and promote it heavily across the council\'s channels',
         correct: false,
         why: 'A single channel excludes anyone who cannot use that channel, however good it is.',
       },
       {
         id: 'c',
-        text: 'Use the largest available model so answers are as good as possible',
+        text: 'Use the largest available model, so the answers are as good as they can be',
         correct: false,
         why: 'Answer quality does not help someone who cannot reach the system.',
       },
@@ -160,6 +172,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Inclusiveness is about reach: multiple modalities, multiple languages, accessibility standards, and not assuming everyone has the same device or connection.',
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+    },
     tags: ['inclusiveness', 'design'],
   },
   {
@@ -198,6 +214,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Microsoft embeds Content Credentials in AI-generated images so their origin can be verified downstream. Provenance is a transparency control.',
+    reference: {
+      label: 'Content provenance for Foundry models',
+      url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
+    },
     tags: ['transparency', 'c2pa', 'image-generation'],
   },
   {
@@ -232,6 +252,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Content filters cover reliability and safety, citations cover transparency, permission-aware retrieval covers privacy, the named owner covers accountability, and accessible multilingual interfaces cover inclusiveness. Nothing in the list evaluates whether the system performs equally well across groups - that is fairness, and it is the one most often left out.',
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+    },
     tags: ['all-principles', 'hard', 'governance'],
   },
   {
@@ -270,6 +294,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Confidence-threshold routing is the intended pattern for Content Understanding, and it is a governance answer as much as a technical one: a human stays in the loop precisely where the system is least certain.',
+    reference: {
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+    },
     tags: ['accountability', 'content-understanding', 'cross-topic'],
   },
   {
@@ -284,30 +312,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Indirect prompt injection - untrusted retrieved content is being treated as instructions rather than data',
+        text: 'Indirect prompt injection: retrieved content treated as instructions',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A hallucination - the model invented the instruction',
+        text: 'A hallucination: the model invented the instruction itself',
         correct: false,
         why: 'The text is genuinely present in the source. Nothing was invented.',
       },
       {
         id: 'c',
-        text: 'Data drift - the corpus has changed since indexing',
+        text: 'Data drift: the corpus has changed since it was indexed',
         correct: false,
         why: 'Drift is about distributions changing over time, not adversarial content.',
       },
       {
         id: 'd',
-        text: 'Overfitting - the model has memorised the document',
+        text: 'Overfitting: the model has memorised the uploaded document',
         correct: false,
         why: 'Overfitting is a training-time problem, and retrieval does not train anything.',
       },
     ],
     explanation:
       'Indirect prompt injection hides instructions in content the model will retrieve. Defences include prompt shields, treating retrieved content strictly as data, least-privilege tool permissions, and permission-aware retrieval so an agent cannot reach content the caller could not.',
+    reference: {
+      label: 'Prompt Shields in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/content-filter-prompt-shields',
+    },
     tags: ['privacy', 'prompt-injection', 'rag', 'hard'],
   },
 
@@ -346,6 +378,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Prefer the narrowest prebuilt feature whose output shape matches the requirement. Reach for a generative model when the output is genuinely open-ended.',
+    reference: {
+      label: 'What is key phrase extraction in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview',
+    },
     tags: ['routing', 'text-analysis'],
   },
   {
@@ -382,6 +418,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Detecting the defect is computer vision. Raising a ticket and notifying someone are actions in external systems, which requires tools - that is what makes the second half agentic.',
+    reference: {
+      label: 'Introduction to AI concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+    },
     tags: ['routing', 'multi-workload', 'hard'],
   },
   {
@@ -394,28 +434,32 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       'A product team gets thousands of free-text survey responses and wants to know which product areas people complain about most, and how strongly.',
     prompt: 'Which combination gives them that?',
     options: [
-      { id: 'a', text: 'Opinion mining, which links each target to an assessment and a sentiment', correct: true },
+      { id: 'a', text: 'Opinion mining, linking each target to an assessment and sentiment', correct: true },
       {
         id: 'b',
-        text: 'Document-level sentiment analysis alone',
+        text: 'Document-level sentiment analysis on each response alone',
         correct: false,
         why: 'It gives one label per response and loses which area the feeling attached to.',
       },
       {
         id: 'c',
-        text: 'Language detection plus summarization',
+        text: 'Language detection, then summarization of each response',
         correct: false,
         why: 'Neither identifies complaint targets or strength of feeling.',
       },
       {
         id: 'd',
-        text: 'Named entity recognition alone',
+        text: 'Named entity recognition on each response alone',
         correct: false,
         why: 'NER finds people, places and organisations - not product aspects with sentiment attached.',
       },
     ],
     explanation:
       'Whenever a requirement pairs "which aspect" with "how did they feel about it", the answer is opinion mining (aspect-based sentiment analysis).',
+    reference: {
+      label: 'What are sentiment analysis and opinion mining?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+    },
     tags: ['text-analysis', 'opinion-mining'],
   },
   {
@@ -450,6 +494,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'SSML gives exactly this control: `<break>` for the pause, `<prosody rate>` for the delivery speed, and `<voice>` to choose the neural voice.',
+    reference: {
+      label: 'Speech Synthesis Markup Language (SSML) overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup',
+    },
     tags: ['speech', 'ssml'],
   },
   {
@@ -484,6 +532,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Only per-pixel segmentation gives an exact shape and therefore an area. Detection is enough to *locate* and *count*; segmentation is required to *measure*.',
+    reference: {
+      label: 'Introduction to computer vision concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+    },
     tags: ['vision', 'segmentation', 'hard'],
   },
   {
@@ -518,6 +570,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Requirements phrased as "these named fields, so we can filter" point at Content Understanding: declare a field schema, choose Classify or Generate per field, and get typed output with confidence scores.',
+    reference: {
+      label: 'Content Understanding image overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/image/overview',
+    },
     tags: ['extraction', 'content-understanding', 'vision'],
   },
   {
@@ -540,6 +596,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Six requirements, six different features. The recurring exam skill is picking the *narrowest* capability whose output shape matches, rather than reaching for a generative model each time.',
+    reference: {
+      label: 'What is Azure Language in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+    },
     tags: ['text-analysis', 'matching', 'hard', 'cram'],
   },
   {
@@ -574,6 +634,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Embeddings place text by meaning, so semantically related passages sit close together even with no vocabulary overlap. Hybrid search combines this with keyword matching for the best of both.',
+    reference: {
+      label: 'Vector search overview - Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/vector-search-overview',
+    },
     tags: ['embeddings', 'rag', 'search'],
   },
   {
@@ -608,6 +672,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The third requirement - a yes/no compliance field - is what tips this from transcription to extraction. An audio analyzer transcribes, labels speakers, and produces the fields you defined, in one call.',
+    reference: {
+      label: 'Content Understanding audio overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/audio/overview',
+    },
     tags: ['speech', 'content-understanding', 'routing'],
   },
   {
@@ -642,6 +710,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'New content whose wording is not in the input is always generative AI. It becomes agentic only when the system must take actions in other systems.',
+    reference: {
+      label: 'Introduction to generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/',
+    },
     tags: ['routing', 'generative'],
   },
   {
@@ -676,6 +748,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Language detection returns an ISO language code and a confidence score. It is the usual first step in a multilingual pipeline, because it determines what happens next.',
+    reference: {
+      label: 'What is language detection in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/language-detection/overview',
+    },
     tags: ['text-analysis', 'language-detection'],
   },
   {
@@ -690,30 +766,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'An image generation model, which starts from noise and iteratively denoises conditioned on the prompt',
+        text: 'Image generation: it starts from noise and denoises, guided by the prompt',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Image analysis, which describes an image it is given',
+        text: 'Image analysis: it describes the image it is given in detail',
         correct: false,
         why: 'Analysis consumes images; it never produces them.',
       },
       {
         id: 'c',
-        text: 'An embedding model, which converts the description to a vector',
+        text: 'An embedding model: it converts the description into a vector',
         correct: false,
         why: 'Vectors are not images. Embeddings power search, not generation.',
       },
       {
         id: 'd',
-        text: 'OCR, which reads text from images',
+        text: 'OCR: it reads the text that appears in reference photos',
         correct: false,
         why: 'Wrong direction and wrong modality.',
       },
     ],
     explanation:
       'Diffusion is the mechanism: noise in, prompt-conditioned denoising, image out. Nothing is retrieved, which is why a prompt for an impossible scene still returns a picture.',
+    reference: {
+      label: 'Get started with computer vision in Azure - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+    },
     tags: ['vision', 'image-generation', 'diffusion'],
   },
   {
@@ -728,30 +808,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'An agentic solution: a model plus instructions plus tools, with a human approving the final output',
+        text: 'An agentic solution - model, instructions and tools, with human approval',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A pure text-analysis pipeline',
+        text: 'A pure text-analysis pipeline built from prebuilt features',
         correct: false,
         why: 'Text analysis cannot look a policy up in another system or decide a course of action.',
       },
       {
         id: 'c',
-        text: 'A single generative call with a long prompt',
+        text: 'A single generative call with a very long, detailed prompt describing every policy',
         correct: false,
         why: 'One call cannot query the policy system. Without a tool, the model can only guess at the policy details.',
       },
       {
         id: 'd',
-        text: 'An image-generation workflow',
+        text: 'An image-generation workflow driven by the claim email',
         correct: false,
         why: 'Nothing visual is involved.',
       },
     ],
     explanation:
       'Multiple steps, a lookup in an external system, and a decision make this agentic. Note the human-in-the-loop approval - that is a reliability and accountability control, not a technical limitation.',
+    reference: {
+      label: 'Agents in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+    },
     tags: ['routing', 'agents', 'hard'],
   },
   {
@@ -771,6 +855,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Content extraction always precedes field extraction: first get everything readable out of the file, then map it into your schema. Confidence-based routing sits between extraction and integration, which is what makes straight-through processing safe.',
+    reference: {
+      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+    },
     tags: ['extraction', 'pipeline', 'cram'],
   },
 
@@ -809,6 +897,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Batch is discounted asynchronous processing - exactly right for large offline jobs where latency is irrelevant, and exactly wrong for anything interactive.',
+    reference: {
+      label: 'Global batch processing with Azure OpenAI',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/batch',
+    },
     tags: ['deployment', 'batch'],
   },
   {
@@ -843,6 +935,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Match the model tier to the task. High-volume, narrow tasks are where SLMs and prebuilt features earn their keep; save the large models for work that genuinely needs broad knowledge or multi-step reasoning.',
+    reference: {
+      label: 'Overview of Microsoft Foundry Models',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+    },
     tags: ['model-selection', 'slm-vs-llm', 'cost'],
   },
   {
@@ -877,6 +973,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Frequency penalty scales with *how often* a token has already appeared, so it directly discourages repeating the same word. Presence penalty is a flat penalty on any token already used, which is better for encouraging topic variety.',
+    reference: {
+      label: 'Azure OpenAI chat REST reference (request parameters)',
+      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+    },
     tags: ['parameters', 'penalties', 'hard'],
   },
   {
@@ -896,7 +996,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'max_tokens must be under 1000',
+        text: 'max_tokens must stay under 1000 for any request to be accepted',
         correct: false,
         why: 'There is no such universal limit; the ceiling depends on the model.',
       },
@@ -908,13 +1008,17 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'max_tokens limits the prompt, and 30 pages is over 4000 tokens',
+        text: 'max_tokens limits the prompt, and 30 pages is well over 4000 tokens',
         correct: false,
         why: 'This is the trap. max_tokens caps the *completion*, not the prompt.',
       },
     ],
     explanation:
       'Prompt and completion share the context window. A 30-page prompt may fit on its own, but reserving 4000 tokens for the response on top of it can push the total past the limit. The fix is to shorten the prompt - chunk it, or retrieve only the relevant passages.',
+    reference: {
+      label: 'Work with chat completion models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/chatgpt',
+    },
     tags: ['parameters', 'context-window', 'trap'],
   },
   {
@@ -928,30 +1032,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The next token is sampled from a probability distribution, and temperature and top_p control how widely it samples',
+        text: 'The next token is sampled, and temperature and top_p control how widely',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The model retrains itself after each request',
+        text: 'The model retrains itself slightly after each request',
         correct: false,
         why: 'Inference never changes model weights.',
       },
       {
         id: 'c',
-        text: 'The model retrieves a different document each time',
+        text: 'The model retrieves a different document from its training data for each call',
         correct: false,
         why: 'Only true if retrieval is involved, and a plain model call does not retrieve anything.',
       },
       {
         id: 'd',
-        text: 'Because max_tokens varies between calls',
+        text: 'max_tokens changes between calls unless you pin it',
         correct: false,
         why: 'max_tokens is whatever you set it to, and it only caps length.',
       },
     ],
     explanation:
       'Generation is sampling, not lookup. Set temperature near 0 to make output close to deterministic when you need repeatability.',
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+    },
     tags: ['generative', 'sampling'],
   },
   {
@@ -966,30 +1074,34 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Use instant access (preview) to call supported models by name, then compare in the playground',
+        text: 'Instant access (preview), then compare the models in the playground',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Create three managed compute deployments',
+        text: 'Create three managed compute deployments, one per model',
         correct: false,
         why: 'The slowest and most expensive option, and unnecessary for models that do not require dedicated GPUs.',
       },
       {
         id: 'c',
-        text: 'Fine-tune each model on a sample dataset first',
+        text: 'Fine-tune each model on a small sample dataset first',
         correct: false,
         why: 'Fine-tuning before you have even compared base behaviour is backwards.',
       },
       {
         id: 'd',
-        text: 'Request quota increases for each model',
+        text: 'Request a quota increase for each model before calling it',
         correct: false,
         why: 'Not a prerequisite for trying a model.',
       },
     ],
     explanation:
       'Instant access removes the deployment step entirely for supported models. Combined with the playground, it makes model comparison a minutes-long task rather than an afternoon of provisioning.',
+    reference: {
+      label: 'Instant access to models in Microsoft Foundry (preview)',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/instant-models',
+    },
     tags: ['deployment', 'currency', 'hard'],
   },
   {
@@ -1026,6 +1138,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'RAG needs two models doing different jobs: one to turn text into vectors for retrieval, and one to write the answer from the retrieved passages. Foundry IQ handles the embedding side for you when you use it as the knowledge layer.',
+    reference: {
+      label: 'RAG and indexes in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+    },
     tags: ['model-selection', 'rag', 'multi-select'],
   },
   {
@@ -1038,28 +1154,32 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       'A financial services firm must keep all inference processing inside its own Azure geography for regulatory reasons, and traffic is spiky.',
     prompt: 'Which deployment type should it choose?',
     options: [
-      { id: 'a', text: 'Standard (single region), within the required Azure geography', correct: true },
+      { id: 'a', text: 'Standard, in the required geography', correct: true },
       {
         id: 'b',
-        text: 'Global Standard',
+        text: 'Global Standard, for the highest quota',
         correct: false,
         why: 'Global types may process inference in any Azure region, which breaks the requirement.',
       },
       {
         id: 'c',
-        text: 'Data Zone Standard',
+        text: 'Data Zone Standard, within the data zone',
         correct: false,
         why: 'Closer, but a data zone spans a region group (US, EU or APAC), not one specific Azure geography.',
       },
       {
         id: 'd',
-        text: 'Regional Provisioned',
+        text: 'Regional Provisioned, with reserved PTUs',
         correct: false,
         why: 'It satisfies residency, but provisioned capacity is the wrong economics for spiky traffic - you pay for the reservation regardless.',
       },
     ],
     explanation:
       'Two independent decisions: *where* (global / data zone / geography) and *how you pay* (standard / provisioned / batch). Strict single-geography residency plus spiky traffic gives Standard within that geography.',
+    reference: {
+      label: 'Deployment types for Microsoft Foundry Models',
+      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/concepts/deployment-types',
+    },
     tags: ['deployment', 'data-residency', 'hard'],
   },
 ];

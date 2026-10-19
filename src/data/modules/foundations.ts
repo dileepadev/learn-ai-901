@@ -15,7 +15,7 @@ export const foundations: Module = {
     'Route a business scenario to the correct workload in one read',
     'Tell generative AI apart from agentic AI, and text analysis apart from information extraction',
   ],
-  quiz: ['wl-002', 'wl-003', 'wl-004', 'wl-005', 'wl-042', 'wl-044'],
+  quiz: ['wl-002', 'wl-003', 'wl-004', 'wl-042', 'sc-wl-02', 'sc-wl-10', 'sc-wl-13'],
   sections: [
     {
       id: 'why',
@@ -76,7 +76,7 @@ export const foundations: Module = {
         {
           t: 'demo',
           name: 'workload-router',
-          caption: 'Try it: read each scenario and pick the workload. Instant feedback.',
+          caption: 'Read each scenario and pick the workload. Instant feedback.',
         },
       ],
     },
@@ -127,7 +127,7 @@ export const foundations: Module = {
         {
           t: 'key',
           title: 'Where each workload lands in Foundry',
-          body: 'Generative + agentic ⇒ **models and Foundry Agent Service**. Text analysis ⇒ **Azure Language**. Speech ⇒ **Azure Speech**, or a multimodal model that accepts audio. Vision ⇒ a **multimodal model** for reasoning, **Content Understanding** for structured output. Information extraction ⇒ **Azure Content Understanding**.',
+          body: 'Generative + agentic ⇒ **Foundry Models and Foundry Agent Service**. Text analysis ⇒ **Azure Language**, or a model. Speech ⇒ **Azure Speech** (including Voice Live), or a model that accepts audio. Vision ⇒ a **multimodal model** to reason about images, **Content Understanding** for structured fields, **Document Intelligence** for document OCR. Information extraction ⇒ **Azure Content Understanding**.',
           priority: 'high',
         },
       ],

@@ -16,7 +16,7 @@ export const textAnalysis: Module = {
     'Tell extractive from abstractive summarization, and sentiment from opinion mining',
     'Know which Language features need training data and which do not',
   ],
-  quiz: ['wl-012', 'wl-013', 'wl-014', 'ts-001', 'ts-008', 'ts-010', 'ts-012'],
+  quiz: ['ts-008', 'ts-012', 'wl-011', 'sc-wl-07', 'sc-ts-01', 'sc-ts-04', 'sc-ts-05', 'sc-ts-07'],
   sections: [
     {
       id: 'techniques',
@@ -126,6 +126,7 @@ export const textAnalysis: Module = {
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.textanalytics import TextAnalyticsClient
 
+# A key keeps the sample short; prefer DefaultAzureCredential in real apps.
 client = TextAnalyticsClient(
     endpoint=os.environ["LANGUAGE_ENDPOINT"],
     credential=AzureKeyCredential(os.environ["LANGUAGE_KEY"]),
@@ -145,7 +146,7 @@ for e in entities.entities:
         },
         {
           t: 'p',
-          md: 'Azure Language is also reachable from Foundry as a tool, and via a Model Context Protocol (MCP) server - which is how an **agent** can use these capabilities as tools rather than your code calling them directly.',
+          md: 'Azure Language is also reachable from Foundry as a tool, through the Azure Language **MCP server** (preview) - which is how an **agent** can call these capabilities as tools rather than your code calling them directly.',
         },
         { t: 'check', qid: 'ts-001' },
       ],

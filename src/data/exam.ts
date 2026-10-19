@@ -11,13 +11,21 @@ export const EXAM = {
   credential: 'Microsoft Certified: Azure AI Fundamentals',
   passingScore: 700,
   scoreScale: 1000,
+  /** Microsoft says most exams have 40-60 questions; the exact count varies. */
   questionCountLabel: '40–60',
+  /** Exam time for Fundamentals exams; seat time adds instructions and comments. */
+  durationMinutes: 45,
+  seatMinutes: 65,
   skillsMeasuredDate: 'April 15, 2026',
   studyGuideUrl:
     'https://learn.microsoft.com/credentials/certifications/resources/study-guides/ai-901',
   examPageUrl: 'https://learn.microsoft.com/credentials/certifications/exams/ai-901/',
+  examExperienceUrl:
+    'https://learn.microsoft.com/credentials/support/exam-duration-exam-experience',
+  learningPathUrl: 'https://learn.microsoft.com/training/paths/get-started-ai-apps-agents/',
   practiceAssessmentUrl:
     'https://aiskillsnavigator.microsoft.com/credentials/cert-83587e0a0754cfee561ade3e27d9fa1cdaf15ae03be52d2413b2b858d1b4eda4',
+  sandboxUrl: 'https://aka.ms/examdemo',
   portalUrl: 'https://ai.azure.com',
 } as const;
 

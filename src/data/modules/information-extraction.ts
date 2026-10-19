@@ -8,7 +8,7 @@ export const informationExtraction: Module = {
     'Azure Content Understanding across documents, images, audio and video - analyzers, field methods, and confidence-driven automation.',
   topic: 'foundry-extraction',
   alsoCovers: ['ai-workloads'],
-  minutes: 22,
+  minutes: 23,
   priority: 'high',
   icon: '📄',
   outcomes: [
@@ -16,7 +16,7 @@ export const informationExtraction: Module = {
     'Choose between Extract, Classify and Generate for a field',
     'Say what confidence scores unlock, and when to use Document Intelligence instead',
   ],
-  quiz: ['fe-002', 'fe-003', 'fe-004', 'fe-006', 'fe-007', 'fe-009', 'fe-013', 'fe-016'],
+  quiz: ['fe-004', 'fe-010', 'fe-011', 'fe-018', 'sc-fe-01', 'sc-fe-03', 'sc-fe-05', 'sc-fe-06', 'sc-fe-09'],
   sections: [
     {
       id: 'why',
@@ -46,7 +46,8 @@ export const informationExtraction: Module = {
           t: 'table',
           headers: ['Analyzer type', 'What it is', 'Example'],
           rows: [
-            ['**Base**', 'Core processing per content type; a building block for custom analyzers', '`prebuilt-document`, `prebuilt-image`, `prebuilt-audio`, `prebuilt-video`'],
+            ['**Content extraction**', 'OCR and layout only - no language model involved', '`prebuilt-read`, `prebuilt-layout`'],
+            ['**Base**', 'Core processing per content type; the only analyzers a custom analyzer can derive from', '`prebuilt-document`, `prebuilt-image`, `prebuilt-audio`, `prebuilt-video`'],
             ['**RAG**', 'Extract content with semantic understanding, optimised for search and AI apps', '`prebuilt-documentSearch`, `prebuilt-imageSearch`, `prebuilt-audioSearch`, `prebuilt-videoSearch`'],
             ['**Domain-specific**', 'Preconfigured for an industry document type, with a tuned schema', '`prebuilt-invoice`, `prebuilt-receipt`, `prebuilt-idDocument`'],
             ['**Custom**', 'A base analyzer extended with your own field schema', 'Your damage-report analyzer'],
@@ -61,6 +62,12 @@ export const informationExtraction: Module = {
           title: 'Always check prebuilt first',
           body: 'A common exam pattern offers "build a custom analyzer from scratch" when a domain-specific prebuilt already targets exactly that document type. Start prebuilt; go custom only when fields are missing.',
           priority: 'high',
+        },
+        {
+          t: 'key',
+          title: 'It runs on your model deployments',
+          body: 'Content Understanding uses **your own Foundry model deployments** - for example `gpt-4.1` and `text-embedding-3-large` - set once per Foundry resource as defaults. Only `prebuilt-read` and `prebuilt-layout` work with no model at all. Use the generally available API (`2025-11-01`) for production.',
+          priority: 'medium',
         },
         { t: 'check', qid: 'fe-001' },
         { t: 'check', qid: 'fe-007' },
@@ -159,8 +166,8 @@ export const informationExtraction: Module = {
           t: 'steps',
           title: 'The workflow',
           steps: [
-            { label: 'Pick a base', detail: 'Start from the base or prebuilt analyzer for your content type.' },
-            { label: 'Define the field schema', detail: 'Name each field, give it a type, and describe it in natural language so the model knows what to look for.' },
+            { label: 'Pick a base', detail: 'Start from the base analyzer for your content type, or copy a prebuilt analyzer as a template.' },
+            { label: 'Define the field schema', detail: 'Name each field, give it a type and a method, and describe it in natural language so the model knows what to look for. Labelled examples are optional extras that can improve accuracy - not a requirement.' },
             { label: 'Create the analyzer', detail: 'Register the schema as a named custom analyzer.' },
             { label: 'Analyze', detail: 'Submit a file - often a blob URL with a SAS token - to the analyze operation.' },
             { label: 'Consume the result', detail: 'Read the structured JSON and the per-field confidence scores.' },
@@ -171,6 +178,7 @@ export const informationExtraction: Module = {
           lang: 'json',
           caption: 'A field schema - descriptions do the work that prompt engineering would otherwise do',
           code: `{
+  "baseAnalyzerId": "prebuilt-document",
   "fieldSchema": {
     "fields": {
       "VendorName": {

@@ -42,6 +42,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Turning unstructured or semi-structured source material (scans, forms, photos, audio, video) into structured fields is the information extraction workload. In Foundry this is Azure Content Understanding.',
+    reference: {
+      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+    },
     tags: ['routing', 'extraction'],
   },
   {
@@ -77,6 +81,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'An agent = a model for reasoning + instructions + tools. The tell-tale signs are a goal rather than a question, multiple steps, and calls out to external systems.',
+    reference: {
+      label: 'Introduction to generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/',
+    },
     tags: ['routing', 'agents'],
   },
   {
@@ -100,6 +108,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Six workloads, six signatures. Generative = create content. Text analysis = understand text you already have. Speech = audio in or out. Vision = pixels in. Extraction = unstructured media becomes structured fields. Agentic = a goal, multiple steps, tools.',
+    reference: {
+      label: 'Introduction to AI concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+    },
     tags: ['routing', 'matching', 'cram'],
   },
   {
@@ -157,30 +169,34 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Write a personalised apology email for a delayed order, in the customer\'s language and the company\'s tone of voice',
+        text: 'Write a personalised apology for a late order, in the customer\'s language and brand tone',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Return the list of main topics mentioned in a support ticket',
+        text: 'Return the list of main topics mentioned across a batch of support tickets',
         correct: false,
         why: 'That is key phrase extraction - a prebuilt text-analysis feature, cheaper and more predictable than a generative call.',
       },
       {
         id: 'c',
-        text: 'Detect whether a review is positive, neutral or negative',
+        text: 'Detect whether each product review is positive, neutral or negative',
         correct: false,
         why: 'That is sentiment analysis.',
       },
       {
         id: 'd',
-        text: 'Find every credit card number in a chat transcript and mask it',
+        text: 'Find every credit card number in a chat transcript and mask it before storage',
         correct: false,
         why: 'That is PII detection and redaction.',
       },
     ],
     explanation:
       'Generative AI is the right answer when the output is *new content* whose exact wording is not present in the input. When the task is labelling, extracting or scoring existing text, a prebuilt text-analysis feature is the better fit.',
+    reference: {
+      label: 'Get started with text analysis in Azure - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/',
+    },
     tags: ['routing', 'generative-vs-nlp', 'trap'],
   },
 
@@ -217,6 +233,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Key phrase extraction = "what is this text about?" as a bag of phrases. If the expected output is an untyped list of topics, it is key phrases.',
+    reference: {
+      label: 'What is key phrase extraction in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview',
+    },
     tags: ['text-analysis', 'definition'],
   },
   {
@@ -240,6 +260,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'These six prebuilt capabilities in Azure Language in Foundry Tools need no training data. The exam tests whether you can pick the one whose *output shape* matches the requirement.',
+    reference: {
+      label: 'What is Azure Language in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+    },
     tags: ['text-analysis', 'matching', 'cram'],
   },
   {
@@ -256,7 +280,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'Opinion mining (aspect-based sentiment analysis)', correct: true },
       {
         id: 'b',
-        text: 'Document-level sentiment analysis',
+        text: 'Document-level sentiment analysis (one label per review)',
         correct: false,
         why: 'It would return a single mixed or neutral label for the whole review and lose the fact that cleanliness scored well and wifi scored badly.',
       },
@@ -275,6 +299,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Opinion mining drills into sentiment analysis to link each *target* (room, wifi) with its *assessment* (spotless, unusable) and a sentiment. Whenever a question says "which specific aspect", the answer is opinion mining.',
+    reference: {
+      label: 'What are sentiment analysis and opinion mining?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+    },
     tags: ['text-analysis', 'opinion-mining', 'trap'],
   },
   {
@@ -309,6 +337,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Extractive summarization selects the most important sentences *unchanged* from the source. Abstractive summarization writes new sentences that capture the meaning. Verbatim / legal / compliance ⇒ extractive; readability / meeting notes / call recaps ⇒ abstractive.',
+    reference: {
+      label: 'What is summarization in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/summarization/overview',
+    },
     tags: ['text-analysis', 'summarization', 'trap'],
   },
   {
@@ -388,6 +420,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Speech-to-text (STT / ASR) = recognition. Text-to-speech (TTS) = synthesis. Every speech question starts by resolving which direction the audio flows.',
+    reference: {
+      label: 'What is Azure Speech in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/overview',
+    },
     tags: ['speech', 'definition'],
   },
   {
@@ -403,9 +439,9 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'Speech Synthesis Markup Language (SSML)', correct: true },
       {
         id: 'b',
-        text: 'A custom neural voice',
+        text: 'A custom voice trained on the brand\'s recordings',
         correct: false,
-        why: 'A custom neural voice gives you a distinct branded voice identity. It does not, by itself, control prosody in a specific utterance.',
+        why: 'A custom voice gives you a distinct branded voice identity. It does not, by itself, control prosody in a specific utterance.',
       },
       {
         id: 'c',
@@ -422,6 +458,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'SSML is an XML format for fine-grained control of synthesis: `<voice>` selects the neural voice, `<prosody>` sets rate, pitch and volume, `<break>` inserts pauses, and `<phoneme>` fixes pronunciation.',
+    reference: {
+      label: 'Speech Synthesis Markup Language (SSML) overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup',
+    },
     tags: ['speech', 'ssml'],
   },
   {
@@ -457,6 +497,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Batch transcription processes large volumes of pre-recorded audio asynchronously from storage. Real-time is for interactive or streaming scenarios. "Archived files in storage" ⇒ batch; "live captions / assistant" ⇒ real-time.',
+    reference: {
+      label: 'Batch transcription overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/batch-transcription',
+    },
     tags: ['speech', 'batch-vs-realtime'],
   },
   {
@@ -471,30 +515,34 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Lower latency, and tone, emphasis and other acoustic context survive instead of being discarded at the transcription step',
+        text: 'Lower latency, and tone and emphasis survive instead of being lost in transcription',
         correct: true,
       },
       {
         id: 'b',
-        text: 'It removes the need for content safety filters',
+        text: 'It removes the need for content safety guardrails on both the questions and the answers',
         correct: false,
         why: 'Guardrails are still required regardless of how audio reaches the model.',
       },
       {
         id: 'c',
-        text: 'It works entirely offline on the client device',
+        text: 'It runs entirely offline on the client device, with no network calls',
         correct: false,
         why: 'Deployed multimodal models are called over the network like any other deployment.',
       },
       {
         id: 'd',
-        text: 'It guarantees perfect transcription accuracy',
+        text: 'It guarantees perfect transcription accuracy for every accent',
         correct: false,
         why: 'No model guarantees perfect recognition.',
       },
     ],
     explanation:
       'A cascade throws away everything the waveform carried that is not words - tone, hesitation, emphasis - and pays the latency of three sequential services. A native multimodal model reasons over the audio itself, so it can respond to *how* something was said and reply fast enough for natural turn-taking.',
+    reference: {
+      label: 'Agents in Microsoft Foundry: how voice-based agents work',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+    },
     tags: ['speech', 'multimodal', 'hard'],
   },
 
@@ -519,6 +567,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The distinction is entirely about output shape. One label for the image = classification. Labels + boxes = detection. Per-pixel mask = segmentation. Characters = OCR. Face rectangles = face detection.',
+    reference: {
+      label: 'Introduction to computer vision concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+    },
     tags: ['vision', 'matching', 'cram'],
   },
   {
@@ -554,6 +606,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Counting multiple instances requires each instance to be located separately, which is object detection: a class label plus a bounding box per detected item.',
+    reference: {
+      label: 'Introduction to computer vision concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+    },
     tags: ['vision', 'routing'],
   },
   {
@@ -567,18 +623,18 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'They start from random noise and iteratively denoise it, guided by the text prompt (a diffusion process)',
+        text: 'They start from random noise and denoise it step by step, guided by the prompt (diffusion)',
         correct: true,
       },
       {
         id: 'b',
-        text: 'They search a large library of stock images and return the closest match',
+        text: 'They search a large library of licensed stock images and return the one that best matches the prompt',
         correct: false,
         why: 'Nothing is retrieved. The image is synthesised, which is why a prompt for an implausible scene still produces an image.',
       },
       {
         id: 'c',
-        text: 'They render 3D geometry described by the prompt',
+        text: 'They build a 3D model of the scene described in the prompt and render it from one angle',
         correct: false,
         why: 'No 3D scene is constructed; generation happens in the image/latent space.',
       },
@@ -591,6 +647,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Diffusion models are trained by progressively adding noise to images, then learning to reverse it. At generation time they start from noise and denoise step by step, conditioned on the prompt embedding.',
+    reference: {
+      label: 'Get started with computer vision in Azure - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+    },
     tags: ['vision', 'image-generation', 'diffusion'],
   },
   {
@@ -610,7 +670,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'Returning bounding boxes for every car in a car park photo',
+        text: 'Returning bounding boxes and labels for every car visible in a car park photo',
         correct: false,
         why: 'Object detection is a classic vision task with a structured output.',
       },
@@ -622,13 +682,17 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'Detecting whether an image contains adult content',
+        text: 'Detecting whether an uploaded image contains adult or racy content before publishing it',
         correct: false,
         why: 'Content moderation classification is a classic vision capability.',
       },
     ],
     explanation:
       'Classic vision services return structured findings - labels, boxes, text, scores. A multimodal model *reasons* about what it sees and answers in natural language, which is what "interpret visual input in prompts" means on the exam.',
+    reference: {
+      label: 'How to use vision-enabled chat models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+    },
     tags: ['vision', 'multimodal', 'hard'],
   },
 
@@ -652,6 +716,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Content Understanding applies the same analyze-and-return-structured-output model across all four modalities. Knowing the expected output shape per modality is the fastest way to answer these.',
+    reference: {
+      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+    },
     tags: ['extraction', 'matching', 'cram'],
   },
   {
@@ -666,30 +734,34 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Information extraction turns unstructured content of any modality into a defined structured schema; text analysis interprets text you already have.',
+        text: 'Extraction fills a schema you define from any modality; text analysis interprets existing text',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Information extraction only works on PDFs; text analysis works on any text.',
+        text: 'Extraction only works on PDF files, whereas text analysis works on any kind of text',
         correct: false,
         why: 'Extraction spans documents, images, audio and video - the modality breadth is one of its defining features.',
       },
       {
         id: 'c',
-        text: 'Information extraction always requires training a custom model; text analysis never does.',
+        text: 'Extraction always requires training a custom model; text analysis never needs training',
         correct: false,
         why: 'Both have prebuilt options. Content Understanding ships prebuilt analyzers; Language ships prebuilt features.',
       },
       {
         id: 'd',
-        text: 'They are the same workload under different names.',
+        text: 'They are the same workload, sold under two different product names',
         correct: false,
         why: 'The study guide lists them as separate workloads with separate objectives.',
       },
     ],
     explanation:
       'The defining question for extraction is "what schema do I want out?" - you declare fields and the service fills them. Text analysis answers fixed questions (sentiment, key phrases, entities) about text that is already text.',
+    reference: {
+      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+    },
     tags: ['extraction', 'routing'],
   },
   {
@@ -705,24 +777,24 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Retrieval-augmented generation, because the answer must come from private, frequently changing content and be traceable to a source',
+        text: 'RAG, because answers must come from private, changing content and cite a source',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Fine-tune a model on the 12,000 documents so the knowledge is baked into the weights',
+        text: 'Fine-tune a model on the 12,000 documents so the knowledge lives in its weights',
         correct: false,
         why: 'Fine-tuning changes *behaviour, style and task performance*, not factual currency. It also cannot produce citations, and every document update would need retraining.',
       },
       {
         id: 'c',
-        text: 'Increase the model\'s max tokens so all documents fit in the prompt',
+        text: 'Raise the model\'s max tokens so all 12,000 documents fit into a single prompt',
         correct: false,
         why: 'No context window holds 12,000 documents, and max tokens limits the *output* length, not the input.',
       },
       {
         id: 'd',
-        text: 'Use a small language model for lower cost',
+        text: 'Use a small language model, because it is cheaper to run at this volume',
         correct: false,
         why: 'Model size is unrelated to whether the assistant has access to private content.',
       },
@@ -768,6 +840,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Computer vision means the *input* is pixels. If the input is text it is NLP, if it is a waveform it is speech.',
+    reference: {
+      label: 'Introduction to computer vision concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+    },
     tags: ['vision', 'routing'],
   },
   {
@@ -783,30 +859,34 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Speech (or a multimodal model handling audio) plus agentic AI for the ordering step',
+        text: 'Speech (or a multimodal audio model) plus agentic AI for the ordering',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Computer vision plus information extraction',
+        text: 'Computer vision plus information extraction from the technician\'s photos',
         correct: false,
         why: 'Nothing visual is involved and no document is being converted to structured data.',
       },
       {
         id: 'c',
-        text: 'Text analysis only',
+        text: 'Text analysis only, run over a transcript of the call',
         correct: false,
         why: 'Text analysis cannot take audio in, speak back, or place an order.',
       },
       {
         id: 'd',
-        text: 'Generative AI only',
+        text: 'Generative AI only, with a model that writes the spoken reply',
         correct: false,
         why: 'A generative model alone can produce a spoken-sounding answer but cannot take an action in an external system - that requires tools, which makes it an agent.',
       },
     ],
     explanation:
       'Two signals to read: audio in and out ⇒ speech or a multimodal model that accepts audio; taking a real action in another system ⇒ agentic AI with a tool. Multi-workload scenarios are common in the case-style questions.',
+    reference: {
+      label: 'Introduction to AI concepts - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+    },
     tags: ['routing', 'multi-workload', 'hard'],
   },
   {
@@ -822,7 +902,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'PII detection and redaction', correct: true },
       {
         id: 'b',
-        text: 'Key phrase extraction',
+        text: 'Key phrase extraction with a custom stop list',
         correct: false,
         why: 'It surfaces topics, not sensitive identifiers, and cannot redact.',
       },
@@ -841,6 +921,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'PII detection is a specialised form of entity recognition that identifies sensitive personal identifiers and can return a redacted copy of the text. It is the standard answer for any "mask sensitive data" scenario.',
+    reference: {
+      label: 'What is PII detection in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/personally-identifiable-information/overview',
+    },
     tags: ['text-analysis', 'pii'],
   },
 ];

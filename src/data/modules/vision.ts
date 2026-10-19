@@ -8,7 +8,7 @@ export const vision: Module = {
     'The five classic vision tasks, multimodal visual reasoning, and the current image and video generation models.',
   topic: 'foundry-vision',
   alsoCovers: ['ai-workloads'],
-  minutes: 18,
+  minutes: 19,
   priority: 'high',
   icon: '👁️',
   outcomes: [
@@ -16,7 +16,7 @@ export const vision: Module = {
     'Say when a multimodal model beats a classic vision service',
     'Name the current image and video generation models and what they do',
   ],
-  quiz: ['wl-030', 'wl-031', 'wl-033', 'fv-002', 'fv-004', 'fv-005', 'fv-006', 'fv-012'],
+  quiz: ['wl-030', 'fv-002', 'fv-003', 'fv-006', 'fv-011', 'sc-wl-05', 'sc-fv-04', 'sc-fv-09'],
   sections: [
     {
       id: 'tasks',
@@ -91,18 +91,21 @@ export const vision: Module = {
       blocks: [
         {
           t: 'changed',
-          title: 'DALL·E is no longer the headline answer',
-          body: 'Foundry\'s image generation now centres on the **GPT-image family** - `gpt-image-1`, `gpt-image-1-mini`, `gpt-image-1.5` and `gpt-image-2`. DALL·E 3 remains available. Video generation is **Sora-2**, in preview. Notes that name only DALL·E are AI-900-era.',
+          title: 'DALL·E 3 has been retired',
+          body: '`dall-e-3` was **retired on 4 March 2026** and existing deployments no longer work. Image generation in Foundry is now the **GPT-image series**, and video generation is **Sora 2**, in preview. Notes that answer "DALL·E" are out of date.',
         },
         {
           t: 'table',
           headers: ['Model', 'Characteristic'],
           rows: [
-            ['`gpt-image-2`', 'Realism-optimised, arbitrary resolutions up to 4K, improved editing; higher latency and cost'],
-            ['`gpt-image-1.5` / `gpt-image-1`', 'High-fidelity with face preservation; fixed size options'],
-            ['`gpt-image-1-mini`', 'Cost-efficient and faster - good for high-volume, iterative, non-portrait work'],
-            ['`sora-2`', 'Text-to-video, in preview'],
+            ['`gpt-image-2.5-sunburst`', 'The most capable for generation and precise editing'],
+            ['`gpt-image-2.5-flare`', 'The fastest high-quality everyday option, tuned for speed and cost'],
+            ['`gpt-image-2`', 'High-resolution and 4K output, improved editing, broad aspect ratios; higher latency and cost'],
+            ['`gpt-image-1.5` / `gpt-image-1`', 'Realism and instruction-following with face preservation (limited access preview)'],
+            ['`gpt-image-1-mini`', 'Cost-efficient and faster for bulk, iterative, non-portrait work (limited access preview)'],
+            ['`sora-2`', 'Video from text or images, with audio and remix - in preview'],
           ],
+          caption: 'The catalog also carries image models from other providers, such as FLUX.',
         },
         {
           t: 'list',
@@ -110,7 +113,7 @@ export const vision: Module = {
             '**Diffusion**: generation starts from noise and iteratively denoises, conditioned on the prompt. Nothing is retrieved or looked up.',
             '**Editing (inpainting)**: supply a mask plus a prompt to change part of an image and leave the rest.',
             '**Variations**: produce alternatives of an existing image.',
-            '**Content Credentials (C2PA)**: cryptographic provenance metadata marking an image as AI-generated - a **transparency** control.',
+            '**Content provenance**: images from Azure OpenAI models carry **Content Credentials (C2PA)**, cryptographically signed metadata saying the image is AI-generated, and Microsoft also embeds **invisible watermarks** that can survive when the metadata is stripped. Both are **transparency** controls.',
           ],
         },
         { t: 'check', qid: 'wl-032' },
@@ -124,7 +127,7 @@ export const vision: Module = {
         {
           t: 'changed',
           title: 'Image Analysis 4.0 is deprecated',
-          body: 'Azure Vision\'s Image Analysis 4.0 is deprecated with a published retirement date of 25 September 2028. Microsoft directs **OCR** scenarios to **Document Intelligence**, **face** scenarios to the **Face** service, and image embedding scenarios to models such as Cohere Embed or SigLIP. Do not build new work on it.',
+          body: 'Azure Vision\'s Image Analysis 4.0 is deprecated with a published retirement date of 25 September 2028. Microsoft directs **OCR** scenarios to **Document Intelligence**, **face** scenarios to the **Face** service, image embeddings to models such as Cohere Embed or SigLIP, and other image analysis to **GPT models** or **Content Understanding**. Do not build new work on it.',
         },
         {
           t: 'table',

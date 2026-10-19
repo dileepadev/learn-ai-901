@@ -7,15 +7,15 @@ export const genaiModels: Module = {
   summary:
     'Model selection, deployment options and inference parameters - small in weight, dense in testable facts, and full of stale-material traps.',
   topic: 'model-components',
-  minutes: 22,
+  minutes: 24,
   priority: 'high',
   icon: '🎛️',
   outcomes: [
     'Choose between an LLM and an SLM, and pick a model by modality',
-    'Explain temperature, top_p, max_tokens, stop and the two penalties',
+    'Explain temperature, top_p, max_tokens, stop and the two penalties - and which models ignore them',
     'Choose the right deployment option and deployment type, using current names',
   ],
-  quiz: ['mc-006', 'mc-007', 'mc-008', 'mc-009', 'mc-011', 'mc-012', 'mc-013', 'mc-017'],
+  quiz: ['mc-007', 'mc-011', 'mc-015', 'mc-022', 'sc-mc-01', 'sc-mc-03', 'sc-mc-04', 'sc-mc-08'],
   sections: [
     {
       id: 'selection',
@@ -30,10 +30,12 @@ export const genaiModels: Module = {
           headers: ['You need to…', 'Model type'],
           rows: [
             ['Chat, follow instructions, reason over text', 'Language / chat model'],
+            ['Work through hard, multi-step problems', 'Reasoning model (for example the GPT-5 series)'],
             ['Reason about images or audio in a prompt', 'Multimodal model'],
+            ['Hold a live spoken conversation', 'Realtime audio model (`gpt-realtime` family), or Voice Live'],
             ['Turn text into vectors for search or RAG', 'Embedding model'],
-            ['Create an image from a description', 'Image generation model (GPT-image family)'],
-            ['Create a video from a description', 'Video generation model (Sora-2, preview)'],
+            ['Create an image from a description', 'Image generation model (GPT-image series)'],
+            ['Create a video from a description', 'Video generation model (Sora 2, preview)'],
           ],
         },
         {
@@ -56,7 +58,7 @@ export const genaiModels: Module = {
       blocks: [
         {
           t: 'p',
-          md: 'The Foundry **model catalog** is where you browse and filter models by capability, modality and provider, then deploy one. It now spans well over ten thousand models from Microsoft, OpenAI, Anthropic, Meta, Mistral, Cohere and the open-source community.',
+          md: 'The Foundry **model catalog** is where you browse and filter models by capability, modality, provider and deployment type, compare benchmarks, and then deploy one. It holds more than 10,000 models - from Microsoft, OpenAI, Anthropic, Meta, Mistral, Cohere, DeepSeek, Hugging Face and others - with roughly 50 new ones a month.',
         },
         {
           t: 'changed',
@@ -72,15 +74,16 @@ export const genaiModels: Module = {
         {
           t: 'key',
           title: 'Two levels, and the exam tests both',
-          body: 'First choose a **deployment option**: *Serverless API* (preferred) or *managed compute*. If you chose Serverless API, then choose a **deployment type**, which decides where data is processed and how you pay.',
+          body: 'First choose a **deployment option**: *Serverless API* (preferred) or *managed compute* (preview). If you chose Serverless API, then choose a **deployment type**, which decides where data is processed and how you pay.',
           priority: 'high',
         },
         {
           t: 'table',
-          headers: ['', 'Serverless API', 'Managed compute'],
+          headers: ['', 'Serverless API', 'Managed compute (preview)'],
           rows: [
             ['Which models', 'All Foundry Models, including those sold by Azure and select partner models', 'Open-source, partner and custom models, NVIDIA NIM, industry models'],
             ['Who hosts it', 'Microsoft', 'Dedicated GPU capacity Foundry manages for you'],
+            ['Deployed into', 'The Foundry resource', 'A Foundry project - no AI hub needed'],
             ['Billing', 'Token usage, or reserved provisioned throughput units (PTUs)', 'Hourly, per accelerator SKU'],
             ['Data processing', 'Regional, data zone, or global', 'Global'],
             ['Content filtering', 'Built-in and customisable', 'Not available in public preview'],
@@ -90,11 +93,11 @@ export const genaiModels: Module = {
         {
           t: 'changed',
           title: 'PTU is not a third option',
-          body: 'Older notes list "Serverless API / Managed compute / PTU" as three peers. **Provisioned throughput is a deployment *type* inside the Serverless API option**, not a separate option. Likewise, "serverless API endpoints" and hub-based managed compute belong to the classic hub model.',
+          body: 'Older notes list "Serverless API / Managed compute / PTU" as three peers. **Provisioned throughput is a deployment *type* inside the Serverless API option**, not a separate option. Likewise, the "serverless API endpoints" and hub-based managed compute of the classic hub model are not the current options - and neither current option needs a hub.',
         },
         {
           t: 'p',
-          md: 'Serverless API **deployment types** fall into three families - *standard* (pay per token), *provisioned* (reserved PTU capacity), and *batch* (discounted asynchronous). Each is offered with Global, Data Zone, or single-region processing. A *Developer* type exists for evaluating fine-tuned models.',
+          md: 'Serverless API **deployment types** fall into three families - *standard* (pay per token), *provisioned* (reserved PTU capacity), and *batch* (asynchronous, at a 50% discount with a 24-hour target). Standard and provisioned come with Global, Data Zone or single-geography processing. A *Developer* type exists only for evaluating fine-tuned models: no SLA, and it deletes itself after 24 hours. Microsoft\'s advice is to **start with Global Standard** - it gets new models first, has the lowest price and the widest region coverage - and move only when you have a reason.',
         },
         {
           t: 'table',
@@ -118,7 +121,7 @@ export const genaiModels: Module = {
         {
           t: 'changed',
           title: 'You do not always need a deployment',
-          body: '**Instant access** (preview) lets you call supported models by name and start inferencing with no Serverless API or managed compute deployment at all. Older material that insists a deployment is always required is out of date.',
+          body: '**Instant access** (preview) lets you call supported models by name and start inferencing with no Serverless API or managed compute deployment at all - during the preview, from projects in West US 3. You still create a deployment when you need reserved throughput, data residency, custom guardrails or a fine-tuned model. Older material that insists a deployment is always required is out of date.',
         },
       ],
     },
@@ -142,6 +145,11 @@ export const genaiModels: Module = {
           t: 'demo',
           name: 'sampling',
           caption: 'Move the sliders and watch which token the model would pick.',
+        },
+        {
+          t: 'changed',
+          title: 'Reasoning models ignore the sampling knobs',
+          body: 'Reasoning models such as the GPT-5 series reject `temperature`, `top_p` and the two penalties. You steer them with `reasoning_effort` (and `verbosity`), and cap length with `max_completion_tokens` in Chat Completions or `max_output_tokens` in the Responses API. The classic parameters still apply to non-reasoning models such as `gpt-4.1` - and the exam still expects you to know what each one does.',
         },
         {
           t: 'trap',

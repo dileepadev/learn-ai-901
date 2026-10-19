@@ -15,7 +15,7 @@ export const promptsAndChat: Module = {
     'Choose between zero-shot, few-shot and chain-of-thought prompting',
     'Describe what a Foundry chat client needs and how it authenticates',
   ],
-  quiz: ['fg-002', 'fg-003', 'fg-004', 'fg-014', 'fg-015', 'fg-040'],
+  quiz: ['fg-042', 'sc-fg-03', 'sc-fg-05', 'sc-fg-09', 'sc-fg-10'],
   sections: [
     {
       id: 'roles',
@@ -25,7 +25,7 @@ export const promptsAndChat: Module = {
           t: 'table',
           headers: ['Role', 'Who writes it', 'What goes in it'],
           rows: [
-            ['**system**', 'The developer', 'Persona, scope, rules, tone, output format, what to do when unsure'],
+            ['**system**', 'The developer', 'Persona, scope, rules, tone, output format, what to do when unsure. Newer APIs also accept a *developer* role, and the Responses API takes the same content as `instructions`.'],
             ['**user**', 'The end user', 'The current question or instruction'],
             ['**assistant**', 'The model', 'Previous replies, replayed to give the model conversation history'],
           ],
@@ -117,7 +117,7 @@ Reply in at most three sentences, plain language, no marketing tone.`,
             },
             {
               label: 'Call the model by deployment name',
-              detail: 'Pass the deployment name you chose in the portal, along with parameters such as temperature and max_tokens.',
+              detail: 'Pass the deployment name you chose in the portal - or, with instant access, the model name - plus any parameters that model supports.',
             },
             { label: 'Read the reply', detail: 'Take the generated content out of the response and show it to the user.' },
           ],
@@ -125,34 +125,35 @@ Reply in at most three sentences, plain language, no marketing tone.`,
         {
           t: 'code',
           lang: 'python',
-          caption: 'The shape of it - endpoint, credential, deployment name, messages',
+          caption: 'The current shape - project endpoint, Entra credential, deployment name, Responses API',
           code: `import os
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
 
+# pip install "azure-ai-projects>=2.3.0" azure-identity
 project = AIProjectClient(
     endpoint=os.environ["PROJECT_ENDPOINT"],
     credential=DefaultAzureCredential(),
 )
 
-client = project.get_openai_client()
+openai = project.get_openai_client()
 
-response = client.chat.completions.create(
+response = openai.responses.create(
     model=os.environ["MODEL_DEPLOYMENT_NAME"],
-    messages=[
-        {"role": "system", "content": "You are a concise IT support assistant."},
-        {"role": "user", "content": "What is an AI agent?"},
-    ],
-    temperature=0.3,
-    max_tokens=200,
+    instructions="You are a concise IT support assistant.",
+    input="What is an AI agent?",
 )
 
-print(response.choices[0].message.content)`,
+print(response.output_text)`,
+        },
+        {
+          t: 'p',
+          md: 'You will also meet the older **Chat Completions** shape - `client.chat.completions.create(messages=[...])`, reading `response.choices[0].message.content`. It still works and the message roles are identical; Microsoft recommends the **Responses API** for new apps because it carries the newest features.',
         },
         {
           t: 'changed',
           title: 'If your notes use a connection string',
-          body: 'Older samples authenticate with `AIProjectClient.from_connection_string(...)`. Current samples use a **project endpoint** with a Microsoft Entra credential. Recognise both, prefer the current one.',
+          body: 'Older samples authenticate with `AIProjectClient.from_connection_string(...)`, or use version 1.x of `azure-ai-projects`. Current samples use version 2.x with a **project endpoint** and a Microsoft Entra credential. Recognise both, prefer the current one.',
         },
         { t: 'check', qid: 'fg-014' },
         { t: 'check', qid: 'fg-015' },

@@ -70,8 +70,8 @@ interface QuestionBase {
   prompt: string;
   /** Why the correct answer is correct. Always shown after answering. */
   explanation: string;
-  /** Optional source link for verification. */
-  reference?: { label: string; url: string };
+  /** Microsoft Learn (or other official) page that backs up the answer. */
+  reference: { label: string; url: string };
   /** Short tags used by Rapid Review and weak-area drilling. */
   tags?: string[];
 }
@@ -306,7 +306,10 @@ export interface Progress {
   sessions: SessionResult[];
   /** ISO dates (YYYY-MM-DD) on which the learner studied. */
   activeDays: string[];
+  /** One-off markers such as "opened the cram sheet". */
   achievements: string[];
+  /** Study-plan steps the learner ticked off by hand. */
+  planDone: string[];
 }
 
 /* ------------------------------------------------------------------ *
