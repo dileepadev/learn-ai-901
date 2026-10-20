@@ -38,8 +38,10 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     explanation:
       'Mood ⇒ sentiment analysis. Recurring themes ⇒ key phrase extraction. Both are prebuilt: no training data, one API call each.',
     reference: {
-      label: 'Get started with text analysis in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/',
+      label: 'Understand text analysis in Foundry - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/2-azure-language',
+      quote:
+        'Sentiment analysis and opinion mining identifies whether text is positive or negative.',
     },
     tags: ['language', 'routing'],
   },
@@ -78,6 +80,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+      quote:
+        'Azure Language is a cloud-based service that provides Natural Language Processing (NLP) features for understanding and analyzing text.',
     },
     tags: ['language', 'naming', 'currency'],
   },
@@ -119,8 +123,10 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     explanation:
       'Prebuilt features return a fixed, well-typed result at a low per-document cost - ideal for high-volume classification. Reach for a generative model when the task needs flexible reasoning or free-form output.',
     reference: {
-      label: 'Get started with text analysis in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/',
+      label: 'Understand text analysis in Foundry - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/2-azure-language',
+      quote:
+        'Azure Language in Foundry tools is a natural language processing service with purpose-built analyzers for specific text analysis tasks. These analyzers use statistical techniques to return structured, deterministic output - making them well-suited for automated pipelines where consistent results matter.',
     },
     tags: ['language', 'prebuilt-vs-generative'],
   },
@@ -163,6 +169,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech to text quickstart',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/get-started-speech-to-text',
+      quote:
+        'To recognize speech from an audio file, use filename instead of use_default_microphone:',
     },
     tags: ['speech', 'sdk'],
   },
@@ -206,6 +214,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry: how voice-based agents work',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture is optimized for natural, low-latency conversation. The realtime model handles spoken input and output directly.',
     },
     tags: ['speech', 'multimodal', 'hard'],
   },
@@ -245,6 +255,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech Synthesis Markup Language (SSML) overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup',
+      quote:
+        'You can also adjust the emphasis, speaking rate, pitch, and volume.',
     },
     tags: ['speech', 'ssml', 'multi-select'],
   },
@@ -283,6 +295,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Custom voice overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/custom-neural-voice',
+      quote:
+        'Custom voice is a text to speech feature that lets you create a one-of-a-kind, customized, synthetic voice for your applications. With custom voice, you can build a highly natural-sounding voice for your brand or characters by providing human speech samples as fine-tuning data.',
     },
     tags: ['speech', 'custom-voice'],
   },
@@ -322,6 +336,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Text analytics for health?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/text-analytics-for-health/overview',
+      quote:
+        "Text analytics for health is an Azure Language prebuilt core capability. Text analytics for health uses machine learning to identify and label medical information in unstructured text such as doctor's notes, clinical documents, and electronic health records.",
     },
     tags: ['language', 'health', 'hard'],
   },
@@ -360,6 +376,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech translation overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-translation',
+      quote:
+        'Use the standard speech translation API when you want to send an input audio stream in a specified source language and return translated text, synthesized speech, or both in your specified target language.',
     },
     tags: ['speech', 'translation'],
   },
@@ -398,6 +416,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is custom text classification?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/custom-text-classification/overview',
+      quote:
+        "Custom text classification is one of the custom features offered by Azure Language in Foundry Tools. It's a cloud-based API service that applies machine-learning intelligence to enable you to build custom models for text classification tasks.",
     },
     tags: ['language', 'custom-classification'],
   },
@@ -439,6 +459,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Pronunciation with SSML',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup-pronunciation',
+      quote:
+        'Phonetic alphabets are composed of phones, which are made up of letters, numbers, or characters, sometimes in combination. Each phone describes a unique sound of speech.',
     },
     tags: ['speech', 'definition'],
   },
@@ -465,6 +487,8 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+      quote:
+        'Conversational language understanding (CLU) enables users to build custom natural language understanding models to predict the overall intention of an incoming utterance and extract important information from it.',
     },
     tags: ['language', 'matching', 'hard', 'cram'],
   },

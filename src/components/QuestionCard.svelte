@@ -440,11 +440,15 @@
         {/if}
       </p>
       <p class="explanation">{@html inlineMarkdown(question.explanation)}</p>
-      <p class="source small">
-        <a href={question.reference.url} target="_blank" rel="noopener noreferrer">
+      <figure class="learn">
+        <figcaption class="learn-head small">From Microsoft Learn</figcaption>
+        <blockquote cite={question.reference.url}>
+          <p>{question.reference.quote}</p>
+        </blockquote>
+        <a class="learn-link small" href={question.reference.url} target="_blank" rel="noopener noreferrer">
           {question.reference.label}<Icon name="external" size={14} label="(opens in a new tab)" />
         </a>
-      </p>
+      </figure>
       {#if onnext}
         <div class="verdict-actions">
           <button type="button" class="btn btn-primary" onclick={() => onnext?.()}>{nextLabel}</button>
@@ -799,20 +803,39 @@
   }
 
   .explanation {
-    margin: 0 0 0.65rem;
-  }
-
-  .source {
     margin: 0;
   }
-  .source a {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.3rem;
+
+  /* The official wording, so the learner can check the guide against the source. */
+  .learn {
+    margin: 0.9rem 0 0;
+    padding: 0.85rem 1rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .learn-head {
+    margin: 0 0 0.4rem;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .learn blockquote {
+    margin: 0 0 0.55rem;
+    padding-left: 0.85rem;
+    border-left: 2px solid var(--accent-edge);
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .learn blockquote p {
+    margin: 0;
+  }
+  .learn-link {
     font-weight: 550;
   }
-  .source :global(.icon) {
-    align-self: center;
+  .learn-link :global(.icon) {
+    margin-left: 0.3rem;
+    vertical-align: -0.15em;
   }
 
   .verdict-actions {

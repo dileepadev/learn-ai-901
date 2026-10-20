@@ -44,6 +44,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is a Content Understanding analyzer?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/analyzer-reference',
+      quote:
+        'Analyzers are the core building blocks of Content Understanding. They combine content extraction, AI-powered analysis, and structured data output into a single, reusable configuration.',
     },
     tags: ['content-understanding', 'definition'],
   },
@@ -92,6 +94,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding overview - field extraction',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Fields can be generated via three methods: • Extract: Directly extract values as they appear in the input content (supported for documents only), such as dates from receipts or item details from invoices. • Classify: Classify content from a predefined set of categories, such as call sentiment or chart type, and route it to the correct analyzer for analysis. • Generate: Generate values freely from input data, such as summarizing an audio conversation or creating scene descriptions from videos.',
     },
     tags: ['content-understanding', 'field-methods', 'multi-select'],
   },
@@ -118,6 +122,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Fields can be generated via three methods: • Extract: Directly extract values as they appear in the input content (supported for documents only), such as dates from receipts or item details from invoices. • Classify: Classify content from a predefined set of categories, such as call sentiment or chart type, and route it to the correct analyzer for analysis. • Generate: Generate values freely from input data, such as summarizing an audio conversation or creating scene descriptions from videos.',
     },
     tags: ['content-understanding', 'field-methods', 'matching', 'cram'],
   },
@@ -160,6 +166,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Provides reliability estimates from 0 to 1 for each extracted field value. High scores indicate accurate data extraction, enabling straight-through processing in automation workflows.',
     },
     tags: ['content-understanding', 'confidence'],
   },
@@ -203,6 +211,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding audio overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/audio/overview',
+      quote:
+        'Audio analyzers enable transcription and diarization for conversational audio and extract structured fields such as summaries, sentiment, and key topics.',
     },
     tags: ['content-understanding', 'audio'],
   },
@@ -245,6 +255,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prebuilt analyzers',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        'Automatically segments videos into meaningful sections based on topic shifts, scene changes, or visual cues.',
     },
     tags: ['content-understanding', 'video'],
   },
@@ -288,6 +300,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prebuilt analyzers',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        'Domain-specific analyzers - Preconfigured analyzers for common document categories with specialized field extraction for invoice processing, tax forms, ID verification, mortgage documents, and contracts.',
     },
     tags: ['content-understanding', 'prebuilt-vs-custom', 'hard'],
   },
@@ -312,6 +326,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Create a custom analyzer with Content Understanding',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      quote:
+        'To create a custom analyzer, define a field schema that describes the structured data you want to extract.',
     },
     tags: ['content-understanding', 'workflow', 'cram'],
   },
@@ -354,6 +370,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Document Intelligence?',
       url: 'https://learn.microsoft.com/azure/ai-services/document-intelligence/overview',
+      quote:
+        'Azure Document Intelligence applies optical character recognition (OCR) based on machine learning along with document understanding technologies to extract text, tables, structure, and key/value pairs from documents.',
     },
     tags: ['content-understanding', 'document-intelligence', 'hard'],
   },
@@ -392,6 +410,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prebuilt analyzers in Azure Content Understanding',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        'Extracts visual content for search and retrieval applications.',
     },
     tags: ['content-understanding', 'image'],
   },
@@ -435,6 +455,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding classification and segmentation',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/classifier',
+      quote:
+        'Classify and analyze: Classifies and analyzes the input file by routing the input to the desired extraction analyzer.',
     },
     tags: ['content-understanding', 'classification', 'routing'],
   },
@@ -477,6 +499,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Quickstart: Content Understanding REST API',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/quickstart/use-rest-api',
+      quote:
+        'Use the Operation-Location from the POST response and retrieve the result of the analysis. A successful response returns status: "Succeeded" with extracted fields in the result object.',
     },
     tags: ['content-understanding', 'sdk'],
   },
@@ -517,8 +541,10 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     explanation:
       'In Content Understanding, segmentation means breaking content into meaningful chunks - splitting a multi-document PDF by document type, or a video into scenes - so each section gets its own targeted extraction.',
     reference: {
-      label: 'Content Understanding classification and segmentation',
-      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/classifier',
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Divides documents or videos into logical sections for targeted processing. Configured using the enableSegment property in the analyzer schema. Enables breaking content into meaningful chunks, such as splitting a document by document type or dividing a video into scenes.',
     },
     tags: ['content-understanding', 'segmentation', 'hard', 'trap'],
   },
@@ -559,6 +585,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Confidence scores and grounding. Content Understanding ensures the accuracy of extracted values while minimizing the cost of human review.',
     },
     tags: ['content-understanding', 'multi-select'],
   },
@@ -594,6 +622,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'The source content that Content Understanding processes. Supports multiple modalities including Documents, Images, Video, and Audio.',
     },
     tags: ['content-understanding', 'modalities', 'cram'],
   },
@@ -637,6 +667,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Content Understanding accelerates time to value by enabling straight-through processing of unstructured data with confidence scores, minimizing manual review, and reducing operational costs.',
     },
     tags: ['content-understanding', 'confidence', 'hard', 'cross-topic'],
   },
@@ -678,6 +710,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Transforms unstructured input into normalized, structured text and metadata. Extracts text using optical character recognition (OCR), identifies selection marks and barcodes, detects formulas, and recognizes layout elements like paragraphs, sections, and tables. For audio and video, transcribes speech and identifies key visual elements.',
     },
     tags: ['content-understanding', 'pipeline'],
   },
@@ -717,6 +751,8 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prebuilt analyzers in Azure Content Understanding',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        "This prebuilt doesn't require a language model or embedding model.",
     },
     tags: ['content-understanding', 'analyzers', 'currency'],
   },

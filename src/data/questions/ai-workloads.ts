@@ -45,6 +45,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+      quote:
+        'AI information extraction enables you to extract data values from documents, images, and other unstructured data sources.',
     },
     tags: ['routing', 'extraction'],
   },
@@ -82,8 +84,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'An agent = a model for reasoning + instructions + tools. The tell-tale signs are a goal rather than a question, multiple steps, and calls out to external systems.',
     reference: {
-      label: 'Introduction to generative AI and agents - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/',
+      label: 'AI agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/7-agents',
+      quote:
+        'Agents are software applications built on generative AI that can reason over and generate natural language, automate tasks by using tools, and respond to contextual conditions to take appropriate action.',
     },
     tags: ['routing', 'agents'],
   },
@@ -109,8 +113,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Six workloads, six signatures. Generative = create content. Text analysis = understand text you already have. Speech = audio in or out. Vision = pixels in. Extraction = unstructured media becomes structured fields. Agentic = a goal, multiple steps, tools.',
     reference: {
-      label: 'Introduction to AI concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+      label: 'Generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/2-generative-ai',
+      quote:
+        'Generative AI is a branch of AI that enables software applications to generate new content; often natural language dialogs, but also images, video, code, and other formats.',
     },
     tags: ['routing', 'matching', 'cram'],
   },
@@ -154,6 +160,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'It uses generative AI to process and ingest many types of content, including documents, images, videos, and audio, into a user-defined output format.',
     },
     tags: ['routing', 'content-understanding', 'hard'],
   },
@@ -194,8 +202,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Generative AI is the right answer when the output is *new content* whose exact wording is not present in the input. When the task is labelling, extracting or scoring existing text, a prebuilt text-analysis feature is the better fit.',
     reference: {
-      label: 'Get started with text analysis in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/',
+      label: 'Understand text analysis in Foundry - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/2-azure-language',
+      quote:
+        'While a large language model trained for general generative AI workloads can often do a great job of text analysis, sometimes a more specialized tool gets more predictable results.',
     },
     tags: ['routing', 'generative-vs-nlp', 'trap'],
   },
@@ -236,6 +246,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is key phrase extraction in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview',
+      quote:
+        'Use key phrase extraction to quickly identify the main concepts in text. For example, in the text "The food was delicious and the staff were wonderful.", key phrase extraction returns the main topics: "food" and "wonderful staff."',
     },
     tags: ['text-analysis', 'definition'],
   },
@@ -263,6 +275,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+      quote:
+        'Key phrase extraction is a preconfigured feature that evaluates and returns the main concepts in unstructured text, and returns them as a list.',
     },
     tags: ['text-analysis', 'matching', 'cram'],
   },
@@ -302,6 +316,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What are sentiment analysis and opinion mining?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+      quote:
+        'Opinion mining is a feature of sentiment analysis, also known as aspect-based sentiment analysis in Natural Language Processing (NLP). This feature provides more granular information about the opinions related to words (such as the attributes of products or services) in text.',
     },
     tags: ['text-analysis', 'opinion-mining', 'trap'],
   },
@@ -340,6 +356,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is summarization in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/summarization/overview',
+      quote:
+        'Extractive summarization: Produces a summary by extracting salient sentences within the source text, together the positioning information of these sentences.',
     },
     tags: ['text-analysis', 'summarization', 'trap'],
   },
@@ -380,6 +398,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+      quote:
+        'Custom named entity recognition (CNER) enables you to build custom AI models to extract custom entity categories (labels for words or phrases), using unstructured text that you provide.',
     },
     tags: ['text-analysis', 'prebuilt-vs-custom', 'hard'],
   },
@@ -423,6 +443,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Speech in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/overview',
+      quote:
+        'With text to speech, you can convert input text into humanlike synthesized speech.',
     },
     tags: ['speech', 'definition'],
   },
@@ -461,6 +483,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech Synthesis Markup Language (SSML) overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup',
+      quote:
+        'Speech Synthesis Markup Language (SSML) is an XML-based markup language that you can use to fine-tune your text to speech output attributes such as pitch, pronunciation, speaking rate, volume, and more. It gives you more control and flexibility than plain text input.',
     },
     tags: ['speech', 'ssml'],
   },
@@ -500,6 +524,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Batch transcription overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/batch-transcription',
+      quote:
+        'Use batch transcription to transcribe a large amount of audio data in storage.',
     },
     tags: ['speech', 'batch-vs-realtime'],
   },
@@ -542,6 +568,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry: how voice-based agents work',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture is optimized for natural, low-latency conversation. The realtime model handles spoken input and output directly.',
     },
     tags: ['speech', 'multimodal', 'hard'],
   },
@@ -568,8 +596,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'The distinction is entirely about output shape. One label for the image = classification. Labels + boxes = detection. Per-pixel mask = segmentation. Characters = OCR. Face rectangles = face detection.',
     reference: {
-      label: 'Introduction to computer vision concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        "One of the oldest computer vision solutions is a technique called image classification, in which a model that has been trained with a large number of images is used to predict a text label based on an image's contents.",
     },
     tags: ['vision', 'matching', 'cram'],
   },
@@ -607,8 +637,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Counting multiple instances requires each instance to be located separately, which is object detection: a class label plus a bounding box per detected item.',
     reference: {
-      label: 'Introduction to computer vision concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        'Object detection models examine multiple regions in an image to find individual objects and their locations. The resulting prediction from the model includes which objects were detected, and the specific regions of the image in which they appear - indicated by the coordinates of the rectangular bounding box.',
     },
     tags: ['vision', 'routing'],
   },
@@ -619,11 +651,11 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     objective: 'Identify features and capabilities of computer vision and image-generation models',
     difficulty: 'medium',
     kind: 'learn',
-    prompt: 'How do modern text-to-image models such as the GPT-image family generate an image?',
+    prompt: 'How do diffusion-based text-to-image models, such as the MAI image models in Microsoft Foundry, generate an image?',
     options: [
       {
         id: 'a',
-        text: 'They start from random noise and denoise it step by step, guided by the prompt (diffusion)',
+        text: 'They start from random noise and refine it step by step into an image, guided by the prompt',
         correct: true,
       },
       {
@@ -646,10 +678,12 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Diffusion models are trained by progressively adding noise to images, then learning to reverse it. At generation time they start from noise and denoise step by step, conditioned on the prompt embedding.',
+      'Diffusion models are trained by progressively adding noise to images, then learning to reverse it. At generation time they start from noise and refine it step by step, conditioned on the prompt. Not every image model works this way, so the exam asks about the approach, not a vendor.',
     reference: {
-      label: 'Get started with computer vision in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+      label: 'Deploy and use MAI image models in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/how-to/use-foundry-models-mai-image',
+      quote:
+        'MAI image models are diffusion-based generative models designed for both high-quality text-to-image generation and precise, controllable image-to-image editing. Each model uses a diffusion-based approach to progressively refine images from a natural language prompt, enabling strong alignment between the input text and the generated output.',
     },
     tags: ['vision', 'image-generation', 'diffusion'],
   },
@@ -692,6 +726,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'Vision-enabled chat models are large multimodal models (LMM) developed by OpenAI that can analyze images and provide textual responses to questions about them. They incorporate both natural language processing and visual understanding.',
     },
     tags: ['vision', 'multimodal', 'hard'],
   },
@@ -717,8 +753,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Content Understanding applies the same analyze-and-return-structured-output model across all four modalities. Knowing the expected output shape per modality is the fastest way to answer these.',
     reference: {
-      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+      label: 'Field extraction and mapping - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/4-form-extraction',
+      quote:
+        'In many cases, data fields in a document or form are discrete values that can be mapped to keys - for example, the vendor name, date, and total amount in a receipt or invoice.',
     },
     tags: ['extraction', 'matching', 'cram'],
   },
@@ -759,8 +797,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'The defining question for extraction is "what schema do I want out?" - you declare fields and the service fills them. Text analysis answers fixed questions (sentiment, key phrases, entities) about text that is already text.',
     reference: {
-      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+      label: 'Field extraction and mapping - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/4-form-extraction',
+      quote:
+        'Prompt-based extraction in which you provide the LLM with document text and a schema definition, and it matches the text to the fields in the schema.',
     },
     tags: ['extraction', 'routing'],
   },
@@ -804,6 +844,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Use RAG when you need answers grounded in private or frequently changing data.',
     },
     tags: ['routing', 'rag-vs-finetune', 'trap'],
   },
@@ -841,8 +883,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Computer vision means the *input* is pixels. If the input is text it is NLP, if it is a waveform it is speech.',
     reference: {
-      label: 'Introduction to computer vision concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        'The term "computer vision" refers to a range of tasks and techniques in which AI software processes visual input; typically from images, videos, or live camera streams.',
     },
     tags: ['vision', 'routing'],
   },
@@ -884,8 +928,10 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     explanation:
       'Two signals to read: audio in and out ⇒ speech or a multimodal model that accepts audio; taking a real action in another system ⇒ agentic AI with a tool. Multi-workload scenarios are common in the case-style questions.',
     reference: {
-      label: 'Introduction to AI concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+      label: 'Speech - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/4-speech',
+      quote:
+        'Speech recognition is the ability of AI to "hear" and interpret speech. Usually this capability takes the form of speech-to-text (where the audio signal for the speech is transcribed into text).',
     },
     tags: ['routing', 'multi-workload', 'hard'],
   },
@@ -924,6 +970,8 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is PII detection in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/personally-identifiable-information/overview',
+      quote:
+        'Personally Identifiable Information (PII) detection is an Azure Language core capability that helps you identify, classify, and redact sensitive data across text, conversations, and native documents.',
     },
     tags: ['text-analysis', 'pii'],
   },

@@ -50,6 +50,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'You define prompt agents entirely through configuration, including instructions, model selection, and tools. Author them in the Foundry portal for a quick start, or define them programmatically with the SDKs or REST API to integrate with your CI/CD workflows.',
     },
     tags: ['agents', 'prompt-vs-hosted'],
   },
@@ -88,6 +90,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Hosted agents in Foundry Agent Service',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents',
+      quote:
+        "Every Hosted agent deployed to a Foundry project gets its own dedicated Microsoft Entra ID (agent identity) and dedicated endpoint - both created automatically at deploy time. You don't need to configure managed identities or routing manually.",
     },
     tags: ['agents', 'hosted', 'currency', 'hard'],
   },
@@ -130,6 +134,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prompt engineering techniques',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'When using the Chat Completions API, a series of messages between the User and Assistant (written in the new prompt format), can serve as examples for few-shot learning.',
     },
     tags: ['prompts', 'format', 'trap'],
   },
@@ -172,6 +178,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Migrate from hub-based to Foundry projects',
       url: 'https://learn.microsoft.com/azure/foundry-classic/how-to/migrate-project',
+      quote:
+        'Projects are now child resources; they might be assigned their own admin controls like Azure RBAC, but by default share common settings from their parent resource.',
     },
     tags: ['foundry', 'currency', 'trap'],
   },
@@ -214,6 +222,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Role-based access control for Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry',
+      quote:
+        'Microsoft recommends using Entra ID authentication for improved security and granular access control.',
     },
     tags: ['sdk', 'auth', 'security'],
   },
@@ -256,6 +266,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Toolbox in Microsoft Foundry?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/toolbox-overview',
+      quote:
+        'Toolbox addresses these challenges by allowing teams to define and manage tools centrally and expose them through a single MCP-compatible endpoint.',
     },
     tags: ['agents', 'toolbox', 'currency', 'hard'],
   },
@@ -294,6 +306,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'Return extractive data with citations so agents can reason over raw content and trace answers to source documents.',
     },
     tags: ['rag', 'transparency', 'cross-topic'],
   },
@@ -336,6 +350,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'A knowledge base consists of knowledge sources (connections to internal and external data stores) and parameters that control retrieval behavior. Multiple agents can share the same knowledge base.',
     },
     tags: ['rag', 'foundry-iq', 'hard'],
   },
@@ -376,6 +392,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prompt engineering techniques',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Instead of splitting a task into smaller steps, in this approach, the model response is instructed to proceed step-by-step and present all the steps involved.',
     },
     tags: ['prompts', 'chain-of-thought', 'agents', 'multi-select'],
   },
@@ -418,6 +436,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Work with chat completion models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/chatgpt',
+      quote:
+        '400/404 (deployment not found): Confirm that model matches your deployment name.',
     },
     tags: ['sdk', 'troubleshooting'],
   },
@@ -442,6 +462,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agent development lifecycle',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/development-lifecycle',
+      quote:
+        'If you already know what kind of agent you want to create, name it and then start configuring its model instructions and tools.',
     },
     tags: ['agents', 'workflow', 'cram'],
   },
@@ -484,6 +506,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'RAG in Azure AI Search',
       url: 'https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview',
+      quote:
+        'During indexing, use chunking to subdivide large documents so that portions can be matched on independently.',
     },
     tags: ['rag', 'chunking', 'troubleshooting', 'hard'],
   },
@@ -522,6 +546,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agentic retrieval overview - Azure AI Search',
       url: 'https://learn.microsoft.com/azure/search/agentic-retrieval-overview',
+      quote:
+        'Use agentic retrieval when you want to provide agents and apps with the most relevant content for answering harder questions, drawing on chat context, your proprietary content, and external sources.',
     },
     tags: ['rag', 'agentic-retrieval', 'currency'],
   },
@@ -564,6 +590,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Microsoft Foundry architecture',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/architecture',
+      quote:
+        'Foundry resource: Top-level Azure resource where you manage governance settings such as networking, security, and model deployments.',
     },
     tags: ['foundry', 'architecture', 'rbac'],
   },
@@ -608,8 +636,10 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Three requirements, three prebuilt features, no training data. Reach for custom capabilities only when the categories or entities are specific to that business.',
     reference: {
-      label: 'Get started with text analysis in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/',
+      label: 'Understand text analysis in Foundry - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/2-azure-language',
+      quote:
+        'Key phrase extraction lists the main concepts from unstructured text.',
     },
     tags: ['language', 'routing'],
   },
@@ -652,6 +682,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry: how voice-based agents work',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture is optimized for natural, low-latency conversation. The realtime model handles spoken input and output directly.',
     },
     tags: ['speech', 'multimodal', 'hard'],
   },
@@ -694,6 +726,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Custom voice overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/custom-neural-voice',
+      quote:
+        'Custom voice access is limited based on eligibility and usage criteria.',
     },
     tags: ['speech', 'custom-voice', 'responsible-ai'],
   },
@@ -732,6 +766,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is custom text classification?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/custom-text-classification/overview',
+      quote:
+        "It's a cloud-based API service that applies machine-learning intelligence to enable you to build custom models for text classification tasks.",
     },
     tags: ['language', 'custom-classification'],
   },
@@ -774,6 +810,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Azure Language in Foundry Tools: tools and agents',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/concepts/foundry-tools-agents',
+      quote:
+        'The Azure Language MCP server in the Foundry portal connects agents to Azure Language services through the Model Context Protocol (MCP). This integration helps you build conversational applications that can call Azure Language capabilities as tools.',
     },
     tags: ['language', 'agents', 'mcp', 'hard', 'currency'],
   },
@@ -812,6 +850,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech to text overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-to-text',
+      quote:
+        "Real-time speech to text transcribes audio as it's recognized from a microphone or file.",
     },
     tags: ['speech', 'batch-vs-realtime'],
   },
@@ -850,6 +890,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is summarization in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/summarization/overview',
+      quote:
+        'Extractive summarization: Produces a summary by extracting salient sentences within the source text, together the positioning information of these sentences.',
     },
     tags: ['language', 'summarization', 'trap'],
   },
@@ -892,6 +934,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry: how voice-based agents work',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture provides broader text-model and Azure voice choices. It also provides explicit control over transcription, phrase lists, turn detection, and interim responses, but each stage contributes to end-to-end latency.',
     },
     tags: ['speech', 'multimodal', 'architecture'],
   },
@@ -934,6 +978,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What are sentiment analysis and opinion mining?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+      quote:
+        'The sentiment analysis feature assigns sentiment labels, such as "negative," "neutral," and "positive." The service determines these labels using the highest confidence score.',
     },
     tags: ['language', 'sentiment', 'trap'],
   },
@@ -977,6 +1023,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech to text overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-to-text',
+      quote:
+        'Batch transcription is designed for transcribing large amounts of audio stored in files.',
     },
     tags: ['speech', 'multi-select'],
   },
@@ -1023,6 +1071,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'The format is the same as the chat completions API for GPT-4o, except that the message content can be an array containing text and images (either a valid publicly accessible HTTP or HTTPS URL to an image, or a base-64-encoded image).',
     },
     tags: ['vision', 'multimodal', 'sdk'],
   },
@@ -1061,6 +1111,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use image generation models from OpenAI',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Supports inpainting and variations with mask + prompt',
     },
     tags: ['vision', 'image-generation', 'inpainting'],
   },
@@ -1099,6 +1151,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Migrate from Azure Vision Image Analysis',
       url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
+      quote:
+        'Azure Document Intelligence provides support for OCR text in images.',
     },
     tags: ['vision', 'document-intelligence', 'currency', 'hard'],
   },
@@ -1141,6 +1195,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Limited Access features of Face',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/computer-vision/limited-access-identity',
+      quote:
+        'Customers and partners who wish to use Limited Access features of the Face API, including Face identification and Face verification, are required to register for access by submitting a registration form. Note that these features are only available with Standard (S0) and Enterprise (E0) pricing tiers and are not supported in the Free (F0) tier. The Face Detection operation is available without registration.',
     },
     tags: ['vision', 'face', 'responsible-ai'],
   },
@@ -1183,6 +1239,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Sora 2 video generation overview (preview)',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/video-generation',
+      quote:
+        'Sora 2 video generation is currently in preview.',
     },
     tags: ['vision', 'video-generation', 'currency'],
   },
@@ -1225,6 +1283,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Migrate from Azure Vision Image Analysis',
       url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
+      quote:
+        'Features: A multilingual multimodal embedding model supported in the Microsoft Foundry portal. It transforms different modalities such as images, texts, and interleaved images and texts into a single vector representation.',
     },
     tags: ['vision', 'embeddings', 'search', 'hard'],
   },
@@ -1267,6 +1327,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'Vision-enabled chat models are large multimodal models (LMM) developed by OpenAI that can analyze images and provide textual responses to questions about them.',
     },
     tags: ['vision', 'multimodal', 'inclusiveness', 'cross-topic'],
   },
@@ -1304,8 +1366,10 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Training adds noise progressively; generation reverses it. The prompt embedding steers each denoising step, which is how the text ends up controlling what appears.',
     reference: {
-      label: 'Get started with computer vision in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+      label: 'Deploy and use MAI image models in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/how-to/use-foundry-models-mai-image',
+      quote:
+        'Each model uses a diffusion-based approach to progressively refine images from a natural language prompt, enabling strong alignment between the input text and the generated output.',
     },
     tags: ['vision', 'diffusion', 'multi-select'],
   },
@@ -1348,6 +1412,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding image overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/image/overview',
+      quote:
+        'Azure Content Understanding standardizes the extraction of data from images, making it easier to analyze large volumes of unstructured image data.',
     },
     tags: ['vision', 'content-understanding', 'architecture', 'hard'],
   },
@@ -1394,6 +1460,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Create a custom analyzer with Content Understanding',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      quote:
+        'To create a custom analyzer, define a field schema that describes the structured data you want to extract. In the following example, you create an analyzer based on the prebuilt document analyzer for processing a receipt.',
     },
     tags: ['content-understanding', 'custom-analyzer'],
   },
@@ -1436,6 +1504,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding video overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/video/overview',
+      quote:
+        'Segmentation: Automatic scene segmentation breaking the video into logical chunks based on categories you define',
     },
     tags: ['content-understanding', 'video', 'segmentation'],
   },
@@ -1474,6 +1544,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Classify: Classify content from a predefined set of categories, such as call sentiment or chart type, and route it to the correct analyzer for analysis.',
     },
     tags: ['content-understanding', 'field-methods', 'hard'],
   },
@@ -1516,6 +1588,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Provides reliability estimates from 0 to 1 for each extracted field value. High scores indicate accurate data extraction, enabling straight-through processing in automation workflows.',
     },
     tags: ['content-understanding', 'confidence'],
   },
@@ -1556,8 +1630,10 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Two things to notice: the modality decides the base analyzer, and the method is chosen per field. A judgement from a fixed set of options is Classify; reading values off an image is Generate, because Extract is a document-only method.',
     reference: {
-      label: 'Content Understanding image overview',
-      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/image/overview',
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Extract: Directly extract values as they appear in the input content (supported for documents only), such as dates from receipts or item details from invoices.',
     },
     tags: ['content-understanding', 'image', 'field-methods'],
   },
@@ -1600,6 +1676,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding classification and segmentation',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/classifier',
+      quote:
+        'Classify, segment, and analyze: Once the segments are classified, route each segment to the desired extraction analyzer for further field extraction.',
     },
     tags: ['content-understanding', 'segmentation', 'classification', 'hard'],
   },
@@ -1639,6 +1717,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding audio overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/audio/overview',
+      quote:
+        'Diarization. Distinguishes between speakers in a conversation, attributing parts of the transcript to specific speakers.',
     },
     tags: ['content-understanding', 'audio', 'multi-select'],
   },
@@ -1679,8 +1759,10 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'This is the headline benefit: schema-driven field extraction with no complex prompt engineering and no labelled training set required. Describe the field well, and the service does the rest - labelled examples are an optional extra for improving accuracy, not a prerequisite.',
     reference: {
-      label: 'Create a custom analyzer with Content Understanding',
-      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        "Simplify field extraction. Content Understanding's field extraction makes it easier to generate structured output from unstructured content. Define a schema to extract, classify, or generate field values with no complex prompt engineering.",
     },
     tags: ['content-understanding', 'custom-analyzer', 'trap'],
   },
@@ -1719,6 +1801,8 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prebuilt analyzers in Azure Content Understanding',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        'RAG analyzers - Optimized for retrieval-augmented generation scenarios with semantic analysis and markdown extraction for document ingestion, search applications, and knowledge bases.',
     },
     tags: ['content-understanding', 'rag', 'analyzer-types'],
   },

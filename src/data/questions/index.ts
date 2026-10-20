@@ -39,6 +39,9 @@ function validate(questions: Question[]): Question[] {
     // Ids travel in a compact "id.topic.kind" encoding, so keep them simple.
     if (!/^[a-z0-9-]+$/.test(q.id)) fail(q.id, 'ids may only contain a-z, 0-9 and hyphens');
     if (!q.reference?.url.startsWith('https://')) fail(q.id, 'needs a reference with an https URL');
+    if (!q.reference.url.startsWith('https://learn.microsoft.com/')) fail(q.id, 'reference must be a Microsoft Learn page');
+    if (q.reference.quote.trim().length < 20) fail(q.id, 'needs a quote from its Microsoft Learn page');
+    if (q.reference.quote.includes('\u2014')) fail(q.id, 'set em dashes in quotes as spaced hyphens');
 
     if (q.type === 'single' || q.type === 'multi') {
       const ids = new Set(q.options.map((o) => o.id));

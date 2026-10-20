@@ -110,7 +110,7 @@ export const vision: Module = {
         {
           t: 'list',
           items: [
-            '**Diffusion**: generation starts from noise and iteratively denoises, conditioned on the prompt. Nothing is retrieved or looked up.',
+            '**Diffusion**, the approach behind models such as the MAI image models: generation starts from noise and iteratively denoises, conditioned on the prompt. Nothing is retrieved or looked up.',
             '**Editing (inpainting)**: supply a mask plus a prompt to change part of an image and leave the rest.',
             '**Variations**: produce alternatives of an existing image.',
             '**Content provenance**: images from Azure OpenAI models carry **Content Credentials (C2PA)**, cryptographically signed metadata saying the image is AI-generated, and Microsoft also embeds **invisible watermarks** that can survive when the metadata is stripped. Both are **transparency** controls.',

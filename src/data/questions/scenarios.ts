@@ -53,6 +53,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'AI is based on probabilistic models, it is not infallible. AI-powered applications need to take this into account and mitigate risks accordingly.',
     },
     tags: ['reliability', 'hallucination', 'agents'],
   },
@@ -95,6 +97,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'An AI-powered college admissions system should be tested to ensure it evaluates all applications fairly, taking into account relevant academic criteria but avoiding unfounded discrimination based on irrelevant demographic factors.',
     },
     tags: ['fairness', 'evaluation', 'trap'],
   },
@@ -133,6 +137,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is PII detection in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/personally-identifiable-information/overview',
+      quote:
+        'PII detection is useful when you need to apply privacy controls before storage, analytics, sharing, or downstream AI processing.',
     },
     tags: ['privacy', 'rag', 'pii'],
   },
@@ -175,6 +181,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        "The potential of AI to improve lives and drive success should be open to everyone. AI developers should strive to ensure that their solutions don't exclude some users.",
     },
     tags: ['inclusiveness', 'design'],
   },
@@ -217,6 +225,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content provenance for Foundry models',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
+      quote:
+        "Content Credentials are based on the Coalition for Content Provenance and Authenticity (C2PA) open standard. When you generate supported content, Microsoft Foundry can attach cryptographically signed metadata that records information about the content's origin and generation history.",
     },
     tags: ['transparency', 'c2pa', 'image-generation'],
   },
@@ -255,6 +265,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'AI developers need to take care to minimize bias in training data and test AI systems for fairness.',
     },
     tags: ['all-principles', 'hard', 'governance'],
   },
@@ -297,6 +309,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Confidence scores and grounding. Content Understanding ensures the accuracy of extracted values while minimizing the cost of human review.',
     },
     tags: ['accountability', 'content-understanding', 'cross-topic'],
   },
@@ -339,6 +353,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Prompt Shields in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/content-filter-prompt-shields',
+      quote:
+        'An application submits text in the documents array to analyze it for document attack patterns, such as injected instructions that attempt to alter the intended behavior of an LLM system. The submitted text can include retrieved documents, emails, webpages, model-generated content, or content from other sources.',
     },
     tags: ['privacy', 'prompt-injection', 'rag', 'hard'],
   },
@@ -381,6 +397,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is key phrase extraction in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview',
+      quote:
+        'Use key phrase extraction to quickly identify the main concepts in text.',
     },
     tags: ['routing', 'text-analysis'],
   },
@@ -419,8 +437,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Detecting the defect is computer vision. Raising a ticket and notifying someone are actions in external systems, which requires tools - that is what makes the second half agentic.',
     reference: {
-      label: 'Introduction to AI concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/',
+      label: 'Computer vision - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/3-computer-vision',
+      quote:
+        'Computer vision is the area of artificial intelligence that deals with the analysis of visual input; such as photographs, videos, and live camera feeds.',
     },
     tags: ['routing', 'multi-workload', 'hard'],
   },
@@ -459,6 +479,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What are sentiment analysis and opinion mining?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+      quote:
+        'Opinion mining is a feature of sentiment analysis, also known as aspect-based sentiment analysis in Natural Language Processing (NLP).',
     },
     tags: ['text-analysis', 'opinion-mining'],
   },
@@ -497,6 +519,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Speech Synthesis Markup Language (SSML) overview',
       url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup',
+      quote:
+        'Define the input text structure that determines the structure, content, and other characteristics of your text to speech output. For example, you can use SSML to define a paragraph, a sentence, a break or a pause, or silence.',
     },
     tags: ['speech', 'ssml'],
   },
@@ -533,8 +557,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Only per-pixel segmentation gives an exact shape and therefore an area. Detection is enough to *locate* and *count*; segmentation is required to *measure*.',
     reference: {
-      label: 'Introduction to computer vision concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        'Another, more sophisticated way to detect objects in an image, is called "semantic segmentation". In this approach, a model is trained to find objects, and classify individual pixels in the image based on the object to which they belong. The result of this process is a much more precise prediction of the location of objects in the image.',
     },
     tags: ['vision', 'segmentation', 'hard'],
   },
@@ -573,6 +599,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding image overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/image/overview',
+      quote:
+        'With the Content Understanding APIs, you can define schemas to specify the fields, descriptions, and output types for extraction.',
     },
     tags: ['extraction', 'content-understanding', 'vision'],
   },
@@ -599,6 +627,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
+      quote:
+        'Custom text classification enables you to build custom AI models to classify unstructured text documents into custom classes you define.',
     },
     tags: ['text-analysis', 'matching', 'hard', 'cram'],
   },
@@ -637,6 +667,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Vector search overview - Azure AI Search',
       url: 'https://learn.microsoft.com/azure/search/vector-search-overview',
+      quote:
+        'Because the content is numeric rather than plain text, matching is based on vectors that are most similar to the query vector. This approach enables matching across: Semantic or conceptual likeness. For example, "dog" and "canine" are conceptually similar but linguistically distinct.',
     },
     tags: ['embeddings', 'rag', 'search'],
   },
@@ -675,6 +707,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content Understanding audio overview',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/audio/overview',
+      quote:
+        'Audio analyzers enable transcription and diarization for conversational audio and extract structured fields such as summaries, sentiment, and key topics.',
     },
     tags: ['speech', 'content-understanding', 'routing'],
   },
@@ -711,8 +745,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'New content whose wording is not in the input is always generative AI. It becomes agentic only when the system must take actions in other systems.',
     reference: {
-      label: 'Introduction to generative AI and agents - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/',
+      label: 'Generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/2-generative-ai',
+      quote:
+        'Generative AI is a branch of AI that enables software applications to generate new content; often natural language dialogs, but also images, video, code, and other formats.',
     },
     tags: ['routing', 'generative'],
   },
@@ -751,6 +787,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is language detection in Azure Language?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/language-detection/overview',
+      quote:
+        'Language detection: For each document, returns the main language, its ISO 639-1 code, readable name, confidence score, script name, and ISO 15924 script code.',
     },
     tags: ['text-analysis', 'language-detection'],
   },
@@ -762,11 +800,11 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     kind: 'exam',
     scenario:
       'A team needs a photo-realistic product shot that does not exist yet, from a written description.',
-    prompt: 'Which capability, and what is the mechanism?',
+    prompt: 'Which capability fits, and how does it produce the picture?',
     options: [
       {
         id: 'a',
-        text: 'Image generation: it starts from noise and denoises, guided by the prompt',
+        text: 'Image generation: it creates an original image from the description',
         correct: true,
       },
       {
@@ -789,10 +827,12 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Diffusion is the mechanism: noise in, prompt-conditioned denoising, image out. Nothing is retrieved, which is why a prompt for an impossible scene still returns a picture.',
+      'An image generation model synthesises a new image from the prompt. Nothing is retrieved, which is why a prompt for an impossible scene still returns a picture. Diffusion-based models such as the MAI image models get there by refining random noise step by step, guided by the prompt.',
     reference: {
-      label: 'Get started with computer vision in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+      label: 'What are image-generation models? - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/generate-images-azure-openai/2-what-is-dall-e',
+      quote:
+        "The images generated are original; they aren't retrieved from a curated image catalog. In other words, the model isn't a search system for finding appropriate images - it is an artificial intelligence (AI) model that generates new images based on the data on which it was trained.",
     },
     tags: ['vision', 'image-generation', 'diffusion'],
   },
@@ -835,6 +875,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agents in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Prompt agents: the fastest path. Define instructions, a model, and tools, and Foundry runs the agent for you with no code or infrastructure to manage.',
     },
     tags: ['routing', 'agents', 'hard'],
   },
@@ -856,8 +898,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Content extraction always precedes field extraction: first get everything readable out of the file, then map it into your schema. Confidence-based routing sits between extraction and integration, which is what makes straight-through processing safe.',
     reference: {
-      label: 'Introduction to AI-powered information extraction concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/',
+      label: 'Field extraction and mapping - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-information-extraction/4-form-extraction',
+      quote:
+        'Field extraction follows a systematic pipeline that transforms OCR output into structured data.',
     },
     tags: ['extraction', 'pipeline', 'cram'],
   },
@@ -900,6 +944,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Global batch processing with Azure OpenAI',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/batch',
+      quote:
+        'The Azure OpenAI Batch API efficiently handles large-scale and high-volume processing tasks. It processes asynchronous groups of requests with separate quota and offers a 24-hour target turnaround at 50% less cost than global standard.',
     },
     tags: ['deployment', 'batch'],
   },
@@ -936,8 +982,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Match the model tier to the task. High-volume, narrow tasks are where SLMs and prebuilt features earn their keep; save the large models for work that genuinely needs broad knowledge or multi-step reasoning.',
     reference: {
-      label: 'Overview of Microsoft Foundry Models',
-      url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+      label: 'Generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/2-generative-ai',
+      quote:
+        'SLMs tend to work well in scenarios that are more focused on specific topic areas or that require easily deployed small models for local applications and agents on devices.',
     },
     tags: ['model-selection', 'slm-vs-llm', 'cost'],
   },
@@ -976,6 +1024,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Azure OpenAI chat REST reference (request parameters)',
       url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      quote:
+        "Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
     },
     tags: ['parameters', 'penalties', 'hard'],
   },
@@ -1018,6 +1068,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Work with chat completion models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/chatgpt',
+      quote:
+        "The combined token count of your messages plus the requested output tokens must stay within the model's limit, or the request fails.",
     },
     tags: ['parameters', 'context-window', 'trap'],
   },
@@ -1057,8 +1109,10 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     explanation:
       'Generation is sampling, not lookup. Set temperature near 0 to make output close to deterministic when you need repeatability.',
     reference: {
-      label: 'Large language models (LLMs) - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Top_probability is another parameter and is similar to Temperature in that it also controls the randomness of the model response, but it does so in a different way.',
     },
     tags: ['generative', 'sampling'],
   },
@@ -1101,6 +1155,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Instant access to models in Microsoft Foundry (preview)',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/instant-models',
+      quote:
+        'Instant access to models lets you call any supported model by name - no deployment required. Create a Foundry project, start coding, and use any available model immediately.',
     },
     tags: ['deployment', 'currency', 'hard'],
   },
@@ -1141,6 +1197,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Embeddings: Numeric representations of content used for vector similarity search.',
     },
     tags: ['model-selection', 'rag', 'multi-select'],
   },
@@ -1179,6 +1237,8 @@ export const scenarioQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Deployment types for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/foundry-models/concepts/deployment-types',
+      quote:
+        'Standard and Regional Provisioned types: Prompts and responses are processed within the customer-specified Azure geography and might be processed between regions within that geography for operational purposes.',
     },
     tags: ['deployment', 'data-residency', 'hard'],
   },

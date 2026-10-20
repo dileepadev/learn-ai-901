@@ -70,8 +70,12 @@ interface QuestionBase {
   prompt: string;
   /** Why the correct answer is correct. Always shown after answering. */
   explanation: string;
-  /** Microsoft Learn (or other official) page that backs up the answer. */
-  reference: { label: string; url: string };
+  /**
+   * The Microsoft Learn page that backs up the answer, and a short passage
+   * quoted from it word for word (em dashes set as spaced hyphens), shown to
+   * the learner after they answer.
+   */
+  reference: { label: string; url: string; quote: string };
   /** Short tags used by Rapid Review and weak-area drilling. */
   tags?: string[];
 }

@@ -44,6 +44,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'The format is the same as the chat completions API for GPT-4o, except that the message content can be an array containing text and images (either a valid publicly accessible HTTP or HTTPS URL to an image, or a base-64-encoded image).',
     },
     tags: ['vision', 'multimodal', 'sdk'],
   },
@@ -86,6 +88,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use image generation models from OpenAI',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'The DALL-E image generation model dall-e-3 was retired on March 4, 2026, and is no longer available for new deployments. Existing deployments are non-functional. Use a gpt-image- series model for image generation instead.',
     },
     tags: ['vision', 'image-generation', 'currency'],
   },
@@ -124,6 +128,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Sora 2 video generation overview (preview)',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/video-generation',
+      quote:
+        'Sora 2 is an AI model from OpenAI that creates realistic and imaginative video scenes from text instructions and/or input images or video.',
     },
     tags: ['vision', 'video-generation', 'currency'],
   },
@@ -167,6 +173,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Create a custom analyzer',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      quote:
+        'To create a custom analyzer, define a field schema that describes the structured data you want to extract. In the following example, you create an analyzer based on a prebuilt image analyzer for processing images of charts and graphs.',
     },
     tags: ['vision', 'content-understanding', 'hard', 'currency'],
   },
@@ -209,6 +217,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Limited Access features of Face',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/computer-vision/limited-access-identity',
+      quote:
+        'Customers and partners who wish to use Limited Access features of the Face API, including Face identification and Face verification, are required to register for access by submitting a registration form.',
     },
     tags: ['vision', 'face', 'responsible-ai'],
   },
@@ -251,6 +261,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Migrate from Azure Vision Image Analysis',
       url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
+      quote:
+        'The Azure Vision in Foundry Tools - Image Analysis API will be retired on September 25, 2028. After that date, calls to the service fail.',
     },
     tags: ['vision', 'currency', 'hard', 'trap'],
   },
@@ -289,6 +301,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use image generation models from OpenAI',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Supports inpainting and variations with mask + prompt',
     },
     tags: ['vision', 'image-generation', 'inpainting'],
   },
@@ -327,6 +341,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Content provenance for Foundry models',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
+      quote:
+        "Content provenance technologies can improve transparency around AI-generated content, but it's important to understand their limitations.",
     },
     tags: ['vision', 'c2pa', 'responsible-ai', 'cross-topic'],
   },
@@ -367,6 +383,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'Vision-enabled chat models are large multimodal models (LMM) developed by OpenAI that can analyze images and provide textual responses to questions about them.',
     },
     tags: ['vision', 'multimodal', 'multi-select'],
   },
@@ -402,8 +420,10 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     explanation:
       'Classification answers "what is this a picture of?" - one label for the whole frame. If the question needs *where* or *how many*, classification is not enough.',
     reference: {
-      label: 'Introduction to computer vision concepts - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/',
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        "One of the oldest computer vision solutions is a technique called image classification, in which a model that has been trained with a large number of images is used to predict a text label based on an image's contents.",
     },
     tags: ['vision', 'definition'],
   },
@@ -447,6 +467,8 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'How to use image generation models from OpenAI',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Cost-efficient and faster for large-scale or iterative generation',
     },
     tags: ['vision', 'image-generation', 'model-selection', 'hard'],
   },
@@ -471,8 +493,10 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     explanation:
       'Five different jobs, five different tools. Getting this routing right is most of the vision section.',
     reference: {
-      label: 'Get started with computer vision in Azure - Microsoft Learn training',
-      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/',
+      label: 'Multimodal models for image analysis - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/2-vision-enabled-models',
+      quote:
+        'Multimodal models are AI models that can understand and work with more than one type of data at the same time, such as text, images, audio, or video. For instance, the multimodal model could describe an image in natural language or answer a question about a photo.',
     },
     tags: ['vision', 'matching', 'cram'],
   },

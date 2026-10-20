@@ -98,7 +98,8 @@ await sample.locator('.option').first().click();
 await page.waitForTimeout(250);
 check('sample question is marked straight away', await sample.locator('.verdict').isVisible());
 check('every wrong option explains itself', (await sample.locator('.why').count()) >= 1);
-check('marking links to its source', (await sample.locator('.source a[href^="https://"]').count()) === 1);
+check('marking links to its Microsoft Learn page', (await sample.locator('.learn a[href^="https://learn.microsoft.com/"]').count()) === 1);
+check('marking quotes Microsoft Learn', ((await sample.locator('.learn blockquote').innerText()) ?? '').trim().length > 20);
 
 /* ---------------- 3. Home, returning ---------------- */
 console.log('\n[3] Home: returning visitor');

@@ -29,6 +29,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Large language models (LLMs) - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'For example, given the sequence "When my dog was a ...", the model will evaluate the tokens in the sequence so far, use attention to assign weights, and predict that the next most probable token is "puppy" rather than, say, "cat" or "skateboard".',
     },
     tags: ['generative', 'pipeline'],
   },
@@ -70,6 +72,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Large language models (LLMs) - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'While we tend to think of language in terms of words, LLMs break down their vocabulary into tokens. Tokens include words, but also sub-words (like the "un" in "unbelievable" and "unlikely"), punctuation, and other commonly used sequences of characters.',
     },
     tags: ['generative', 'tokens', 'definition'],
   },
@@ -111,6 +115,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Large language models (LLMs) - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'Because the dimensions are calculated based on how the tokens relate linguistically to one another, tokens that are used in similar contexts (and therefore have similar meanings) result in vectors with similar directions.',
     },
     tags: ['generative', 'embeddings'],
   },
@@ -153,6 +159,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Large language models (LLMs) - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        "An attention layer considers each token in turn, within the context of the sequence of tokens in which it appears. The tokens around the current one are weighted to reflect their influence and the weights are used to calculate the element values for the current token's embedding vector.",
     },
     tags: ['generative', 'transformer'],
   },
@@ -189,8 +197,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     explanation:
       'Temperature controls randomness in token selection. Near 0 the model repeatedly picks the highest-probability token, giving focused, near-deterministic output. Near 1+ it samples more widely, giving creative and varied output.',
     reference: {
-      label: 'Azure OpenAI chat REST reference (request parameters)',
-      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        "A fictional story could be generated using a higher temperature. Whereas to generate a legal document it's recommended to use a much lower temperature.",
     },
     tags: ['parameters', 'temperature'],
   },
@@ -228,6 +238,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Azure OpenAI chat REST reference (request parameters)',
       url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      quote:
+        'The maximum number of tokens that can be generated in the chat completion. This value can be used to control costs for text generated via API.',
     },
     tags: ['parameters', 'max-tokens', 'trap'],
   },
@@ -255,6 +267,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Azure OpenAI chat REST reference (request parameters)',
       url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      quote:
+        'Up to 4 sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.',
     },
     tags: ['parameters', 'matching', 'cram'],
   },
@@ -294,8 +308,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     explanation:
       'temperature reshapes the whole probability distribution; top_p truncates it to the most likely candidates whose cumulative probability reaches p. Both dial the same underlying thing, so change one at a time.',
     reference: {
-      label: 'Azure OpenAI chat REST reference (request parameters)',
-      url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Top_probability is another parameter and is similar to Temperature in that it also controls the randomness of the model response, but it does so in a different way. The general recommendation is to alter one of these two parameters at a time, not both',
     },
     tags: ['parameters', 'temperature-vs-topp', 'trap', 'hard'],
   },
@@ -333,8 +349,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     explanation:
       'SLMs have far fewer parameters, so they run on modest hardware or at the edge with low latency and cost. Pick an SLM when the task is narrow and the constraints are compute, cost, latency or offline operation; pick an LLM when the task needs broad knowledge or complex multi-step reasoning.',
     reference: {
-      label: 'Overview of Microsoft Foundry Models',
-      url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+      label: 'Generative AI and agents - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/2-generative-ai',
+      quote:
+        'LLMs are powerful and generalize well, but can be more costly to train and use. SLMs tend to work well in scenarios that are more focused on specific topic areas or that require easily deployed small models for local applications and agents on devices.',
     },
     tags: ['model-selection', 'slm-vs-llm'],
   },
@@ -361,6 +379,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Overview of Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+      quote:
+        'These models range from foundation models, reasoning models, small language models, multimodal models, domain-specific models, and industry models.',
     },
     tags: ['model-selection', 'matching', 'cram'],
   },
@@ -399,6 +419,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Deployment overview for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',
+      quote:
+        'Serverless API is the preferred deployment option in Foundry. It supports the widest range of capabilities and deployment types.',
     },
     tags: ['deployment', 'currency'],
   },
@@ -442,6 +464,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Deployment types for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/foundry-models/concepts/deployment-types',
+      quote:
+        'With provisioned throughput, you purchase a fixed number of provisioned throughput units (PTUs) that guarantee a specific level of processing capacity. This deployment type provides lower and more consistent latency than Global Standard.',
     },
     tags: ['deployment', 'ptu', 'hard'],
   },
@@ -480,6 +504,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Deployment types for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/foundry-models/concepts/deployment-types',
+      quote:
+        'For Global deployment types, the service can process prompts and responses in any geography where the model is deployed. For Data Zone deployment types, the service processes prompts and responses only within the specified data zone',
     },
     tags: ['deployment', 'data-residency', 'hard'],
   },
@@ -521,6 +547,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Deployment overview for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',
+      quote:
+        'Managed compute billing is hourly per accelerator SKU, with throughput per GPU as the underlying billing unit.',
     },
     tags: ['deployment', 'billing'],
   },
@@ -563,6 +591,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Overview of Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
+      quote:
+        'Search and discover models that meet your needs through keyword search and filters. The model catalog also offers the model performance leaderboard and benchmark metrics for select models.',
     },
     tags: ['model-catalog'],
   },
@@ -605,6 +635,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Hallucination despite grounding: Even with retrieved content, models can still generate inaccurate responses. Enable citations and use clear system messages and prompts to instruct the model to stick to retrieved content.',
     },
     tags: ['generative', 'hallucination'],
   },
@@ -653,6 +685,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Use RAG when you need answers grounded in private or frequently changing data. Use fine-tuning when you need to change model behavior, style, or task performance, rather than add fresh knowledge.',
     },
     tags: ['rag-vs-finetune', 'hard', 'multi-select'],
   },
@@ -694,6 +728,8 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Azure OpenAI chat REST reference (request parameters)',
       url: 'https://learn.microsoft.com/rest/api/microsoft-foundry/azureopenai/chat',
+      quote:
+        'Up to 4 sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.',
     },
     tags: ['parameters', 'stop'],
   },
@@ -729,7 +765,12 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The decoder predicts the most probable next token, the token is added to the sequence, and the whole process repeats until the model predicts the end. That loop is what *autoregressive* means - and why replies stream in word by word.',
-    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'The predicted value is then added to the sequence, and the whole process repeats to predict the next token; and so on, until the decoder predicts that the sequence has ended.',
+    },
     tags: ['how-llms-work', 'tokens'],
   },
   {
@@ -767,7 +808,12 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Models break text into tokens - words, sub-words, punctuation - and each has a fixed ID in the vocabulary. Tokens are the unit models read, generate and bill in; in English, a token averages roughly four characters.',
-    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'Tokens include words, but also sub-words (like the "un" in "unbelievable" and "unlikely"), punctuation, and other commonly used sequences of characters.',
+    },
     tags: ['tokens', 'how-llms-work'],
   },
   {
@@ -806,7 +852,12 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Embeddings encode meaning as direction in a many-dimensional space, learned from the contexts words appear in. Similar meanings point in similar directions, which you can measure with cosine similarity - the property that powers semantic search and RAG.',
-    reference: { label: 'Large language models (LLMs) - Microsoft Learn training', url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models' },
+    reference: {
+      label: 'Large language models (LLMs) - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/fundamentals-generative-ai/3-language-models',
+      quote:
+        'For example, the embeddings for "dog" and "puppy" point in more or less the same direction, which isn\'t too different from the embedding for "cat"; but very different from the embedding for "skateboard" or "car". We can measure how close tokens are to one another semantically by calculating the cosine similarity of their vectors.',
+    },
     tags: ['embeddings', 'how-llms-work'],
   },
   {
@@ -847,8 +898,10 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
     explanation:
       'Reasoning models do not support `temperature`, `top_p`, the penalties or `max_tokens`. Cap length with `max_completion_tokens` in Chat Completions or `max_output_tokens` in the Responses API, and use `reasoning_effort` to trade depth of thinking for speed.',
     reference: {
-      label: 'Azure OpenAI reasoning models',
-      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/reasoning',
+      label: 'Work with chat completion models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/chatgpt',
+      quote:
+        "Reasoning models, such as the GPT-5 series, behave differently on this API. They use max_completion_tokens instead of max_tokens, and they don't support temperature, top_p, or the penalty parameters.",
     },
     tags: ['parameters', 'reasoning-models', 'currency'],
   },
