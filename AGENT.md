@@ -55,7 +55,9 @@ tests/smoke.mjs    Playwright smoke suite
   (skills measured as of **April 15, 2026**) and current Microsoft Learn docs.
   Use the Microsoft Learn MCP when it is available.
 - Never invent a fact, a service name, or a URL. If you cannot verify it, leave it out and say so.
-- Give every question a real `reference` link.
+- Give every question a real `reference`: a Microsoft Learn page that backs up the answer, plus a
+  `quote` copied word for word from that page. Learners see it after they answer. Only change to
+  the quote: set em dashes as spaced hyphens. The build rejects a missing quote or a non-Learn URL.
 - Use **current** product naming: Microsoft Foundry (not Azure AI Foundry or Azure AI Studio),
   Foundry Tools (not Cognitive Services or Azure AI services), prompt agents and hosted agents,
   Azure Content Understanding, Foundry resource and project (not AI hub).

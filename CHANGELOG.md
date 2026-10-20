@@ -13,6 +13,9 @@ Changes are organized into the following categories:
 
 ### Added
 
+- Every question now shows a passage from Microsoft Learn after you answer, quoted word for word
+  from the page that backs up the answer, with a link to it. All 217 quotes were checked against
+  their pages, and the build rejects a question without one.
 - A static, printable cram sheet, and a lesson quiz page for every lesson (`/learn/<id>/quiz/`).
 - Resumable practice exams: the attempt is saved after every answer, the timer runs against a
   wall-clock deadline, and a confirmation dialog lists unanswered and marked questions.
@@ -31,6 +34,12 @@ Changes are organized into the following categories:
 
 ### Changed
 
+- Responsible AI questions now cite Microsoft Learn (What is Responsible AI, and the AI
+  fundamentals unit) instead of a microsoft.com marketing page, and most module landing pages were
+  replaced by the specific units that cover each answer.
+- Two image generation questions no longer say the GPT-image models use diffusion, which
+  Microsoft Learn doesn't state. They now ask about diffusion-based models such as the MAI image
+  models, or about image generation in general.
 - A new design: Inter throughout, a near-white canvas with soft layered cards, one indigo accent,
   keycap-style answer options, a frosted sticky header and phone tab bar, and tinted callouts for
   key facts, traps and changes. Light and dark themes, with the system mono for code.

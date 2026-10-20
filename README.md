@@ -18,7 +18,7 @@ Everything is static. Progress lives in your browser. No backend, no account, no
 | | |
 | :--- | :--- |
 | **12 lessons** | About 4 hours in all, in recommended study order, with 8 interactive demos and 80 inline knowledge checks |
-| **217 questions** | 186 exam-style plus 31 lesson checks. Multiple choice, multi-select, matching and ordering, each with an explanation, a reason why every wrong option is wrong, and a link to the Microsoft Learn page that backs it up. Options are shuffled, so the answer is never always A |
+| **217 questions** | 186 exam-style plus 31 lesson checks. Multiple choice, multi-select, matching and ordering, each with an explanation, a reason why every wrong option is wrong, and a passage quoted word for word from the Microsoft Learn page that backs it up, with a link to that page. Options are shuffled, so the answer is never always A |
 | **Spaced repetition** | A Leitner scheduler tuned for a sprint: intervals run from 8 minutes to 4 days, so the whole bank can resurface before exam day |
 | **Weak-area drilling** | Topics ranked by *weighted readiness left on the table*, so a shaky high-weight topic outranks a neglected small one |
 | **Mistakes mode** | Every question currently sitting on a wrong answer, in one place |
@@ -187,7 +187,11 @@ in `data/questions/`; nothing in `lib/` or `components/` needs to change.
     { id: 'b', text: 'A plausible one', correct: false, why: 'Why it is wrong.' },
   ],
   explanation: 'Why the correct answer is correct.',
-  reference: { label: 'Microsoft Learn', url: 'https://learn.microsoft.com/...' },
+  reference: {
+    label: 'Page title',
+    url: 'https://learn.microsoft.com/...',
+    quote: 'A sentence or two copied word for word from that page.',
+  },
 }
 ```
 
@@ -198,7 +202,8 @@ in `data/questions/`; nothing in `lib/` or `components/` needs to change.
 Lessons are arrays of typed blocks: `p`, `list`, `table`, `code`, `key`, `trap`, `changed`,
 `steps`, `demo` and `check`.
 
-The build **fails** on a duplicate question id, a question without an https `reference`, a
+The build **fails** on a duplicate question id, a question whose `reference` is not a Microsoft Learn
+page or has no `quote`, a
 single-answer question without exactly one correct option, a wrong option without a `why`, a
 lesson referencing a question id that does not exist, or a lesson quiz that repeats its own
 knowledge checks - so broken content never ships.
