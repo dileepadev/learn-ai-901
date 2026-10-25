@@ -15,7 +15,7 @@ export const agents: Module = {
     'Choose between a prompt agent, a voice-based prompt agent, a hosted agent, and the Responses API',
     'Pick the right tools for a scenario and explain what a toolbox is',
   ],
-  quiz: ['fg-027', 'fg-043', 'sc-fg-01', 'sc-fg-02', 'sc-fg-06', 'sc-fg-11'],
+  quiz: ['fg-027', 'fg-043', 'sc-fg-01', 'sc-fg-02', 'sc-fg-06', 'sc-fg-11', 'yn-fg-02', 'dd-fg-01', 'code-ag-01'],
   sections: [
     {
       id: 'what',

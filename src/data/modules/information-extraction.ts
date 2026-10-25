@@ -16,7 +16,7 @@ export const informationExtraction: Module = {
     'Choose between Extract, Classify and Generate for a field',
     'Say what confidence scores unlock, and when to use Document Intelligence instead',
   ],
-  quiz: ['fe-004', 'fe-010', 'fe-011', 'fe-018', 'sc-fe-01', 'sc-fe-03', 'sc-fe-05', 'sc-fe-06', 'sc-fe-09'],
+  quiz: ['fe-004', 'fe-010', 'fe-011', 'fe-018', 'sc-fe-01', 'sc-fe-03', 'sc-fe-05', 'sc-fe-06', 'sc-fe-09', 'yn-fe-01', 'dd-fe-01', 'code-cu-01'],
   sections: [
     {
       id: 'why',

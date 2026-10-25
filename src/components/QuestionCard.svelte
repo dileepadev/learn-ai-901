@@ -8,8 +8,8 @@
    * sequence of questions wrap it in `{#key question.id}`.
    */
   import { tick, untrack } from 'svelte';
-  import type { Answer, ChoiceOption, Question } from '../data/types';
-  import { grade } from '../lib/store';
+  import { BLANK, blankText, type Answer, type ChoiceOption, type Question } from '../data/types';
+  import { grade, pointsFor, score } from '../lib/store';
   import { inlineMarkdown } from '../lib/markdown';
   import { topicLabel } from '../data/exam';
   import Icon from './Icon.svelte';
@@ -79,18 +79,36 @@
       : [],
   );
 
+  const blankOptions = $derived<Record<string, ChoiceOption[]>>(
+    question.type === 'dropdown'
+      ? Object.fromEntries(
+          question.blanks.map((b) => [b.id, shuffleStable(b.options, `${question.id}:${b.id}:${seed}`)]),
+        )
+      : {},
+  );
+
+  /** A dropdown question's blanks sit in its code, when the code has any. */
+  const inCode = $derived(question.type === 'dropdown' && blankText(question) === question.code);
+
+  /** The sentence or code around a dropdown question's blanks. */
+  const sentence = $derived(question.type === 'dropdown' ? blankText(question).split(BLANK) : []);
+
+  /** Build-list steps in a stable order that never hands out the answer. */
+  const stepOrder = $derived.by(() => {
+    if (question.type !== 'order') return [];
+    const ids = question.items.map((i) => i.id);
+    const shuffled = shuffleStable(ids, `${question.id}:order`);
+    // If the shuffle lands on the correct order, rotate it.
+    return shuffled.every((id, i) => id === ids[i]) ? [...ids.slice(1), ids[0]!] : shuffled;
+  });
+
   /* ---------------- answer state ---------------- */
 
   const start = untrack(() => ({ initial, revealed, question }));
 
-  function startingOrder(): string[] {
-    const q = start.question;
-    if (q.type !== 'order') return [];
-    if (start.initial?.type === 'order') return [...start.initial.itemIds];
-    const ids = q.items.map((i) => i.id);
-    const shuffled = shuffleStable(ids, `${q.id}:order`);
-    // Never hand out the answer: if the shuffle lands on the correct order, rotate it.
-    return shuffled.every((id, i) => id === ids[i]) ? [...ids.slice(1), ids[0]!] : shuffled;
+  /** Blank-per-part state, keyed by part id, seeded from a saved answer. */
+  function parts<T>(ids: string[], saved: Record<string, T | null> | undefined): Record<string, T | null> {
+    return Object.fromEntries(ids.map((id) => [id, saved?.[id] ?? null]));
   }
 
   let selectedSingle = $state<string | null>(
@@ -101,15 +119,30 @@
   );
   let assignments = $state<Record<string, string | null>>(
     start.question.type === 'match'
-      ? Object.fromEntries(
-          start.question.pairs.map((p) => [
-            p.id,
-            start.initial?.type === 'match' ? (start.initial.assignments[p.id] ?? null) : null,
-          ]),
+      ? parts(
+          start.question.pairs.map((p) => p.id),
+          start.initial?.type === 'match' ? start.initial.assignments : undefined,
         )
       : {},
   );
-  let ordering = $state<string[]>(startingOrder());
+  /** Build list: the steps in the answer area, in the learner's order. */
+  let ordering = $state<string[]>(start.initial?.type === 'order' ? [...start.initial.itemIds] : []);
+  let verdicts = $state<Record<string, boolean | null>>(
+    start.question.type === 'yesno'
+      ? parts(
+          start.question.statements.map((s) => s.id),
+          start.initial?.type === 'yesno' ? start.initial.values : undefined,
+        )
+      : {},
+  );
+  let choices = $state<Record<string, string | null>>(
+    start.question.type === 'dropdown'
+      ? parts(
+          start.question.blanks.map((b) => b.id),
+          start.initial?.type === 'dropdown' ? start.initial.choices : undefined,
+        )
+      : {},
+  );
 
   let submitted = $state(start.revealed);
   let wasCorrect = $state(
@@ -126,6 +159,10 @@
         return { type: 'match', assignments };
       case 'order':
         return { type: 'order', itemIds: ordering };
+      case 'yesno':
+        return { type: 'yesno', values: verdicts };
+      case 'dropdown':
+        return { type: 'dropdown', choices };
     }
   });
 
@@ -134,11 +171,15 @@
       case 'single':
         return selectedSingle !== null;
       case 'multi':
-        return selectedMulti.length > 0;
+        return selectedMulti.length === requiredCount;
       case 'match':
         return question.pairs.every((p) => assignments[p.id]);
       case 'order':
         return ordering.length === question.items.length;
+      case 'yesno':
+        return question.statements.every((s) => verdicts[s.id] !== null);
+      case 'dropdown':
+        return question.blanks.every((b) => choices[b.id]);
     }
   });
 
@@ -148,10 +189,18 @@
 
   const showMarking = $derived(submitted && !examMode);
   const locked = $derived(showMarking);
+  /** Read only once marked, so a click does not re-score the answer. */
+  const points = $derived(score(question, answer));
+  /** Multi-part questions earn a point per part, and say so, as the real exam does. */
+  const perPart = $derived(pointsFor(question) > 1);
 
   /* ---------------- interactions ---------------- */
 
   let verdictEl = $state<HTMLElement | null>(null);
+  /** Read out by screen readers: limits reached, values picked up and placed. */
+  let note = $state('');
+  /** A multi-answer option was refused because the limit is reached. Shown, not only read out. */
+  let limitHit = $state(false);
 
   function changed() {
     onchange?.(answer, complete);
@@ -167,9 +216,18 @@
 
   function toggleMulti(id: string) {
     if (locked) return;
-    selectedMulti = selectedMulti.includes(id)
-      ? selectedMulti.filter((x) => x !== id)
-      : [...selectedMulti, id];
+    limitHit = false;
+    if (selectedMulti.includes(id)) {
+      selectedMulti = selectedMulti.filter((x) => x !== id);
+      note = '';
+    } else if (selectedMulti.length >= requiredCount) {
+      // Choosing more than asked would earn nothing extra on the exam either.
+      note = `You have chosen ${requiredCount}. Clear one to change your answer.`;
+      limitHit = true;
+      return;
+    } else {
+      selectedMulti = [...selectedMulti, id];
+    }
     changed();
   }
 
@@ -178,9 +236,59 @@
     else toggleMulti(option.id);
   }
 
-  function assign(pairId: string, value: string) {
+  function setVerdict(statementId: string, yes: boolean) {
     if (locked) return;
-    assignments = { ...assignments, [pairId]: value || null };
+    verdicts = { ...verdicts, [statementId]: yes };
+    changed();
+  }
+
+  function fill(blankId: string, optionId: string) {
+    if (locked) return;
+    choices = { ...choices, [blankId]: optionId || null };
+    changed();
+  }
+
+  /* ---------------- drag and drop ---------------- */
+
+  /**
+   * Everything that can be dragged can also be selected and then placed, so
+   * the same questions work by touch, keyboard and screen reader. `held` is
+   * the value or step picked up that way.
+   */
+  let held = $state<string | null>(null);
+  let dropTarget = $state<string | null>(null);
+
+  function pickUp(value: string) {
+    if (locked) return;
+    held = held === value ? null : value;
+    note = held ? `${value} picked up. Choose the row it belongs in.` : '';
+  }
+
+  function assign(pairId: string, value: string | null) {
+    if (locked) return;
+    assignments = { ...assignments, [pairId]: value };
+    changed();
+  }
+
+  function placeHeld(pairId: string, left: string) {
+    if (!held) return;
+    assign(pairId, held);
+    note = `${held} placed next to ${left}.`;
+    held = null;
+  }
+
+  function place(id: string, before: string | null = null) {
+    if (locked) return;
+    const next = ordering.filter((x) => x !== id);
+    const at = before === null ? -1 : next.indexOf(before);
+    next.splice(at === -1 ? next.length : at, 0, id);
+    ordering = next;
+    changed();
+  }
+
+  function unplace(id: string) {
+    if (locked) return;
+    ordering = ordering.filter((x) => x !== id);
     changed();
   }
 
@@ -194,9 +302,76 @@
     changed();
   }
 
+  /** Drag payloads: a value from the bank, a filled slot, or a build-list step. */
+  type Dragged = { kind: 'value'; value: string } | { kind: 'slot'; pairId: string } | { kind: 'step'; id: string };
+
+  /** One type per question, so a card ignores what is dragged out of another card on the page. */
+  const DRAG_MIME = $derived(`application/x-ai901-drag-${question.id}`);
+
+  function dragStart(event: DragEvent, payload: Dragged) {
+    if (locked || !event.dataTransfer) return;
+    event.dataTransfer.setData(DRAG_MIME, JSON.stringify(payload));
+    event.dataTransfer.effectAllowed = 'move';
+    held = null;
+  }
+
+  function dragged(event: DragEvent): Dragged | null {
+    try {
+      return JSON.parse(event.dataTransfer?.getData(DRAG_MIME) ?? '') as Dragged;
+    } catch {
+      return null;
+    }
+  }
+
+  function allowDrop(event: DragEvent, target: string) {
+    if (locked || !event.dataTransfer?.types.includes(DRAG_MIME)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    dropTarget = target;
+  }
+
+  function leave(target: string) {
+    if (dropTarget === target) dropTarget = null;
+  }
+
+  function dropOnSlot(event: DragEvent, pairId: string) {
+    event.preventDefault();
+    dropTarget = null;
+    const d = dragged(event);
+    if (d?.kind === 'value') assign(pairId, d.value);
+    else if (d?.kind === 'slot' && d.pairId !== pairId) {
+      const value = assignments[d.pairId] ?? null;
+      assignments = { ...assignments, [d.pairId]: null };
+      assign(pairId, value);
+    }
+  }
+
+  function dropOnBank(event: DragEvent) {
+    event.preventDefault();
+    dropTarget = null;
+    const d = dragged(event);
+    if (d?.kind === 'slot') assign(d.pairId, null);
+  }
+
+  function dropStep(event: DragEvent, before: string | null) {
+    event.preventDefault();
+    event.stopPropagation();
+    dropTarget = null;
+    const d = dragged(event);
+    if (d?.kind === 'step' && d.id !== before) place(d.id, before);
+  }
+
+  function dropOnSteps(event: DragEvent) {
+    event.preventDefault();
+    dropTarget = null;
+    const d = dragged(event);
+    if (d?.kind === 'step') unplace(d.id);
+  }
+
   async function submit() {
     if (submitted || !complete || examMode) return;
     submitted = true;
+    held = null;
     wasCorrect = grade(question, answer);
     onanswered?.(wasCorrect, answer);
     // The options just became read-only. Hand focus to the marking, which is
@@ -224,6 +399,11 @@
   /* ---------------- keyboard ---------------- */
 
   function onKey(event: KeyboardEvent) {
+    if (event.key === 'Escape' && held) {
+      held = null;
+      note = '';
+      return;
+    }
     if (!keys || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target as HTMLElement | null;
     if (target?.closest('input, textarea, select, [contenteditable="true"], dialog')) return;
@@ -258,11 +438,29 @@
     question.type === 'match' ? [...new Set(question.pairs.map((p) => p.right))].sort() : [],
   );
 
-  const itemText = $derived(
+  const itemText = $derived<Record<string, string>>(
     question.type === 'order' ? Object.fromEntries(question.items.map((i) => [i.id, i.text])) : {},
   );
 
   const correctOrder = $derived(question.type === 'order' ? question.items.map((i) => i.id) : []);
+
+  /** Build-list steps still outside the answer area. */
+  const unplaced = $derived(stepOrder.filter((id) => !ordering.includes(id)));
+
+  const instruction = $derived.by(() => {
+    switch (question.type) {
+      case 'multi':
+        return `Choose ${requiredCount}. Each correct answer is part of the solution.`;
+      case 'match':
+        return 'Drag each item into the row it belongs in, or select an item and then select the row. Each item may be used once, more than once, or not at all.';
+      case 'order':
+        return 'Move the steps into the answer area and arrange them in the correct order. Drag them, or select a step to add it next.';
+      case 'yesno':
+        return 'For each statement, select Yes if it is true. Otherwise, select No.';
+      default:
+        return '';
+    }
+  });
 
   const correctLetters = $derived(
     options
@@ -288,12 +486,31 @@
     <p class="scenario">{@html inlineMarkdown(question.scenario)}</p>
   {/if}
 
-  <h3 class="q-prompt">{@html inlineMarkdown(question.prompt)}</h3>
+  {#if question.type === 'dropdown' && !inCode}
+    <h3 class="q-prompt">
+      Select the {question.blanks.length > 1 ? 'answers that correctly complete' : 'answer that correctly completes'} the
+      sentence.
+    </h3>
+  {:else}
+    <h3 class="q-prompt">{@html inlineMarkdown(question.prompt)}</h3>
+  {/if}
+
+  {#if question.code && !inCode}
+    <figure class="codeblock q-code">
+      <figcaption>Python</figcaption>
+      <pre><code>{question.code}</code></pre>
+    </figure>
+  {/if}
+
+  {#if instruction || perPart}
+    <p class="choose">
+      {instruction}
+      {#if perPart}<span class="per-part">Each correct selection is worth one point.</span>{/if}
+    </p>
+  {/if}
+  <p class="visually-hidden" aria-live="polite">{note}</p>
 
   {#if question.type === 'single' || question.type === 'multi'}
-    {#if question.type === 'multi'}
-      <p class="choose">Choose {requiredCount}. Each correct answer is part of the solution.</p>
-    {/if}
     <div class="options" role="group" aria-label="Answer options">
       {#each options as option, i (option.id)}
         {@const mark = markOf(option)}
@@ -330,69 +547,288 @@
         </button>
       {/each}
     </div>
-  {:else if question.type === 'match'}
-    <ul class="matches">
-      {#each question.pairs as pair (pair.id)}
-        {@const chosen = assignments[pair.id]}
-        {@const ok = showMarking && chosen === pair.right}
-        <li class="match" class:right={ok} class:wrong={showMarking && !ok}>
-          <span class="match-left">{@html inlineMarkdown(pair.left)}</span>
-          <span class="match-control">
-            <select
-              class="input"
-              value={chosen ?? ''}
-              disabled={locked}
-              aria-label={`${question.rightLabel} for ${pair.left}`}
-              onchange={(e) => assign(pair.id, e.currentTarget.value)}
-            >
-              <option value="">Choose {question.rightLabel.toLowerCase()}</option>
-              {#each rightOptions as right (right)}
-                <option value={right}>{right}</option>
-              {/each}
-            </select>
-            {#if showMarking && !ok}
-              <span class="correction"><Icon name="check" size={16} /> {pair.right}</span>
-            {/if}
-            {#if showMarking && !ok && pair.why}
-              <span class="why">{@html inlineMarkdown(pair.why)}</span>
-            {/if}
+    {#if limitHit && !locked}
+      <p class="small subtle" aria-hidden="true">You have chosen {requiredCount}. Clear one to change your answer.</p>
+    {/if}
+  {:else if question.type === 'yesno'}
+    <ul class="statements">
+      {#each question.statements as statement (statement.id)}
+        {@const value = verdicts[statement.id]}
+        {@const ok = showMarking && value === statement.yes}
+        <li class="statement" class:right={ok} class:wrong={showMarking && !ok}>
+          <span class="statement-text" id={`${uid}-${statement.id}`}>{@html inlineMarkdown(statement.text)}</span>
+          <span class="yn" role="radiogroup" aria-labelledby={`${uid}-${statement.id}`}>
+            {#each [true, false] as yes (yes)}
+              <label class="yn-choice" class:on={value === yes}>
+                <input
+                  type="radio"
+                  name={`${uid}-${statement.id}`}
+                  checked={value === yes}
+                  disabled={locked}
+                  onchange={() => setVerdict(statement.id, yes)}
+                />
+                <span>{yes ? 'Yes' : 'No'}</span>
+              </label>
+            {/each}
           </span>
-        </li>
-      {/each}
-    </ul>
-  {:else if question.type === 'order'}
-    <p class="choose">Put these in order, first at the top.</p>
-    <ol class="ordering">
-      {#each ordering as id, i (id)}
-        {@const ok = showMarking && correctOrder[i] === id}
-        <li class="order-item" class:right={ok} class:wrong={showMarking && !ok}>
-          <span class="order-index num" aria-hidden="true">{i + 1}</span>
-          <span class="order-text">{@html inlineMarkdown(itemText[id] ?? id)}</span>
-          {#if !locked}
-            <span class="order-controls">
-              <button
-                type="button"
-                class="icon-btn"
-                disabled={i === 0}
-                aria-label={`Move up: ${itemText[id] ?? id}`}
-                onclick={() => move(i, -1)}
-              >
-                <Icon name="chevron-down" class="flip" />
-              </button>
-              <button
-                type="button"
-                class="icon-btn"
-                disabled={i === ordering.length - 1}
-                aria-label={`Move down: ${itemText[id] ?? id}`}
-                onclick={() => move(i, 1)}
-              >
-                <Icon name="chevron-down" />
-              </button>
+          {#if showMarking}
+            <span class="statement-mark">
+              <span class="correction" class:off={!ok}>
+                <Icon name={ok ? 'check' : 'x'} size={16} />
+                {ok ? 'Right' : 'Wrong'}: the answer is {statement.yes ? 'Yes' : 'No'}.
+              </span>
+              <span class="why">{@html inlineMarkdown(statement.why)}</span>
             </span>
           {/if}
         </li>
       {/each}
-    </ol>
+    </ul>
+  {:else if question.type === 'dropdown'}
+    {#snippet blankSelect(i: number)}
+      {#if question.type === 'dropdown' && question.blanks[i]}
+        {@const blank = question.blanks[i]!}
+        {@const chosen = choices[blank.id]}
+        {@const ok = showMarking && blank.options.some((o) => o.correct && o.id === chosen)}
+        <select
+          class="input blank"
+          class:right={ok}
+          class:wrong={showMarking && !ok}
+          value={chosen ?? ''}
+          disabled={locked}
+          aria-label={question.blanks.length > 1 ? `Blank ${i + 1}` : 'Answer'}
+          onchange={(e) => fill(blank.id, e.currentTarget.value)}
+        >
+          <option value="">Choose an answer</option>
+          {#each blankOptions[blank.id] ?? [] as option (option.id)}
+            <option value={option.id}>{option.text}</option>
+          {/each}
+        </select>
+      {/if}
+    {/snippet}
+    {#if inCode}
+      <!-- One line on purpose: whitespace inside <pre> is part of the code. -->
+      <figure class="codeblock q-code answer-code">
+        <figcaption>Answer area: Python</figcaption>
+        <pre><code>{#each sentence as part, i (i)}{part}{@render blankSelect(i)}{/each}</code></pre>
+      </figure>
+    {:else}
+      <div class="answer-area sentence">
+        <p class="area-label">Answer area</p>
+        <!-- Kept on one line where it matters: whitespace here would show as a gap before the punctuation. -->
+        <p class="sentence-text">
+          {#each sentence as part, i (i)}{@html inlineMarkdown(part)}{@render blankSelect(i)}{/each}
+        </p>
+      </div>
+    {/if}
+    {#if showMarking}
+      <ul class="blank-marks">
+        {#each question.blanks as blank, i (blank.id)}
+          {#each [...blank.options].sort((a, b) => Number(b.correct) - Number(a.correct)) as option (option.id)}
+            {@const chosen = choices[blank.id] === option.id}
+            <li class:right={option.correct} class:wrong={chosen && !option.correct}>
+              <span class="correction" class:off={chosen && !option.correct} class:muted={!chosen && !option.correct}>
+                <Icon name={option.correct ? 'check' : 'x'} size={16} />
+                {question.blanks.length > 1 ? `Blank ${i + 1}: ` : ''}{option.text}
+                {#if chosen}<span class="tag" class:tag-red={!option.correct}>Your answer</span>{/if}
+              </span>
+              {#if !option.correct && option.why}
+                <span class="why">{@html inlineMarkdown(option.why)}</span>
+              {/if}
+            </li>
+          {/each}
+        {/each}
+      </ul>
+    {/if}
+  {:else if question.type === 'match'}
+    <div class="dnd">
+      {#if !locked}
+        <!-- Dropping a placed value back on the list removes it. Every drag here has a select-and-place equivalent. -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+          class="bank"
+          class:target={dropTarget === 'bank'}
+          ondragover={(e) => allowDrop(e, 'bank')}
+          ondragleave={() => leave('bank')}
+          ondrop={dropOnBank}
+        >
+          <p class="area-label" id={`${uid}-bank`}>{question.rightLabel}</p>
+          <ul class="tokens" aria-labelledby={`${uid}-bank`}>
+            {#each rightOptions as value (value)}
+              <li>
+                <button
+                  type="button"
+                  class="token"
+                  class:held={held === value}
+                  draggable="true"
+                  aria-pressed={held === value}
+                  ondragstart={(e) => dragStart(e, { kind: 'value', value })}
+                  ondragend={() => (dropTarget = null)}
+                  onclick={() => pickUp(value)}>{value}</button
+                >
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {/if}
+      <div class="answer-area">
+        <p class="area-label">Answer area</p>
+        <ul class="matches">
+          {#each question.pairs as pair (pair.id)}
+            {@const chosen = assignments[pair.id]}
+            {@const ok = showMarking && chosen === pair.right}
+            <li class="match" class:right={ok} class:wrong={showMarking && !ok}>
+              <span class="match-left">{@html inlineMarkdown(pair.left)}</span>
+              <span class="match-control">
+                {#if locked}
+                  <span class="slot filled">{chosen ?? 'Not answered'}</span>
+                {:else}
+                  <span class="slot-row">
+                    <button
+                      type="button"
+                      class="slot"
+                      class:filled={chosen !== null}
+                      class:ready={held !== null}
+                      class:target={dropTarget === pair.id}
+                      draggable={chosen ? 'true' : 'false'}
+                      aria-label={`${question.rightLabel} for ${pair.left}: ${chosen ?? 'empty'}${held ? `. Select to place ${held} here` : ''}`}
+                      ondragstart={(e) => dragStart(e, { kind: 'slot', pairId: pair.id })}
+                      ondragend={() => (dropTarget = null)}
+                      ondragover={(e) => allowDrop(e, pair.id)}
+                      ondragleave={() => leave(pair.id)}
+                      ondrop={(e) => dropOnSlot(e, pair.id)}
+                      onclick={() => placeHeld(pair.id, pair.left)}
+                    >
+                      {chosen ?? (held ? 'Place here' : 'Drop here')}
+                    </button>
+                    {#if chosen}
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        aria-label={`Remove ${chosen} from ${pair.left}`}
+                        onclick={() => assign(pair.id, null)}
+                      >
+                        <Icon name="x" size={16} />
+                      </button>
+                    {/if}
+                  </span>
+                {/if}
+                {#if showMarking && !ok}
+                  <span class="correction"><Icon name="check" size={16} /> {pair.right}</span>
+                {/if}
+                {#if showMarking && !ok && pair.why}
+                  <span class="why">{@html inlineMarkdown(pair.why)}</span>
+                {/if}
+              </span>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    </div>
+  {:else if question.type === 'order'}
+    <div class="dnd build" class:split={!locked}>
+      {#if !locked}
+        <!-- Dropping a step back here takes it out of the answer area. -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+          class="bank"
+          class:target={dropTarget === 'steps'}
+          ondragover={(e) => allowDrop(e, 'steps')}
+          ondragleave={() => leave('steps')}
+          ondrop={dropOnSteps}
+        >
+          <p class="area-label" id={`${uid}-steps`}>Steps</p>
+          {#if unplaced.length}
+            <ul class="steps" aria-labelledby={`${uid}-steps`}>
+              {#each unplaced as id (id)}
+                <li>
+                  <button
+                    type="button"
+                    class="token step"
+                    draggable="true"
+                    aria-label={`Add to the answer area: ${itemText[id] ?? id}`}
+                    ondragstart={(e) => dragStart(e, { kind: 'step', id })}
+                    ondragend={() => (dropTarget = null)}
+                    onclick={() => place(id)}>{@html inlineMarkdown(itemText[id] ?? id)}</button
+                  >
+                </li>
+              {/each}
+            </ul>
+          {:else}
+            <p class="small subtle">Every step is in the answer area.</p>
+          {/if}
+        </div>
+      {/if}
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="answer-area"
+        class:target={dropTarget === 'answer'}
+        ondragover={(e) => allowDrop(e, 'answer')}
+        ondragleave={() => leave('answer')}
+        ondrop={(e) => dropStep(e, null)}
+      >
+        <p class="area-label">Answer area</p>
+        {#if ordering.length === 0}
+          <p class="drop-hint small subtle">
+            {locked ? 'No steps were placed.' : 'Drag the steps here, or select them in order.'}
+          </p>
+        {/if}
+        <ol class="ordering">
+          {#each ordering as id, i (id)}
+            {@const ok = showMarking && correctOrder[i] === id}
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+            <li
+              class="order-item"
+              class:right={ok}
+              class:wrong={showMarking && !ok}
+              class:target={dropTarget === id}
+              draggable={locked ? 'false' : 'true'}
+              ondragstart={(e) => dragStart(e, { kind: 'step', id })}
+              ondragend={() => (dropTarget = null)}
+              ondragover={(e) => {
+                // Keep the answer area's own handler from taking the marker back.
+                e.stopPropagation();
+                allowDrop(e, id);
+              }}
+              ondragleave={() => leave(id)}
+              ondrop={(e) => dropStep(e, id)}
+            >
+              <span class="order-index num" aria-hidden="true">{i + 1}</span>
+              <span class="order-text">{@html inlineMarkdown(itemText[id] ?? id)}</span>
+              {#if !locked}
+                <span class="order-controls">
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    disabled={i === 0}
+                    aria-label={`Move up: ${itemText[id] ?? id}`}
+                    onclick={() => move(i, -1)}
+                  >
+                    <Icon name="chevron-down" class="flip" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    disabled={i === ordering.length - 1}
+                    aria-label={`Move down: ${itemText[id] ?? id}`}
+                    onclick={() => move(i, 1)}
+                  >
+                    <Icon name="chevron-down" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    aria-label={`Take out of the answer area: ${itemText[id] ?? id}`}
+                    onclick={() => unplace(id)}
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </span>
+              {/if}
+            </li>
+          {/each}
+        </ol>
+      </div>
+    </div>
     {#if showMarking && !wasCorrect}
       <div class="callout callout-info">
         <p class="callout-title">The correct order</p>
@@ -412,11 +848,17 @@
       </button>
       {#if !complete}
         <span class="small subtle">
-          {question.type === 'multi'
-            ? `Choose ${requiredCount}, then check.`
-            : question.type === 'match'
-              ? 'Match every row, then check.'
-              : 'Arrange the items, then check.'}
+          {#if question.type === 'multi'}
+            Choose {requiredCount}, then check.
+          {:else if question.type === 'match'}
+            Fill every row, then check.
+          {:else if question.type === 'order'}
+            Move every step into the answer area, then check.
+          {:else if question.type === 'yesno'}
+            Answer every statement, then check.
+          {:else}
+            Fill the {question.blanks.length > 1 ? 'blanks' : 'blank'}, then check.
+          {/if}
         </span>
       {/if}
     </footer>
@@ -426,6 +868,7 @@
     <section
       class="verdict rise-in"
       class:ok={wasCorrect}
+      class:partial={!wasCorrect && points.earned > 0}
       bind:this={verdictEl}
       tabindex="-1"
       aria-labelledby={`${uid}-verdict`}
@@ -434,7 +877,13 @@
         <span class="verdict-mark" aria-hidden="true">
           <Icon name={wasCorrect ? 'check' : 'x'} size={18} />
         </span>
-        {wasCorrect ? 'Correct' : 'Not quite'}
+        {#if wasCorrect}
+          Correct{perPart ? `: all ${points.possible} points` : ''}
+        {:else if points.earned > 0}
+          Partly right: {points.earned} of {points.possible} points
+        {:else}
+          Not quite
+        {/if}
         {#if !wasCorrect && correctLetters}
           <span class="visually-hidden">. The correct answer is {correctLetters}.</span>
         {/if}
@@ -749,6 +1198,297 @@
     margin: 0;
   }
 
+  /* ---- Yes/No statements ---- */
+
+  .per-part {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  .statements,
+  .blank-marks,
+  .tokens,
+  .steps {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .statements li + li,
+  .blank-marks li + li,
+  .tokens li + li,
+  .steps li + li {
+    margin-top: 0;
+  }
+
+  .statement {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    padding: 0.7rem 0.75rem 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+  }
+  .statement.right,
+  .blank-marks .right {
+    border-color: var(--success-edge);
+    background: var(--success-soft);
+  }
+  .statement.wrong,
+  .blank-marks .wrong {
+    border-color: var(--danger-edge);
+    background: var(--danger-soft);
+  }
+  .statement-mark {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 0.25rem;
+  }
+
+  /* Two pills per statement, backed by real radio buttons for the keyboard. */
+  .yn {
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+  .yn-choice {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-width: 3.6rem;
+    min-height: 2.5rem;
+    padding: 0 0.8rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .yn-choice input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+  .yn-choice:hover {
+    border-color: var(--accent-edge);
+  }
+  .yn-choice:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .yn-choice.on {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .yn-choice:has(input:disabled) {
+    cursor: default;
+  }
+
+  .correction.off {
+    color: var(--danger);
+  }
+  .correction.muted {
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 560px) {
+    .statement {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---- answer areas: sentence completion and drag and drop ---- */
+
+  .answer-area,
+  .bank {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .bank {
+    border-style: solid;
+    border-color: var(--border);
+    background: var(--surface-2);
+  }
+  .answer-area.target,
+  .bank.target {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .area-label {
+    margin: 0;
+    color: var(--ink-3);
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sentence-text {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 2.2;
+  }
+  .blank {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    margin: 0 0.2rem 0 0;
+    vertical-align: baseline;
+  }
+  /* A dropdown inside code sits on the code's own line, in the code's own font. */
+  .answer-code .blank {
+    min-height: 0;
+    margin: 0.15rem 0;
+    padding: 0.1rem 1.6rem 0.1rem 0.45rem;
+    font-family: var(--mono);
+    font-size: inherit;
+    line-height: 1.4;
+    vertical-align: baseline;
+  }
+  /* Wrap long lines rather than scroll, so no blank or line label hides off to the side. */
+  .q-code > pre {
+    line-height: 1.9;
+    white-space: pre-wrap;
+  }
+  .q-code code {
+    overflow-wrap: anywhere;
+  }
+
+  .blank.right {
+    border-color: var(--success);
+    box-shadow: 0 0 0 1px var(--success);
+  }
+  .blank.wrong {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
+  }
+  .blank-marks li {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .dnd {
+    display: grid;
+    gap: 0.75rem;
+  }
+  @media (min-width: 760px) {
+    .dnd.build.split {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      align-items: start;
+    }
+  }
+
+  .tokens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .token {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 550;
+    text-align: left;
+    cursor: grab;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .tokens .token {
+    width: auto;
+  }
+  .token:hover {
+    border-color: var(--accent-edge);
+  }
+  .token:active {
+    cursor: grabbing;
+  }
+  .token.held {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .slot-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .slot {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font: inherit;
+    font-size: 0.95rem;
+    text-align: left;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  button.slot {
+    cursor: pointer;
+  }
+  .slot.filled {
+    border-style: solid;
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 550;
+    cursor: grab;
+  }
+  .slot.ready,
+  .slot.target {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .order-item[draggable='true'] {
+    cursor: grab;
+  }
+  .order-item.target {
+    box-shadow: inset 0 3px 0 var(--accent);
+  }
+  .drop-hint {
+    margin: 0;
+  }
+
   .q-foot {
     display: flex;
     align-items: center;
@@ -767,6 +1507,10 @@
   .verdict.ok {
     border-color: var(--success-edge);
     background: var(--success-soft);
+  }
+  .verdict.partial {
+    border-color: var(--warn-edge);
+    background: var(--warn-soft);
   }
   .verdict:focus {
     outline: none;
@@ -789,6 +1533,9 @@
   .verdict.ok .verdict-head {
     color: var(--success);
   }
+  .verdict.partial .verdict-head {
+    color: var(--warn);
+  }
   .verdict-mark {
     display: grid;
     place-items: center;
@@ -800,6 +1547,9 @@
   }
   .verdict.ok .verdict-mark {
     background: var(--success);
+  }
+  .verdict.partial .verdict-mark {
+    background: var(--warn);
   }
 
   .explanation {

@@ -14,7 +14,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-001',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'easy',
     kind: 'learn',
     prompt:
@@ -54,7 +54,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-002',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -95,7 +95,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-003',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     type: 'match',
@@ -124,7 +124,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-004',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -169,7 +169,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-005',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
@@ -215,7 +215,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-010',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'easy',
     kind: 'learn',
     prompt:
@@ -255,7 +255,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-011',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'medium',
     kind: 'exam',
     type: 'match',
@@ -271,7 +271,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       { id: 't6', left: 'Credit card numbers located and masked', right: 'PII detection' },
     ],
     explanation:
-      'These six prebuilt capabilities in Azure Language in Foundry Tools need no training data. The exam tests whether you can pick the one whose *output shape* matches the requirement.',
+      'These six prebuilt capabilities in Azure Language in Foundry Tools need no training data. Pick the one whose *output shape* matches the requirement.',
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
@@ -284,7 +284,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-012',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -325,7 +325,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-013',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
@@ -365,7 +365,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-014',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'hard',
     kind: 'exam',
     type: 'multi',
@@ -678,7 +678,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Diffusion models are trained by progressively adding noise to images, then learning to reverse it. At generation time they start from noise and refine it step by step, conditioned on the prompt. Not every image model works this way, so the exam asks about the approach, not a vendor.',
+      'Diffusion models are trained by progressively adding noise to images, then learning to reverse it. At generation time they start from noise and refine it step by step, conditioned on the prompt. Not every image model works this way, so learn the approach rather than any one vendor.',
     reference: {
       label: 'Deploy and use MAI image models in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/foundry-models/how-to/use-foundry-models-mai-image',
@@ -722,7 +722,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Classic vision services return structured findings - labels, boxes, text, scores. A multimodal model *reasons* about what it sees and answers in natural language, which is what "interpret visual input in prompts" means on the exam.',
+      'Classic vision services return structured findings - labels, boxes, text, scores. A multimodal model *reasons* about what it sees and answers in natural language, which is what the skill "interpret visual input in prompts" is about.',
     reference: {
       label: 'How to use vision-enabled chat models',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
@@ -808,7 +808,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-042',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -853,7 +853,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-043',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'easy',
     kind: 'learn',
     type: 'multi',
@@ -894,7 +894,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-044',
     topic: 'ai-workloads',
     moduleId: 'foundations',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -926,7 +926,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Two signals to read: audio in and out ⇒ speech or a multimodal model that accepts audio; taking a real action in another system ⇒ agentic AI with a tool. Multi-workload scenarios are common in the case-style questions.',
+      'Two signals to read: audio in and out ⇒ speech or a multimodal model that accepts audio; taking a real action in another system ⇒ agentic AI with a tool.',
     reference: {
       label: 'Speech - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/4-speech',
@@ -939,7 +939,7 @@ export const aiWorkloadQuestions: AuthoredQuestion[] = [
     id: 'wl-045',
     topic: 'ai-workloads',
     moduleId: 'text-analysis',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'easy',
     kind: 'learn',
     prompt:

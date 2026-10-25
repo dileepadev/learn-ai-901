@@ -15,7 +15,7 @@ export const foundations: Module = {
     'Route a business scenario to the correct workload in one read',
     'Tell generative AI apart from agentic AI, and text analysis apart from information extraction',
   ],
-  quiz: ['wl-002', 'wl-003', 'wl-004', 'wl-042', 'sc-wl-02', 'sc-wl-10', 'sc-wl-13'],
+  quiz: ['wl-002', 'wl-003', 'wl-004', 'wl-042', 'sc-wl-02', 'sc-wl-10', 'sc-wl-13', 'dd-wl-01'],
   sections: [
     {
       id: 'why',

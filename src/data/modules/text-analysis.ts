@@ -16,7 +16,7 @@ export const textAnalysis: Module = {
     'Tell extractive from abstractive summarization, and sentiment from opinion mining',
     'Know which Language features need training data and which do not',
   ],
-  quiz: ['ts-008', 'ts-012', 'wl-011', 'sc-wl-07', 'sc-ts-01', 'sc-ts-04', 'sc-ts-05', 'sc-ts-07'],
+  quiz: ['ts-008', 'ts-012', 'wl-011', 'sc-wl-07', 'sc-ts-01', 'sc-ts-04', 'sc-ts-05', 'sc-ts-07', 'yn-ts-01', 'dd-wl-02', 'code-ta-01'],
   sections: [
     {
       id: 'techniques',

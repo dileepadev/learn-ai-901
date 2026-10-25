@@ -10,7 +10,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-001',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'easy',
     kind: 'learn',
     prompt: 'What is an *analyzer* in Azure Content Understanding?',
@@ -53,7 +53,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-002',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     type: 'multi',
@@ -90,7 +90,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'The three methods are **Extract** (value appears verbatim - documents only), **Classify** (choose from a predefined set of categories, such as call sentiment or chart type), and **Generate** (freely produce a value, such as a summary or scene description). Knowing which method a requirement needs is a common exam question.',
+      'The three methods are **Extract** (value appears verbatim - documents only), **Classify** (choose from a predefined set of categories, such as call sentiment or chart type), and **Generate** (freely produce a value, such as a summary or scene description). Choose the method field by field, from what each requirement needs.',
     reference: {
       label: 'Content Understanding overview - field extraction',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
@@ -103,7 +103,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-003',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     type: 'match',
@@ -131,7 +131,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-004',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
@@ -264,7 +264,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-007',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -309,7 +309,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-008',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     type: 'order',
@@ -335,9 +335,9 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-009',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
-    kind: 'exam',
+    kind: 'learn',
     prompt:
       'When would you choose Azure Document Intelligence over Azure Content Understanding?',
     options: [
@@ -366,7 +366,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Document Intelligence is the specialist for documents: read (OCR), layout (tables, selection marks, reading order), prebuilt document models, and custom models. Content Understanding is the generalist across documents, images, audio and video with a schema you define. AI-901 emphasises Content Understanding, but the distinction is fair game.',
+      'Document Intelligence is the specialist for documents: read (OCR), layout (tables, selection marks, reading order), prebuilt document models, and custom models. Content Understanding is the generalist across documents, images, audio and video with a schema you define. The AI-901 skills name Content Understanding, so treat Document Intelligence as background: know it exists and what it is best at.',
     reference: {
       label: 'What is Azure Document Intelligence?',
       url: 'https://learn.microsoft.com/azure/ai-services/document-intelligence/overview',
@@ -419,7 +419,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-011',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -464,7 +464,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-012',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
@@ -508,7 +508,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-013',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     prompt:
@@ -552,7 +552,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-014',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     type: 'multi',
@@ -594,7 +594,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-015',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'easy',
     kind: 'learn',
     type: 'multi',
@@ -618,7 +618,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'All four media types. One service, one analyze pattern, four modalities - that unification is the reason AI-901 features it so heavily.',
+      'All four media types, through one service and one analyze pattern. All four of the AI-901 information extraction skills name Content Understanding.',
     reference: {
       label: 'What is Azure Content Understanding in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
@@ -631,7 +631,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-016',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -676,7 +676,7 @@ export const foundryExtractionQuestions: AuthoredQuestion[] = [
     id: 'fe-017',
     topic: 'foundry-extraction',
     moduleId: 'information-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     prompt: 'What does content extraction do inside a Content Understanding analyzer?',

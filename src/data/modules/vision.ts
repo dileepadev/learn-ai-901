@@ -16,7 +16,7 @@ export const vision: Module = {
     'Say when a multimodal model beats a classic vision service',
     'Name the current image and video generation models and what they do',
   ],
-  quiz: ['wl-030', 'fv-002', 'fv-003', 'fv-006', 'fv-011', 'sc-wl-05', 'sc-fv-04', 'sc-fv-09'],
+  quiz: ['wl-030', 'fv-002', 'fv-003', 'fv-006', 'fv-011', 'sc-wl-05', 'sc-fv-04', 'sc-fv-09', 'yn-fv-01', 'dd-fv-01', 'code-vi-01', 'code-vi-02'],
   sections: [
     {
       id: 'tasks',
@@ -135,7 +135,7 @@ export const vision: Module = {
           rows: [
             ['Explain or reason about an image in prose', '**Multimodal model**'],
             ['Named fields with confidence scores from an image', '**Content Understanding**'],
-            ['Text and layout from a scanned document', '**Document Intelligence**'],
+            ['Text and layout from a scanned document', '**Content Understanding** (`prebuilt-layout`)'],
             ['Create a new image or video', '**Image / video generation model**'],
             ['Identify a specific person', '**Face service** (Limited Access)'],
           ],

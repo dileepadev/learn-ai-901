@@ -261,7 +261,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Content filters cover reliability and safety, citations cover transparency, permission-aware retrieval covers privacy, the named owner covers accountability, and accessible multilingual interfaces cover inclusiveness. Nothing in the list evaluates whether the system performs equally well across groups - that is fairness, and it is the one most often left out.',
+      'Content filters cover reliability and safety, citations cover transparency, permission-aware retrieval covers privacy, the named owner covers accountability, and accessible multilingual interfaces cover inclusiveness. Nothing in the list evaluates whether the system performs equally well across groups - that is fairness, and it is the one missing here.',
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
@@ -365,7 +365,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-01',
     topic: 'ai-workloads',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -405,7 +405,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-02',
     topic: 'ai-workloads',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -447,7 +447,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-03',
     topic: 'ai-workloads',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -607,7 +607,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-07',
     topic: 'ai-workloads',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'hard',
     kind: 'exam',
     type: 'match',
@@ -623,7 +623,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
       { id: 's6', left: 'Work out which product feature a complaint is about, and how negative it is', right: 'Opinion mining' },
     ],
     explanation:
-      'Six requirements, six different features. The recurring exam skill is picking the *narrowest* capability whose output shape matches, rather than reaching for a generative model each time.',
+      'Six requirements, six different features. The skill is picking the *narrowest* capability whose output shape matches, rather than reaching for a generative model each time.',
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
@@ -635,7 +635,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-08',
     topic: 'ai-workloads',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -675,7 +675,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-09',
     topic: 'ai-workloads',
-    objective: 'Identify features and capabilities of speech recognition and speech synthesis',
+    objective: 'Identify techniques to extract information from text, images, audio, and videos',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -715,7 +715,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-10',
     topic: 'ai-workloads',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'easy',
     kind: 'exam',
     scenario:
@@ -755,7 +755,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-11',
     topic: 'ai-workloads',
-    objective: 'Describe common text analysis techniques',
+    objective: 'Describe common text analysis techniques, including keyword extraction, entity detection, sentiment analysis, and summarization',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -839,7 +839,7 @@ export const scenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-wl-13',
     topic: 'ai-workloads',
-    objective: 'Identify scenarios for common AI workloads',
+    objective: 'Identify scenarios for common AI workloads, including generative and agentic AI, text analysis, speech, computer vision, and information extraction',
     difficulty: 'hard',
     kind: 'exam',
     scenario:

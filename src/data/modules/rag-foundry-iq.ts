@@ -15,7 +15,7 @@ export const ragFoundryIq: Module = {
     'Explain what Foundry IQ provides beyond a plain search index',
     'Diagnose a grounding failure and pick the right fix',
   ],
-  quiz: ['fg-030', 'fg-044', 'sc-fg-07', 'sc-fg-08', 'sc-fg-12', 'sc-fg-13', 'sc-rai-08'],
+  quiz: ['fg-030', 'fg-044', 'sc-fg-07', 'sc-fg-08', 'sc-fg-12', 'sc-fg-13', 'sc-rai-08', 'dd-fg-02'],
   sections: [
     {
       id: 'why',

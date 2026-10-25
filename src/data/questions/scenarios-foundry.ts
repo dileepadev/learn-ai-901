@@ -174,7 +174,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'This is the single most common way old study material misleads people. Hub-based projects are the classic path; new investment is in Foundry projects, which are child resources of a Foundry resource and need no separate storage or key vault.',
+      'Hub-based projects are the classic path; new investment is in Foundry projects, which are child resources of a Foundry resource and need no separate storage or key vault.',
     reference: {
       label: 'Migrate from hub-based to Foundry projects',
       url: 'https://learn.microsoft.com/azure/foundry-classic/how-to/migrate-project',
@@ -302,7 +302,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Citations are the single most important transparency feature of a grounded assistant, and returning extractive data with citations so answers trace back to source documents is a headline Foundry IQ capability.',
+      'Citations are a key transparency feature of a grounded assistant, and returning extractive data with citations so answers trace back to source documents is a headline Foundry IQ capability.',
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
@@ -806,7 +806,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'This is the shift worth understanding for AI-901: prebuilt capabilities are increasingly reachable as *tools an agent can call*, not just APIs your code calls. Toolboxes then govern which agents get which tools.',
+      'Prebuilt capabilities are increasingly reachable as *tools an agent can call*, not just APIs your code calls. Toolboxes then govern which agents get which tools.',
     reference: {
       label: 'Azure Language in Foundry Tools: tools and agents',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/concepts/foundry-tools-agents',
@@ -1118,48 +1118,47 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   },
   {
     id: 'sc-fv-03',
-    topic: 'foundry-vision',
-    objective: 'Build a lightweight application that includes vision capabilities',
-    difficulty: 'hard',
+    topic: 'foundry-extraction',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
+    difficulty: 'medium',
     kind: 'exam',
     scenario:
-      'A team is starting a new project that needs OCR over scanned multi-page contracts, including tables and checkboxes.',
-    prompt: 'Which service should they build on?',
+      'A team needs the text, paragraphs and tables from scanned multi-page contracts. They do not need any fields extracted or generated, and they do not want to deploy a language model for this step.',
+    prompt: 'Which Azure Content Understanding analyzer should they use?',
     options: [
-      { id: 'a', text: 'Azure Document Intelligence', correct: true },
+      { id: 'a', text: '`prebuilt-layout`', correct: true },
       {
         id: 'b',
-        text: 'Azure Vision Image Analysis 4.0',
+        text: '`prebuilt-read`',
         correct: false,
-        why: 'It is deprecated with a published retirement date, and Microsoft\'s migration guidance explicitly directs OCR scenarios to Document Intelligence.',
+        why: 'It extracts words and paragraphs, but without layout analysis, so tables are not returned as tables.',
       },
       {
         id: 'c',
-        text: 'An image generation model',
+        text: '`prebuilt-contract`',
         correct: false,
-        why: 'Wrong direction - generation creates images.',
+        why: 'A domain-specific analyzer that extracts contract fields, which the team does not need.',
       },
       {
         id: 'd',
-        text: 'The Face service',
+        text: '`prebuilt-documentSearch`',
         correct: false,
-        why: 'That is for face scenarios only.',
+        why: 'A RAG analyzer that also writes figure descriptions and a summary of the document, which is more than the team needs.',
       },
     ],
     explanation:
-      'Document Intelligence is the specialist for document OCR, layout, tables, selection marks and reading order. Content Understanding is the right choice when you need declared fields across several modalities.',
+      'The content extraction analyzers do OCR and layout without any model: `prebuilt-read` for plain text, and `prebuilt-layout` when you also need structure such as tables and sections.',
     reference: {
-      label: 'Migrate from Azure Vision Image Analysis',
-      url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
-      quote:
-        'Azure Document Intelligence provides support for OCR text in images.',
+      label: 'Prebuilt analyzers in Azure Content Understanding in Foundry Tools',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote: 'Extracts content and layout elements such as words, figures, paragraphs, and tables from documents.',
     },
-    tags: ['vision', 'document-intelligence', 'currency', 'hard'],
+    tags: ['content-understanding', 'layout'],
   },
   {
     id: 'sc-fv-04',
     topic: 'foundry-vision',
-    objective: 'Identify features and capabilities of computer vision and image-generation models',
+    objective: 'Build a lightweight application that includes vision capabilities',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1235,7 +1234,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'The exam concentrates on generally available features but may include commonly used preview features. Knowing what is preview and what is GA is itself examinable.',
+      'The study guide says most questions cover generally available features, but preview features may appear when they are commonly used. Previews come without a service-level agreement.',
     reference: {
       label: 'Sora 2 video generation overview (preview)',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/video-generation',
@@ -1335,7 +1334,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fv-08',
     topic: 'foundry-vision',
-    objective: 'Identify features and capabilities of computer vision and image-generation models',
+    objective: 'Create new visual outputs by using generative models',
     difficulty: 'medium',
     kind: 'exam',
     type: 'multi',
@@ -1424,7 +1423,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-01',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1512,7 +1511,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-03',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -1552,7 +1551,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-04',
     topic: 'foundry-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1640,7 +1639,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-06',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -1725,7 +1724,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-08',
     topic: 'foundry-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1769,7 +1768,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-09',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     scenario:

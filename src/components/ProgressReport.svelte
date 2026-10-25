@@ -1,6 +1,6 @@
 <script lang="ts">
   /** The full progress report: readiness, retention, milestones, history and your data. */
-  import { computeOverall, computeReadiness, daysUntilExam, type ScoredModule } from '../lib/scoring';
+  import { computeOverall, computeReadiness, daysUntilExam, pointsText, sessionPct, type ScoredModule } from '../lib/scoring';
   import { MASTERED_BOX } from '../lib/srs';
   import { exportJSON, importJSON, resetAll } from '../lib/store';
   import { clearAttempt } from '../lib/examSession';
@@ -194,12 +194,12 @@
           </thead>
           <tbody>
             {#each recentSessions as s (s.id)}
-              {@const pct = s.total ? Math.round((s.correct / s.total) * 100) : 0}
+              {@const pct = sessionPct(s)}
               <tr>
                 <td class="nowrap num">{when(s.finishedAt)}</td>
                 <td>{MODE_LABEL[s.mode] ?? s.mode}</td>
                 <td class="nowrap num">
-                  {s.correct} of {s.total}
+                  {s.points ? pointsText(s.points) : `${s.correct} of ${s.total}`}
                   <span class="chip" class:chip-success={pct >= 75} class:chip-danger={pct < 50} class:chip-warn={pct >= 50 && pct < 75}
                     >{pct}%</span
                   >

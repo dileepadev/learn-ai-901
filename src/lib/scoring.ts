@@ -6,7 +6,7 @@
  * (question accuracy), and discounts accuracy that rests on a small sample -
  * three lucky guesses should not read as mastery.
  */
-import type { Progress, TopicId } from '../data/types';
+import type { Points, Progress, SessionResult, TopicId } from '../data/types';
 import { TOPICS } from '../data/exam';
 import { MASTERED_BOX } from './srs';
 
@@ -212,9 +212,7 @@ export function computeOverall(
   }
 
   const exams = p.sessions.filter((s) => s.mode === 'exam' || s.mode === 'mini-exam');
-  const bestExamScore = exams.length
-    ? Math.max(...exams.map((s) => (s.total ? Math.round((s.correct / s.total) * 100) : 0)))
-    : null;
+  const bestExamScore = exams.length ? Math.max(...exams.map(sessionPct)) : null;
 
   const { current, best } = streaks(p.activeDays);
 
@@ -279,4 +277,22 @@ export function daysUntilExam(p: Progress): number | null {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return Math.round((target - today.getTime()) / 86_400_000);
+}
+
+/**
+ * A session's score as a percentage. Practice exams are scored in points, one
+ * per correct part, as the real exam is; other sessions count whole questions.
+ */
+export function sessionPct(s: SessionResult): number {
+  if (s.points) return pointsPct(s.points);
+  return s.total ? Math.round((s.correct / s.total) * 100) : 0;
+}
+
+export function pointsPct(p: Points): number {
+  return p.possible ? Math.round((p.earned / p.possible) * 100) : 0;
+}
+
+/** "3 of 4 points". */
+export function pointsText(p: Points): string {
+  return `${p.earned} of ${p.possible} ${p.possible === 1 ? 'point' : 'points'}`;
 }

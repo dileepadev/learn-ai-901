@@ -57,6 +57,11 @@ export function decodeQuestionRefs(encoded: string): QuestionRef[] {
   });
 }
 
+/** SDK code questions: those that show a snippet, or are tagged `code`, such as which SDK object holds the key. */
+export function isCodeQuestion(q: Question): boolean {
+  return Boolean(q.code) || Boolean(q.tags?.includes('code'));
+}
+
 /** Every inline knowledge-check question id used by a module, in order. */
 export function checkIdsOf(module: Module): string[] {
   const ids: string[] = [];

@@ -50,40 +50,41 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     topic: 'foundry-text-speech',
     moduleId: 'text-analysis',
     objective: 'Build a lightweight application that includes text analysis',
-    difficulty: 'medium',
+    difficulty: 'easy',
     kind: 'exam',
-    prompt:
-      'Which service does the exam expect you to name for prebuilt text analysis in Foundry?',
+    scenario:
+      'A developer is adding prebuilt sentiment analysis, key phrase extraction and PII detection to an app built with Microsoft Foundry.',
+    prompt: 'Which Foundry Tool provides these features?',
     options: [
       { id: 'a', text: 'Azure Language in Foundry Tools', correct: true },
       {
         id: 'b',
-        text: 'Azure Cognitive Services Text Analytics',
+        text: 'Azure Speech in Foundry Tools',
         correct: false,
-        why: 'The old name. "Cognitive Services" became Azure AI services and is now presented as Foundry Tools.',
+        why: 'Azure Speech turns audio into text and text into audio. It does not score sentiment or find PII in text.',
       },
       {
         id: 'c',
-        text: 'Language Understanding (LUIS)',
+        text: 'Azure Translator in Foundry Tools',
         correct: false,
-        why: 'LUIS is retired; its successor is conversational language understanding inside Azure Language.',
+        why: 'Translator converts text between languages. It does not analyse sentiment, key phrases or personal data.',
       },
       {
         id: 'd',
-        text: 'Azure Machine Learning designer',
+        text: 'Azure Vision in Foundry Tools',
         correct: false,
-        why: 'A classical ML tool, not a prebuilt NLP service - and largely out of scope for AI-901.',
+        why: 'Azure Vision analyses images, not text.',
       },
     ],
     explanation:
-      'Current naming matters on this exam: Azure **Language** in Foundry Tools, Azure **Speech** in Foundry Tools, Azure **Vision** in Foundry Tools, Azure **Content Understanding** in Foundry Tools.',
+      'Prebuilt text analysis - sentiment, key phrases, entities, PII detection, language detection and summarization - is **Azure Language in Foundry Tools**. Speech handles audio, Translator translates, and Vision handles images.',
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',
       quote:
         'Azure Language is a cloud-based service that provides Natural Language Processing (NLP) features for understanding and analyzing text.',
     },
-    tags: ['language', 'naming', 'currency'],
+    tags: ['language', 'naming'],
   },
   {
     id: 'ts-003',
@@ -210,7 +211,7 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      '"Respond to spoken prompts by using a deployed multimodal model" is a named exam objective. Prefer the native multimodal path when latency and acoustic nuance matter; the cascaded pipeline remains valid when you need control over each stage or a specific branded voice.',
+      '"Respond to spoken prompts by using a deployed multimodal model" is one of the skills measured. Prefer the native multimodal path when latency and acoustic nuance matter; the cascaded pipeline remains valid when you need control over each stage or a specific branded voice.',
     reference: {
       label: 'Agents in Microsoft Foundry: how voice-based agents work',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
@@ -425,7 +426,7 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
     id: 'ts-011',
     topic: 'foundry-text-speech',
     moduleId: 'speech',
-    objective: 'Identify features and capabilities of speech recognition and speech synthesis',
+    objective: 'Build a lightweight application by using Azure Speech in Foundry Tools',
     difficulty: 'easy',
     kind: 'learn',
     prompt: 'What is a phoneme?',
@@ -483,7 +484,7 @@ export const foundryTextSpeechQuestions: AuthoredQuestion[] = [
       { id: 'l5', left: 'Condense a long call into notes using new wording', right: 'Abstractive summarization' },
     ],
     explanation:
-      'Azure Language bundles many distinct features. The exam tests whether you pick the narrowest one that satisfies the requirement rather than reaching for a generative model every time.',
+      'Azure Language bundles many distinct features. Pick the narrowest one that satisfies the requirement rather than reaching for a generative model every time.',
     reference: {
       label: 'What is Azure Language in Foundry Tools?',
       url: 'https://learn.microsoft.com/azure/ai-services/language-service/overview',

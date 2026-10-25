@@ -11,7 +11,7 @@
   import { get } from '../lib/store';
   import { computeOverall, computeReadiness, type ScoredModule } from '../lib/scoring';
   import { buildQueue, dueQuestions, unseenQuestions } from '../lib/queue';
-  import { decodeQuestionRefs } from '../lib/catalog';
+  import { decodeQuestionRefs, isCodeQuestion } from '../lib/catalog';
   import { liveProgress } from '../lib/live.svelte';
   import type { IconName } from '../lib/icons';
   import QuizRunner from './QuizRunner.svelte';
@@ -23,16 +23,18 @@
     modules: ScoredModule[];
     /** Fixed set for the dedicated routes. */
     fixedMode?: 'mistakes' | 'weak-areas';
+    /** How many Python SDK code questions there are, counted at build time. */
+    codeCount?: number;
   }
 
-  let { base, refs, modules, fixedMode }: Props = $props();
+  let { base, refs, modules, fixedMode, codeCount = 0 }: Props = $props();
 
   const link = (p: string) => `${base.replace(/\/$/, '')}${p}`;
   const questionRefs = $derived(decodeQuestionRefs(refs));
   const live = liveProgress();
   const p = $derived(live.value);
 
-  type SetKind = 'quick' | 'long' | 'rapid' | 'due' | 'mistakes' | 'weak' | 'topic';
+  type SetKind = 'quick' | 'long' | 'rapid' | 'due' | 'code' | 'mistakes' | 'weak' | 'topic';
 
   interface SessionSpec {
     kind: SetKind;
@@ -55,6 +57,7 @@
     long: 25,
     rapid: 20,
     due: 20,
+    code: 40,
     mistakes: 40,
     weak: 12,
     topic: 12,
@@ -85,6 +88,10 @@
         case 'due':
           pool = dueQuestions(ALL_QUESTIONS, snapshot);
           title = 'Due for review';
+          break;
+        case 'code':
+          pool = ALL_QUESTIONS.filter(isCodeQuestion);
+          title = 'Code questions';
           break;
         case 'mistakes':
           mode = 'mistakes';
@@ -141,7 +148,13 @@
       void start({ kind: 'topic', topics: [topic] });
     } else if (topicList.length) {
       void start({ kind: 'topic', topics: topicList });
-    } else if (startParam === 'quick' || startParam === 'long' || startParam === 'rapid' || startParam === 'due') {
+    } else if (
+      startParam === 'quick' ||
+      startParam === 'long' ||
+      startParam === 'rapid' ||
+      startParam === 'due' ||
+      startParam === 'code'
+    ) {
       void start({ kind: startParam });
     }
   });
@@ -188,6 +201,13 @@
         ? 'Questions scheduled to come back right about now, before you forget them.'
         : 'Nothing is due yet. Answered questions come back here on a schedule.',
       disabled: due === 0,
+    },
+    {
+      kind: 'code',
+      icon: 'keyboard',
+      title: `Code questions, ${codeCount}`,
+      body: 'Python SDK code to read and complete: Speech, chat and agent clients, vision, text analysis and Content Understanding.',
+      disabled: codeCount === 0,
     },
   ]);
 </script>

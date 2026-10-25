@@ -16,7 +16,7 @@ export const speech: Module = {
     'Say what SSML controls',
     'Justify a native multimodal audio model over a three-service cascade',
   ],
-  quiz: ['wl-021', 'ts-009', 'sc-wl-04', 'sc-ts-02', 'sc-ts-03', 'sc-ts-06', 'sc-ts-08'],
+  quiz: ['wl-021', 'ts-009', 'sc-wl-04', 'sc-ts-02', 'sc-ts-03', 'sc-ts-06', 'sc-ts-08', 'yn-wl-01', 'yn-ts-02', 'dd-ts-01', 'code-sp-01', 'code-sp-03'],
   sections: [
     {
       id: 'directions',

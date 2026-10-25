@@ -434,7 +434,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Transparency is about the user being able to understand what the system is and where its answers came from. Citations are the single most important transparency feature of a grounded assistant - and returning grounded answers with citations is a headline capability of Foundry IQ.',
+      'Transparency is about the user being able to understand what the system is and where its answers came from. Citations are a key transparency feature of a grounded assistant - and returning grounded answers with citations is a headline capability of Foundry IQ.',
     reference: {
       label: 'Responsible AI - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
@@ -605,7 +605,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     id: 'rai-015',
     topic: 'responsible-ai',
     moduleId: 'responsible-ai',
-    objective: 'Describe principles of responsible AI',
+    objective: 'Describe considerations for transparency in an AI solution',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -633,7 +633,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Transparency covers disclosure that AI is involved, communicating capabilities and limitations, and provenance. Content Credentials (C2PA) cryptographically mark an image as AI-generated, which is a provenance/transparency control - a favourite exam detail.',
+      'Transparency covers disclosure that AI is involved, communicating capabilities and limitations, and provenance. Content Credentials (C2PA) cryptographically mark an image as AI-generated, which is a provenance/transparency control.',
     reference: {
       label: 'Content provenance for Foundry models',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
@@ -677,7 +677,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Fairness is measured by comparing performance *across sub-populations*, not by a single aggregate metric. The classic trap on this exam is a distractor offering overall accuracy as evidence of fairness.',
+      'Fairness is measured by comparing performance *across sub-populations*, not by a single aggregate metric. A high overall accuracy can hide a much lower accuracy for one group.',
     reference: {
       label: 'What is Responsible AI? - Azure Machine Learning',
       url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
@@ -690,7 +690,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     id: 'rai-017',
     topic: 'responsible-ai',
     moduleId: 'responsible-ai',
-    objective: 'Describe principles of responsible AI',
+    objective: 'Describe considerations for privacy and security in an AI solution',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -812,7 +812,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Hallucination is a reliability and safety risk. Undisclosed AI involvement is transparency. Missing ownership and recourse is accountability. Being able to run this mapping quickly is most of what the responsible AI section of the exam asks for.',
+      'Hallucination is a reliability and safety risk. Undisclosed AI involvement is transparency. Missing ownership and recourse is accountability. Practise this mapping until it is automatic.',
     reference: {
       label: 'What is Responsible AI? - Azure Machine Learning',
       url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
@@ -885,7 +885,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       { id: 'm6', left: 'Assign an executive owner and a formal incident process', right: 'Accountability' },
     ],
     explanation:
-      'Each mitigation is the canonical control for its principle. If you can produce this table from memory, the responsible AI portion of the exam is largely handled.',
+      'Each mitigation is the canonical control for its principle. It is worth knowing this table well enough to produce it from memory.',
     reference: {
       label: 'What is Responsible AI? - Azure Machine Learning',
       url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
@@ -902,7 +902,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     difficulty: 'medium',
     kind: 'learn',
     prompt:
-      'Which statement about transparency is correct for the AI-901 exam?',
+      'Which statement about the transparency principle is correct?',
     options: [
       {
         id: 'a',

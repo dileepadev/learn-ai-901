@@ -180,13 +180,13 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
   },
   {
     id: 'fv-005',
-    topic: 'foundry-vision',
+    topic: 'ai-workloads',
     moduleId: 'vision',
     objective: 'Identify features and capabilities of computer vision and image-generation models',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
-      'Which statement about face capabilities is correct for the current exam?',
+      'Which statement about the face capabilities available in Azure is correct?',
     options: [
       {
         id: 'a',
@@ -213,7 +213,7 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Locating faces is routine. Deciding *who* a face belongs to is a Limited Access scenario requiring registration and an eligible use case - and emotion and gender inference were retired outright. This is a favourite responsible-AI-flavoured vision question.',
+      'Locating faces is routine. Deciding *who* a face belongs to is a Limited Access scenario requiring registration and an eligible use case - and emotion and gender inference were retired outright.',
     reference: {
       label: 'Limited Access features of Face',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/computer-vision/limited-access-identity',
@@ -227,44 +227,44 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     topic: 'foundry-vision',
     moduleId: 'vision',
     objective: 'Build a lightweight application that includes vision capabilities',
-    difficulty: 'hard',
+    difficulty: 'medium',
     kind: 'exam',
-    prompt:
-      'A team\'s existing app calls Azure Vision Image Analysis 4.0 for OCR. What should they know?',
+    scenario:
+      'A Python app calls a GPT-image model deployed in Microsoft Foundry through the Responses API, with the image generation tool, to create product illustrations.',
+    prompt: 'How does the app turn the response into an image file?',
     options: [
       {
         id: 'a',
-        text: 'It is deprecated and retiring; move OCR to Document Intelligence',
+        text: 'It reads the base64 image data from the image generation call in the response output, decodes it and saves the bytes',
         correct: true,
       },
       {
         id: 'b',
-        text: 'It is the recommended service for all new OCR work',
+        text: "It reads the response's output_text and saves it with a .png extension",
         correct: false,
-        why: 'It is deprecated. Building new work on it is exactly what the migration guidance advises against.',
+        why: "output_text carries the model's text. The image comes back as base64 data on the image generation call.",
       },
       {
         id: 'c',
-        text: 'It has already been removed from Azure and no longer works',
+        text: 'It sends the prompt on to Azure Content Understanding, which returns the finished image',
         correct: false,
-        why: 'It still functions; a retirement date has been announced, after which calls will fail.',
+        why: 'Content Understanding analyses content you already have. It does not generate images.',
       },
       {
         id: 'd',
-        text: 'It was renamed Content Understanding, with no other change',
+        text: "It downloads the closest match from the model's built-in library of stock images",
         correct: false,
-        why: 'Content Understanding is a separate, newer, generative multimodal service - not a rename.',
+        why: 'An image generation model creates a new image. Nothing is fetched from a library.',
       },
     ],
     explanation:
-      'For AI-901, the practical takeaway is where new work should go: multimodal models for visual reasoning, Content Understanding for structured extraction across modalities, Document Intelligence for document OCR and layout, and the Face service for face scenarios.',
+      'Images are binary, but a JSON response is text, so the image arrives as **base64** text. The app finds the image generation call in the output, decodes the base64 string, and writes the bytes to a file.',
     reference: {
-      label: 'Migrate from Azure Vision Image Analysis',
-      url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
-      quote:
-        'The Azure Vision in Foundry Tools - Image Analysis API will be retired on September 25, 2028. After that date, calls to the service fail.',
+      label: 'Image generation models - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/3-image-generation',
+      quote: 'Base64 encoding converts binary data into safe ASCII text, allows binary files to be embedded inside JSON or URLs.',
     },
-    tags: ['vision', 'currency', 'hard', 'trap'],
+    tags: ['vision', 'image-generation', 'sdk'],
   },
   {
     id: 'fv-007',
@@ -337,7 +337,7 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Content Credentials cryptographically mark an asset as AI-generated so downstream viewers can verify its origin. Provenance is a transparency control - a reliable cross-topic exam question.',
+      'Content Credentials cryptographically mark an asset as AI-generated so downstream viewers can verify its origin. Provenance is a transparency control.',
     reference: {
       label: 'Content provenance for Foundry models',
       url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
@@ -390,7 +390,7 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
   },
   {
     id: 'fv-010',
-    topic: 'foundry-vision',
+    topic: 'ai-workloads',
     moduleId: 'vision',
     objective: 'Identify features and capabilities of computer vision and image-generation models',
     difficulty: 'easy',
@@ -487,11 +487,10 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
       { id: 'x1', left: 'Explain, in prose, what a chart in a screenshot shows', right: 'Multimodal model' },
       { id: 'x2', left: 'Create a new illustration from a written description', right: 'Image generation model' },
       { id: 'x3', left: 'Return named fields with confidence scores from a photo of a form', right: 'Content Understanding' },
-      { id: 'x4', left: 'Extract text and layout from a scanned multi-page PDF', right: 'Document Intelligence' },
       { id: 'x5', left: 'Identify which registered employee a face belongs to', right: 'Face service (Limited Access)' },
     ],
     explanation:
-      'Five different jobs, five different tools. Getting this routing right is most of the vision section.',
+      'Four different jobs, four different tools: reasoning about an image, creating one, extracting named fields, and identifying a person, which is Limited Access.',
     reference: {
       label: 'Multimodal models for image analysis - Microsoft Learn training',
       url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/2-vision-enabled-models',

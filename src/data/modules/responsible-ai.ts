@@ -15,7 +15,7 @@ export const responsibleAi: Module = {
     'Map a scenario to the right principle, including the pairs that get confused',
     'Name the standard mitigation for each principle',
   ],
-  quiz: ['rai-003', 'rai-004', 'rai-007', 'rai-008', 'rai-010', 'rai-019', 'rai-020', 'sc-rai-06'],
+  quiz: ['rai-003', 'rai-004', 'rai-007', 'rai-008', 'rai-010', 'rai-019', 'rai-020', 'sc-rai-06', 'yn-rai-01', 'dd-rai-01'],
   sections: [
     {
       id: 'six',

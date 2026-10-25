@@ -8,14 +8,15 @@
    * be resumed - with the clock still running, as it would be in the real exam.
    */
   import { tick } from 'svelte';
-  import type { Answer, Question, TopicId } from '../data/types';
-  import { EXAM, TOPICS, topicLabel } from '../data/exam';
-  import { get, grade, recordAnswer, saveSession } from '../lib/store';
+  import type { Answer, DomainId, Points, Question, TopicId } from '../data/types';
+  import { BLANK, blankText } from '../data/types';
+  import { DOMAINS, EXAM, TOPICS } from '../data/exam';
+  import { get, recordAnswer, saveSession, score } from '../lib/store';
   import { buildQueue } from '../lib/queue';
+  import { pointsPct, pointsText } from '../lib/scoring';
   import {
     answeredCount as countAnswered,
     clearAttempt,
-    isComplete,
     loadAttempt,
     saveAttempt,
     secondsLeft,
@@ -57,7 +58,19 @@
 
   let dialog = $state<HTMLDialogElement | null>(null);
 
-  interface TopicResult {
+  /**
+   * The review screen lists every question with its status, as the real exam's
+   * does. Once the learner has seen it, each question offers a way back.
+   */
+  type View = 'question' | 'review';
+  type Filter = 'all' | 'answered' | 'unanswered' | 'flagged';
+  let view = $state<View>('question');
+  let reviewed = $state(false);
+  let filter = $state<Filter>('all');
+  /** Bumped by "Reset answer" so the card starts again from a blank answer. */
+  let resets = $state(0);
+
+  interface TopicResult extends Points {
     topic: TopicId;
     label: string;
     weight: number;
@@ -65,11 +78,22 @@
     correct: number;
   }
 
+  interface SectionResult extends Points {
+    id: DomainId;
+    label: string;
+    weightLabel: string;
+  }
+
+  /** The share of points that this app treats as a sign of readiness. */
+  const TARGET = 80;
+
   let results = $state.raw<{
     correct: number;
     total: number;
     unanswered: number;
+    points: Points;
     pct: number;
+    bySection: SectionResult[];
     byTopic: TopicResult[];
     missed: Question[];
     elapsed: number;
@@ -113,6 +137,7 @@
         ids: paper.map((q) => q.id),
         seed: Math.floor(Math.random() * 1e9),
         answers: {},
+        done: [],
         flagged: [],
         index: 0,
         startedAt,
@@ -122,6 +147,9 @@
       questions = paper;
       attempt = next;
       saveAttempt(next);
+      view = 'question';
+      reviewed = false;
+      filter = 'all';
       phase = 'running';
       window.scrollTo({ top: 0 });
     } catch {
@@ -141,6 +169,9 @@
       questions = paper;
       attempt = { ...saved, ids: paper.map((q) => q.id), index: Math.min(saved.index, paper.length - 1) };
       saved = null;
+      view = 'question';
+      reviewed = false;
+      filter = 'all';
       if (secondsLeft(attempt) === 0) {
         submit(true);
       } else {
@@ -166,10 +197,26 @@
   const remaining = $derived(attempt?.deadline ? Math.max(0, Math.round((attempt.deadline - now) / 1000)) : null);
   const lowTime = $derived(remaining !== null && remaining <= 300);
   const unansweredNumbers = $derived(
-    attempt ? attempt.ids.map((id, i) => (isComplete(attempt!.answers[id]) ? null : i)).filter((i): i is number => i !== null) : [],
+    attempt ? attempt.ids.map((id, i) => (attempt!.done.includes(id) ? null : i)).filter((i): i is number => i !== null) : [],
   );
   const flaggedNumbers = $derived(
     attempt ? attempt.ids.map((id, i) => (attempt!.flagged.includes(id) ? i : null)).filter((i): i is number => i !== null) : [],
+  );
+
+  const reviewRows = $derived(
+    attempt
+      ? questions.map((q, i) => ({
+          i,
+          q,
+          done: attempt!.done.includes(q.id),
+          flag: attempt!.flagged.includes(q.id),
+        }))
+      : [],
+  );
+  const shownRows = $derived(
+    reviewRows.filter((r) =>
+      filter === 'answered' ? r.done : filter === 'unanswered' ? !r.done : filter === 'flagged' ? r.flag : true,
+    ),
   );
 
   const deadline = $derived(attempt?.deadline ?? null);
@@ -199,9 +246,19 @@
     saveAttempt(attempt);
   }
 
-  function setAnswer(answer: Answer) {
+  function setAnswer(answer: Answer, complete: boolean) {
     if (!attempt || !current) return;
-    update({ answers: { ...attempt.answers, [current.id]: answer } });
+    const id = current.id;
+    const done = attempt.done.filter((x) => x !== id);
+    update({ answers: { ...attempt.answers, [id]: answer }, done: complete ? [...done, id] : done });
+  }
+
+  function resetAnswer() {
+    if (!attempt || !current) return;
+    const id = current.id;
+    const { [id]: _cleared, ...rest } = attempt.answers;
+    update({ answers: rest, done: attempt.done.filter((x) => x !== id) });
+    resets += 1;
   }
 
   function toggleFlag() {
@@ -215,14 +272,50 @@
   async function go(i: number) {
     if (!attempt) return;
     dialog?.close();
+    view = 'question';
     update({ index: Math.max(0, Math.min(questions.length - 1, i)) });
     await tick();
     document.getElementById('exam-question')?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function openReview() {
+  async function openReview() {
+    view = 'review';
+    reviewed = true;
+    await tick();
+    document.getElementById('review-title')?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function confirmFinish() {
     dialog?.showModal();
+  }
+
+  /** A question's scenario and prompt as plain text, for the review list. */
+  function plain(q: Question): string {
+    return [q.scenario, q.prompt]
+      .filter(Boolean)
+      .join(' ')
+      .replaceAll(BLANK, '_____')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[`*]/g, '');
+  }
+
+  function typeLabel(q: Question): string {
+    switch (q.type) {
+      case 'single':
+        return 'Single choice';
+      case 'multi':
+        return 'Multiple choice';
+      case 'match':
+        return 'Drag and drop';
+      case 'order':
+        return 'Build list';
+      case 'yesno':
+        return 'Yes or No';
+      case 'dropdown':
+        return blankText(q) === q.code ? 'Complete the code' : 'Complete the sentence';
+    }
   }
 
   /* ---------------- marking ---------------- */
@@ -233,14 +326,23 @@
     const final = attempt;
     let correct = 0;
     let unanswered = 0;
+    const points: Points = { earned: 0, possible: 0 };
     const missed: Question[] = [];
     const tally: Partial<Record<TopicId, { total: number; correct: number }>> = {};
+    const topicPoints: Partial<Record<TopicId, Points>> = {};
 
     for (const q of questions) {
       const answer = final.answers[q.id];
-      const complete = isComplete(answer);
+      const complete = final.done.includes(q.id);
       if (!complete) unanswered += 1;
-      const isCorrect = complete && answer ? grade(q, answer) : false;
+      // Every correct part earns its point, even on a question left half done.
+      const got = score(q, answer);
+      points.earned += got.earned;
+      points.possible += got.possible;
+      const tp = (topicPoints[q.topic] ??= { earned: 0, possible: 0 });
+      tp.earned += got.earned;
+      tp.possible += got.possible;
+      const isCorrect = got.earned === got.possible;
       const entry = (tally[q.topic] ??= { total: 0, correct: 0 });
       entry.total += 1;
       if (isCorrect) {
@@ -263,22 +365,37 @@
       correct,
       missed: missed.map((q) => q.id),
       limitSeconds: final.limitSeconds ?? undefined,
+      points,
       byTopic: tally,
     });
     clearAttempt();
+
+    const byTopic = TOPICS.filter((t) => tally[t.id]).map((t) => ({
+      topic: t.id,
+      label: t.label,
+      weight: t.weight,
+      total: tally[t.id]!.total,
+      correct: tally[t.id]!.correct,
+      ...topicPoints[t.id]!,
+    }));
 
     results = {
       correct,
       total,
       unanswered,
-      pct: total ? Math.round((correct / total) * 100) : 0,
-      byTopic: TOPICS.filter((t) => tally[t.id]).map((t) => ({
-        topic: t.id,
-        label: t.label,
-        weight: t.weight,
-        total: tally[t.id]!.total,
-        correct: tally[t.id]!.correct,
-      })),
+      points,
+      pct: pointsPct(points),
+      bySection: DOMAINS.map((d) => {
+        const inSection = byTopic.filter((t) => TOPICS.find((x) => x.id === t.topic)?.domain === d.id);
+        return {
+          id: d.id,
+          label: d.label,
+          weightLabel: d.weightLabel,
+          earned: inSection.reduce((sum, t) => sum + t.earned, 0),
+          possible: inSection.reduce((sum, t) => sum + t.possible, 0),
+        };
+      }).filter((d) => d.possible > 0),
+      byTopic,
       missed,
       elapsed: Math.round(((final.deadline ? Math.min(finishedAt, final.deadline) : finishedAt) - final.startedAt) / 1000),
       expired,
@@ -286,6 +403,7 @@
       seed: final.seed,
     };
     attempt = null;
+    view = 'question';
     phase = 'results';
     window.scrollTo({ top: 0 });
   }
@@ -303,7 +421,7 @@
   }
 
   const sortedTopics = $derived(
-    results ? [...results.byTopic].sort((a, b) => a.correct / a.total - b.correct / b.total) : [],
+    results ? [...results.byTopic].sort((a, b) => a.earned / a.possible - b.earned / b.possible) : [],
   );
 </script>
 
@@ -382,9 +500,16 @@
       {/if}
 
       <ul class="rules small muted">
-        <li>Move freely between questions and mark any for review.</li>
+        <li>
+          Expect the real exam's formats: single and multiple choice, Yes or No statements, sentences to
+          complete, drag and drop, and build lists.
+        </li>
+        <li>
+          As on the real exam, a multi-part question earns a point for each part you get right, and wrong
+          answers cost nothing. Answer every question.
+        </li>
+        <li>Move freely between questions, mark any for review, and check them all on the review screen.</li>
         <li>Your answers are saved as you go. Leave and come back, and the clock will have kept running.</li>
-        <li>Wrong answers cost nothing, so answer every question.</li>
       </ul>
     </div>
 
@@ -405,7 +530,13 @@
 {:else if phase === 'running' && attempt && current}
   <section class="running" aria-label="Practice exam">
     <header class="exam-bar">
-      <p class="num"><span class="subtle">Question</span> <strong>{attempt.index + 1} of {questions.length}</strong></p>
+      <p class="num">
+        {#if view === 'review'}
+          <strong>Review</strong>
+        {:else}
+          <span class="subtle">Question</span> <strong>{attempt.index + 1} of {questions.length}</strong>
+        {/if}
+      </p>
       <p class="num subtle">{answered} answered</p>
       {#if remaining !== null}
         <p class="timer num" class:low={lowTime} aria-label={`${Math.ceil(remaining / 60)} minutes left`}>
@@ -415,59 +546,120 @@
       {/if}
     </header>
 
-    <div class="sheet exam-question" id="exam-question" tabindex="-1">
-      {#key current.id}
-        <QuestionCard
-          question={current}
-          examMode
-          keys
-          seed={attempt.seed}
-          initial={attempt.answers[current.id] ?? null}
-          onchange={(answer) => setAnswer(answer)}
-        />
-      {/key}
-    </div>
+    {#if view === 'question'}
+      <div class="sheet exam-question" id="exam-question" tabindex="-1">
+        <p class="q-type small subtle">{typeLabel(current)}</p>
+        {#key `${current.id}:${resets}`}
+          <QuestionCard
+            question={current}
+            examMode
+            keys
+            seed={attempt.seed}
+            initial={attempt.answers[current.id] ?? null}
+            onchange={setAnswer}
+          />
+        {/key}
+      </div>
 
-    <footer class="exam-foot">
-      <button type="button" class="btn" disabled={attempt.index === 0} onclick={() => go(attempt!.index - 1)}>
-        Previous
-      </button>
-      <button type="button" class="btn btn-ghost" aria-pressed={attempt.flagged.includes(current.id)} onclick={toggleFlag}>
-        <Icon name="flag" />
-        {attempt.flagged.includes(current.id) ? 'Marked for review' : 'Mark for review'}
-      </button>
-      <span class="spacer"></span>
-      {#if attempt.index < questions.length - 1}
-        <button type="button" class="btn btn-primary" onclick={() => go(attempt!.index + 1)}>Next</button>
-      {/if}
-      <button type="button" class="btn" class:btn-primary={attempt.index === questions.length - 1} onclick={openReview}>
-        Review and submit
-      </button>
-    </footer>
+      <footer class="exam-foot">
+        <button type="button" class="btn" disabled={attempt.index === 0} onclick={() => go(attempt!.index - 1)}>
+          Previous
+        </button>
+        <button type="button" class="btn btn-ghost" aria-pressed={attempt.flagged.includes(current.id)} onclick={toggleFlag}>
+          <Icon name="flag" />
+          {attempt.flagged.includes(current.id) ? 'Marked for review' : 'Mark for review'}
+        </button>
+        <button type="button" class="btn btn-ghost" disabled={!attempt.answers[current.id]} onclick={resetAnswer}>
+          <Icon name="retry" />
+          Reset answer
+        </button>
+        <span class="spacer"></span>
+        {#if reviewed && attempt.index < questions.length - 1}
+          <button type="button" class="btn" onclick={openReview}>Back to review</button>
+        {/if}
+        {#if attempt.index < questions.length - 1}
+          <button type="button" class="btn btn-primary" onclick={() => go(attempt!.index + 1)}>Next</button>
+        {:else}
+          <button type="button" class="btn btn-primary" onclick={openReview}>Review answers</button>
+        {/if}
+        {#if !reviewed && attempt.index < questions.length - 1}
+          <button type="button" class="btn" onclick={openReview}>Review answers</button>
+        {/if}
+      </footer>
 
-    <nav class="palette sheet" aria-label="All questions">
-      <p class="small subtle">Jump to a question. Filled ones are answered, and an amber dot marks one for review.</p>
-      <ol>
-        {#each attempt.ids as id, i (id)}
-          {@const done = isComplete(attempt.answers[id])}
-          {@const flag = attempt.flagged.includes(id)}
-          <li>
-            <button
-              type="button"
-              class="pal num"
-              class:done
-              class:flag
-              aria-current={i === attempt.index ? 'step' : undefined}
-              aria-label={`Question ${i + 1}${done ? ', answered' : ', not answered'}${flag ? ', marked for review' : ''}`}
-              onclick={() => go(i)}>{i + 1}</button
-            >
-          </li>
-        {/each}
-      </ol>
-    </nav>
+      <nav class="palette sheet" aria-label="All questions">
+        <p class="small subtle">Jump to a question. Filled ones are answered, and an amber dot marks one for review.</p>
+        <ol>
+          {#each attempt.ids as id, i (id)}
+            {@const done = attempt.done.includes(id)}
+            {@const flag = attempt.flagged.includes(id)}
+            <li>
+              <button
+                type="button"
+                class="pal num"
+                class:done
+                class:flag
+                aria-current={i === attempt.index ? 'step' : undefined}
+                aria-label={`Question ${i + 1}${done ? ', answered' : ', not answered'}${flag ? ', marked for review' : ''}`}
+                onclick={() => go(i)}>{i + 1}</button
+              >
+            </li>
+          {/each}
+        </ol>
+      </nav>
+    {:else}
+      <section class="sheet review-screen" aria-labelledby="review-title">
+        <h2 id="review-title" class="h-sm" tabindex="-1">Review your answers</h2>
+        <p class="small muted">
+          Select a question to go back to it, then use Back to review to return here. The clock keeps running
+          while you review.
+        </p>
+        <div class="segmented" role="group" aria-label="Show questions">
+          <button type="button" aria-pressed={filter === 'all'} onclick={() => (filter = 'all')}>
+            All <span class="num">({reviewRows.length})</span>
+          </button>
+          <button type="button" aria-pressed={filter === 'answered'} onclick={() => (filter = 'answered')}>
+            Answered <span class="num">({answered})</span>
+          </button>
+          <button type="button" aria-pressed={filter === 'unanswered'} onclick={() => (filter = 'unanswered')}>
+            Unanswered <span class="num">({unansweredNumbers.length})</span>
+          </button>
+          <button type="button" aria-pressed={filter === 'flagged'} onclick={() => (filter = 'flagged')}>
+            For review <span class="num">({flaggedNumbers.length})</span>
+          </button>
+        </div>
+        {#if shownRows.length}
+          <ol class="review-rows">
+            {#each shownRows as row (row.q.id)}
+              <li>
+                <button type="button" class="review-row" onclick={() => go(row.i)}>
+                  <span class="rr-num num">{row.i + 1}</span>
+                  <span class="rr-body">
+                    <span class="rr-prompt">{plain(row.q)}</span>
+                    <span class="small subtle">{typeLabel(row.q)}</span>
+                  </span>
+                  <span class="rr-status">
+                    {#if row.flag}
+                      <span class="chip chip-warn"><Icon name="flag" size={14} /> For review</span>
+                    {/if}
+                    <span class="chip" class:chip-accent={row.done}>{row.done ? 'Answered' : 'Unanswered'}</span>
+                  </span>
+                </button>
+              </li>
+            {/each}
+          </ol>
+        {:else}
+          <p class="muted">No questions match this filter.</p>
+        {/if}
+        <div class="row">
+          <button type="button" class="btn btn-primary" onclick={confirmFinish}>Finish the exam</button>
+          <button type="button" class="btn" onclick={() => go(attempt!.index)}>Back to question {attempt.index + 1}</button>
+        </div>
+      </section>
+    {/if}
 
-    <dialog bind:this={dialog} class="review" aria-labelledby="review-title">
-      <h2 id="review-title">Ready to submit?</h2>
+    <dialog bind:this={dialog} class="review" aria-labelledby="finish-title">
+      <h2 id="finish-title">Finish the exam?</h2>
       <p class="num">
         You have answered <strong>{answered} of {questions.length}</strong>.
         {#if remaining !== null}You have {clock(remaining)} left.{/if}
@@ -480,17 +672,10 @@
           {/each}
         </ul>
       {/if}
-      {#if flaggedNumbers.length}
-        <p class="small muted">Marked for review:</p>
-        <ul class="jump">
-          {#each flaggedNumbers as i (i)}
-            <li><button type="button" class="pal num flag" onclick={() => go(i)}>{i + 1}</button></li>
-          {/each}
-        </ul>
-      {/if}
+      <p class="small muted">Once you finish, your answers are marked and cannot be changed.</p>
       <div class="row">
-        <button type="button" class="btn btn-primary" onclick={() => submit(false)}>Submit and see my result</button>
-        <button type="button" class="btn" onclick={() => dialog?.close()}>Keep going</button>
+        <button type="button" class="btn btn-primary" onclick={() => submit(false)}>Finish and see my result</button>
+        <button type="button" class="btn" onclick={() => dialog?.close()}>Keep reviewing</button>
       </div>
     </dialog>
   </section>
@@ -498,35 +683,61 @@
   <section class="results">
     <div class="sheet score-sheet">
       <p class="score num" aria-hidden="true">
-        <span class="score-big" class:good={results.pct >= 80} class:mid={results.pct >= 60 && results.pct < 80}
+        <span class="score-big" class:good={results.pct >= TARGET} class:mid={results.pct >= 60 && results.pct < TARGET}
           >{results.pct}%</span
         >
       </p>
       <div>
-        <h1 class="num">{results.correct} of {results.total} correct</h1>
+        <h1 class="num">{pointsText(results.points)}</h1>
         <p class="muted num">
+          {results.correct} of {results.total} questions fully right.
           {#if results.expired}Time ran out. {/if}Finished in {duration(results.elapsed)}{results.unanswered
             ? `, with ${results.unanswered} left blank`
             : ''}.
         </p>
         <p class="small subtle">
-          Microsoft reports a scaled score from 1 to 1,000, and you need {EXAM.passingScore} to pass. A scaled
-          score is not a percentage, so read this as a guide: this app treats 80% or more, on more than one
-          attempt, as a sign you are ready.
+          As on the real exam, each correct part of a multi-part question earned a point. Microsoft reports a
+          scaled score from 1 to 1,000, and you need {EXAM.passingScore} to pass. A scaled score is not a
+          percentage, so read this as a guide: this app treats {TARGET}% or more, on more than one attempt, as a
+          sign you are ready.
         </p>
       </div>
     </div>
+
+    <section class="sheet" aria-labelledby="sections-title">
+      <h2 id="sections-title" class="h-sm">Performance by section</h2>
+      <p class="small subtle section-note">
+        The two skill areas on Microsoft's score report. Shorter bars show weaker areas, and the line marks the
+        {TARGET}% target.
+      </p>
+      <ul class="topic-report">
+        {#each results.bySection as section (section.id)}
+          {@const pct = pointsPct(section)}
+          <li>
+            <div class="tr-head">
+              <span class="tr-name">{section.label}</span>
+              <span class="small subtle">{section.weightLabel} of the exam</span>
+              <span class="tr-score num" class:weak={pct < 70}>{pct}%</span>
+            </div>
+            <div class="bar section-bar" class:bar-success={pct >= TARGET} class:bar-danger={pct < 50} aria-hidden="true">
+              <span style:width={`${pct}%`}></span>
+              <i class="target-line" style:left={`${TARGET}%`}></i>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    </section>
 
     <section class="sheet" aria-labelledby="topics-title">
       <h2 id="topics-title" class="h-sm">Topic by topic, weakest first</h2>
       <ul class="topic-report">
         {#each sortedTopics as t (t.topic)}
-          {@const pct = Math.round((t.correct / t.total) * 100)}
+          {@const pct = pointsPct(t)}
           <li>
             <div class="tr-head">
               <span class="tr-name">{t.label}</span>
               <span class="small subtle">about {t.weight}% of the exam</span>
-              <span class="tr-score num" class:weak={pct < 70}>{t.correct} of {t.total}, {pct}%</span>
+              <span class="tr-score num" class:weak={pct < 70}>{pointsText(t)}, {pct}%</span>
             </div>
             <div class="bar" class:bar-success={pct >= 75} class:bar-danger={pct < 50} aria-hidden="true">
               <span style:width={`${pct}%`}></span>
@@ -542,7 +753,7 @@
     <section class="sheet next-steps" aria-labelledby="next-title">
       <h2 id="next-title" class="h-sm">What to do next</h2>
       <p>
-        {#if results.pct >= 80}
+        {#if results.pct >= TARGET}
           A strong paper. Keep your weakest topics warm with short drills, and use the cram sheet the day
           before.
         {:else}
@@ -561,7 +772,7 @@
 
     {#if results.missed.length}
       <section class="review-list" aria-labelledby="missed-title">
-        <h2 id="missed-title" class="h-sm">Every question you missed, marked</h2>
+        <h2 id="missed-title" class="h-sm">Every question you did not get fully right, marked</h2>
         {#each results.missed as q (q.id)}
           <div class="sheet">
             <QuestionCard question={q} revealed seed={results.seed} initial={results.answers[q.id] ?? null} />
@@ -681,6 +892,92 @@
   }
   .spacer {
     flex: 1;
+  }
+
+  .q-type {
+    margin: 0 0 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .review-screen {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .review-screen h2:focus {
+    outline: none;
+  }
+  .review-screen p,
+  .review-screen .h-sm {
+    margin: 0;
+  }
+  .review-rows {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .review-rows li {
+    margin: 0;
+  }
+  .review-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .review-row:hover {
+    border-color: var(--accent-edge);
+    background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface));
+  }
+  .rr-num {
+    flex-shrink: 0;
+    width: 2rem;
+    color: var(--ink-3);
+    font-weight: 650;
+    text-align: right;
+  }
+  .rr-body {
+    display: grid;
+    flex: 1;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .rr-prompt {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .rr-status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+  @media (max-width: 560px) {
+    .review-row {
+      flex-wrap: wrap;
+    }
+    .rr-status {
+      width: 100%;
+      justify-content: flex-start;
+      padding-left: 2.85rem;
+    }
   }
 
   .palette p {
@@ -831,6 +1128,20 @@
   }
   .tr-score.weak {
     color: var(--danger);
+  }
+
+  .section-note {
+    margin: -0.3rem 0 0.9rem;
+  }
+  .section-bar {
+    height: 0.6rem;
+  }
+  .target-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--ink-2);
   }
 
   .next-steps p {

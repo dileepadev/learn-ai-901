@@ -19,6 +19,8 @@ export interface ExamAttempt {
   /** Seed for the option shuffle, so letters stay put on resume. */
   seed: number;
   answers: Record<string, Answer>;
+  /** Ids of questions with every part answered, as the question card reports it. */
+  done: string[];
   flagged: string[];
   index: number;
   startedAt: number;
@@ -38,12 +40,16 @@ export function loadAttempt(): ExamAttempt | null {
     if (a.v !== 1 || !Array.isArray(a.ids) || a.ids.length === 0 || typeof a.startedAt !== 'number') {
       return null;
     }
+    const answers = a.answers && typeof a.answers === 'object' ? a.answers : {};
     return {
       v: 1,
       preset: a.preset === 'mini' || a.preset === 'custom' ? a.preset : 'full',
       ids: a.ids.filter((id): id is string => typeof id === 'string'),
       seed: typeof a.seed === 'number' ? a.seed : 0,
-      answers: a.answers && typeof a.answers === 'object' ? a.answers : {},
+      answers,
+      done: Array.isArray(a.done)
+        ? a.done.filter((id) => typeof id === 'string')
+        : Object.keys(answers).filter((id) => savedComplete(answers[id])),
       flagged: Array.isArray(a.flagged) ? a.flagged.filter((id) => typeof id === 'string') : [],
       index: typeof a.index === 'number' ? a.index : 0,
       startedAt: a.startedAt,
@@ -81,10 +87,14 @@ export function secondsLeft(attempt: ExamAttempt, now = Date.now()): number | nu
 
 /** Questions with a complete answer. */
 export function answeredCount(attempt: ExamAttempt): number {
-  return attempt.ids.filter((id) => isComplete(attempt.answers[id])).length;
+  return attempt.ids.filter((id) => attempt.done.includes(id)).length;
 }
 
-export function isComplete(answer: Answer | undefined): boolean {
+/**
+ * For attempts saved before `done` was recorded, judged from the answer alone.
+ * Build lists then held every step from the start, so this was exact for them.
+ */
+function savedComplete(answer: Answer | undefined): boolean {
   if (!answer) return false;
   switch (answer.type) {
     case 'single':
@@ -95,5 +105,9 @@ export function isComplete(answer: Answer | undefined): boolean {
       return Object.values(answer.assignments).every(Boolean) && Object.keys(answer.assignments).length > 0;
     case 'order':
       return answer.itemIds.length > 0;
+    case 'yesno':
+      return Object.values(answer.values).every((v) => v !== null) && Object.keys(answer.values).length > 0;
+    case 'dropdown':
+      return Object.values(answer.choices).every(Boolean) && Object.keys(answer.choices).length > 0;
   }
 }

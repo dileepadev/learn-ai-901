@@ -43,7 +43,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'System message = standing instructions from the developer. User message = what the person asked right now. Assistant message = what the model said before. Keeping them straight is the foundation of every prompt question on this exam.',
+      'System message = standing instructions from the developer. User message = what the person asked right now. Assistant message = what the model said before. Keeping the three roles straight is the foundation of prompt design.',
     reference: {
       label: 'Prompt engineering techniques',
       url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
@@ -241,7 +241,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     difficulty: 'hard',
     kind: 'exam',
     prompt:
-      'Older study material describes creating an "AI hub" before you can create a project. What is the current guidance?',
+      'You are creating a Foundry project for a new generative AI app. Which statement about AI hubs is correct?',
     options: [
       {
         id: 'a',
@@ -268,7 +268,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Microsoft moved most hub capabilities under the Foundry resource type. Hubs remain for prompt flow, Azure Machine Learning capabilities and some open-source hosting. If a practice question or older note insists on hubs, storage accounts and key vaults as prerequisites, it predates the current model.',
+      'Microsoft moved most hub capabilities under the Foundry resource type. Hubs remain for prompt flow, Azure Machine Learning capabilities and some open-source hosting. A Foundry project needs a Foundry resource, not a hub.',
     reference: {
       label: 'Migrate from hub-based to Foundry projects',
       url: 'https://learn.microsoft.com/azure/foundry-classic/how-to/migrate-project',
@@ -337,7 +337,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'The services once called Azure AI services (and before that Cognitive Services) are now presented as Foundry Tools: Azure Language in Foundry Tools, Azure Speech in Foundry Tools, Azure Vision in Foundry Tools, Azure Content Understanding in Foundry Tools. Expect the exam to use the new names.',
+      'The services once called Azure AI services (and before that Cognitive Services) are now presented as Foundry Tools: Azure Language in Foundry Tools, Azure Speech in Foundry Tools, Azure Vision in Foundry Tools, Azure Content Understanding in Foundry Tools. The AI-901 skills measured use these names too.',
     reference: {
       label: 'Create a Foundry resource',
       url: 'https://learn.microsoft.com/azure/ai-services/multi-service-resource',
@@ -796,7 +796,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       { id: 'r6', text: 'The model generates an answer with citations' },
     ],
     explanation:
-      'Everything up to indexing happens ahead of time; retrieval and generation happen per query. The exam mostly tests that you know retrieval happens *before* generation and that grounding data goes into the prompt.',
+      'Everything up to indexing happens ahead of time; retrieval and generation happen per query. The key points: retrieval happens *before* generation, and the grounding data goes into the prompt.',
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
@@ -1082,7 +1082,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     difficulty: 'hard',
     kind: 'exam',
     prompt:
-      'A sample from an older tutorial calls `create_thread()`, `create_message()` and `create_and_process_run()` against a connection string. What should you know about this for the current exam?',
+      'You find a code sample that calls `create_thread()`, `create_message()` and `create_and_process_run()` against a connection string. Which statement about the sample is correct?',
     options: [
       {
         id: 'a',
@@ -1109,7 +1109,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'You are unlikely to be asked to write this code from memory, but you may be asked to recognise the current shape. Modern flow (azure-ai-projects 2.x): `AIProjectClient(endpoint, credential)` → `agents.create_version(...)` with a `PromptAgentDefinition` → `conversations.create()` → `responses.create()`.',
+      'Recognise the older shape, and know the current one. Modern flow (azure-ai-projects 2.x): `AIProjectClient(endpoint, credential)` → `agents.create_version(...)` with a `PromptAgentDefinition` → `conversations.create()` → `responses.create()`.',
     reference: {
       label: 'Use the Azure OpenAI Responses API',
       url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/responses',
@@ -1153,7 +1153,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Instant access (preview) removes the deployment step for trying supported models - during the preview, from projects in West US 3. You still deploy when you need reserved throughput, data residency, custom guardrails or a fine-tuned model. The exam concentrates on GA behaviour but may include commonly used preview features.',
+      'Instant access (preview) removes the deployment step for trying supported models - during the preview, from projects in West US 3. You still deploy when you need reserved throughput, data residency, custom guardrails or a fine-tuned model. The study guide says most questions cover generally available features, but preview features may appear when they are commonly used.',
     reference: {
       label: 'Deployment overview for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',

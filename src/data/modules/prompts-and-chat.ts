@@ -15,7 +15,7 @@ export const promptsAndChat: Module = {
     'Choose between zero-shot, few-shot and chain-of-thought prompting',
     'Describe what a Foundry chat client needs and how it authenticates',
   ],
-  quiz: ['fg-042', 'sc-fg-03', 'sc-fg-05', 'sc-fg-09', 'sc-fg-10'],
+  quiz: ['fg-042', 'sc-fg-03', 'sc-fg-05', 'sc-fg-09', 'sc-fg-10', 'yn-fg-01', 'code-gen-01'],
   sections: [
     {
       id: 'roles',

@@ -4,10 +4,13 @@
  */
 import { ALL_QUESTIONS } from '../data/questions';
 import { MODULES } from '../data/modules';
-import { encodeQuestionRefs, toModuleRef, type ModuleRef } from './catalog';
+import { encodeQuestionRefs, isCodeQuestion, toModuleRef, type ModuleRef } from './catalog';
 import type { ScoredModule } from './scoring';
 
 export const questionRefs: string = encodeQuestionRefs(ALL_QUESTIONS);
+
+/** Python SDK code questions, for the practice hub's code set. */
+export const codeQuestionCount: number = ALL_QUESTIONS.filter(isCodeQuestion).length;
 
 export const moduleRefs: ModuleRef[] = MODULES.map(toModuleRef);
 

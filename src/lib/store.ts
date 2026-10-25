@@ -11,6 +11,7 @@ import type {
   Answer,
   FlashcardState,
   ModuleState,
+  Points,
   Progress,
   Question,
   QuestionState,
@@ -105,9 +106,14 @@ function migrate(raw: unknown): Progress {
       (c) => isNum(c.box) && isNum(c.due) && isNum(c.seen),
     ),
     sessions: Array.isArray(raw.sessions)
-      ? (raw.sessions.filter(
-          (s) => isRecord(s) && typeof s.mode === 'string' && isNum(s.total) && isNum(s.correct),
-        ) as SessionResult[])
+      ? (raw.sessions
+          .filter((s) => isRecord(s) && typeof s.mode === 'string' && isNum(s.total) && isNum(s.correct))
+          .map((s) => {
+            const { points, ...rest } = s as Record<string, unknown>;
+            return isRecord(points) && isNum(points.earned) && isNum(points.possible) && points.possible > 0
+              ? { ...rest, points: { earned: points.earned, possible: points.possible } }
+              : rest;
+          }) as unknown as SessionResult[])
       : [],
     activeDays: strings(raw.activeDays),
     achievements: strings(raw.achievements),
@@ -231,27 +237,76 @@ if (isBrowser) {
 
 /** Grade a response without recording it. Pure, so it is safe to call in render. */
 export function grade(question: Question, answer: Answer): boolean {
+  const { earned, possible } = score(question, answer);
+  return earned === possible;
+}
+
+/**
+ * Points a question is worth. Microsoft gives one point for each correctly
+ * answered part of a multi-part question, so a Yes/No set of three statements
+ * is worth three. Single choice and build lists are worth one.
+ */
+export function pointsFor(question: Question): number {
+  switch (question.type) {
+    case 'single':
+    case 'order':
+      return 1;
+    case 'multi':
+      return question.options.filter((o) => o.correct).length;
+    case 'match':
+      return question.pairs.length;
+    case 'yesno':
+      return question.statements.length;
+    case 'dropdown':
+      return question.blanks.length;
+  }
+}
+
+/**
+ * Points earned by a response. No points are taken away for a wrong part. The one
+ * exception is an invalid answer that picks more options than a multi-answer
+ * question asks for: each extra cancels a right one, so picking every option
+ * cannot collect every point. The card never allows it.
+ */
+export function score(question: Question, answer: Answer | undefined): Points {
+  const possible = pointsFor(question);
+  const earned = (n: number): Points => ({ earned: n, possible });
+  if (!answer) return earned(0);
+
   switch (question.type) {
     case 'single': {
-      if (answer.type !== 'single' || !answer.optionId) return false;
-      return question.options.some((o) => o.id === answer.optionId && o.correct);
+      if (answer.type !== 'single' || !answer.optionId) return earned(0);
+      return earned(question.options.some((o) => o.id === answer.optionId && o.correct) ? 1 : 0);
     }
     case 'multi': {
-      if (answer.type !== 'multi') return false;
-      const expected = question.options.filter((o) => o.correct).map((o) => o.id).sort();
-      const got = [...new Set(answer.optionIds)].sort();
-      return expected.length === got.length && expected.every((id, i) => id === got[i]);
+      if (answer.type !== 'multi') return earned(0);
+      const correct = new Set(question.options.filter((o) => o.correct).map((o) => o.id));
+      const chosen = [...new Set(answer.optionIds)];
+      const right = chosen.filter((id) => correct.has(id)).length;
+      // The card stops at the number asked for. Without this, choosing every
+      // option would collect every point.
+      const extra = Math.max(0, chosen.length - possible);
+      return earned(Math.max(0, right - extra));
     }
     case 'match': {
-      if (answer.type !== 'match') return false;
-      return question.pairs.every((p) => answer.assignments[p.id] === p.right);
+      if (answer.type !== 'match') return earned(0);
+      return earned(question.pairs.filter((p) => answer.assignments[p.id] === p.right).length);
     }
     case 'order': {
-      if (answer.type !== 'order') return false;
+      if (answer.type !== 'order') return earned(0);
       const expected = question.items.map((i) => i.id);
-      return (
-        answer.itemIds.length === expected.length &&
-        expected.every((id, i) => id === answer.itemIds[i])
+      const exact =
+        answer.itemIds.length === expected.length && expected.every((id, i) => id === answer.itemIds[i]);
+      return earned(exact ? 1 : 0);
+    }
+    case 'yesno': {
+      if (answer.type !== 'yesno') return earned(0);
+      return earned(question.statements.filter((s) => answer.values[s.id] === s.yes).length);
+    }
+    case 'dropdown': {
+      if (answer.type !== 'dropdown') return earned(0);
+      return earned(
+        question.blanks.filter((b) => b.options.some((o) => o.correct && o.id === answer.choices[b.id])).length,
       );
     }
   }

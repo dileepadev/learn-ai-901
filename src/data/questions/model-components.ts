@@ -375,7 +375,7 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       { id: 'c5', left: 'Respond to a spoken question with spoken audio', right: 'Multimodal (audio) model' },
     ],
     explanation:
-      'Model selection on this exam is almost always a modality question first: what goes in, what must come out. Only then do size, cost and reasoning depth matter.',
+      'Start model selection with modality: what goes in, and what must come out. Only then do size, cost and reasoning depth matter.',
     reference: {
       label: 'Overview of Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview',
@@ -681,7 +681,7 @@ export const modelComponentQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Knowledge problem ⇒ retrieval. Behaviour problem ⇒ fine-tuning. This split is stated directly in Microsoft\'s Foundry guidance and is a reliable exam question.',
+      'Knowledge problem ⇒ retrieval. Behaviour problem ⇒ fine-tuning. This split is stated directly in Microsoft\'s Foundry guidance.',
     reference: {
       label: 'RAG and indexes in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',

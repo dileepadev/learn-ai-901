@@ -15,7 +15,7 @@ export const genaiModels: Module = {
     'Explain temperature, top_p, max_tokens, stop and the two penalties - and which models ignore them',
     'Choose the right deployment option and deployment type, using current names',
   ],
-  quiz: ['mc-007', 'mc-011', 'mc-015', 'mc-022', 'sc-mc-01', 'sc-mc-03', 'sc-mc-04', 'sc-mc-08'],
+  quiz: ['mc-007', 'mc-011', 'mc-015', 'mc-022', 'sc-mc-01', 'sc-mc-03', 'sc-mc-04', 'sc-mc-08', 'yn-mc-01', 'dd-mc-01'],
   sections: [
     {
       id: 'selection',
