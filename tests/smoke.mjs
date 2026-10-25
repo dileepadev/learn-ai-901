@@ -243,6 +243,10 @@ for (let guard = 0; guard < 20 && !(snippetShown && blankInCode); guard++) {
 check('code questions show their Python snippet', snippetShown);
 check('code dropdowns put the blanks in the code', blankInCode);
 
+await goto('/practice/?start=unseen');
+await page.waitForSelector('.question-sheet', { timeout: 10000 });
+check('?start=unseen opens the never-tried set', (await page.locator('.runner-title').innerText()).includes('Never tried'));
+
 await goto('/practice/weak/?topic=responsible-ai');
 await page.waitForSelector('.runner-title', { timeout: 10000 });
 check('weak-area drill honours ?topic', (await page.locator('.runner-title').innerText()).includes('Responsible AI'));

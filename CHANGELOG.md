@@ -20,6 +20,8 @@ Changes are organized into the following categories:
   quickstarts: Azure Speech, chat and agent clients, vision and image generation, text analysis and
   Content Understanding. A new Code set on the Practice page (`?start=code`) drills them, and the
   related lesson quizzes include some.
+- A Never tried set on the Practice page (`?start=unseen`) that serves only the questions you have
+  not answered yet.
 - Practice exams score multi-part questions a point per correct part, as the real exam does, and
   report the score by exam section and by topic. A review screen filters by answered, unanswered
   and marked.

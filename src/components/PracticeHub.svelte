@@ -34,7 +34,7 @@
   const live = liveProgress();
   const p = $derived(live.value);
 
-  type SetKind = 'quick' | 'long' | 'rapid' | 'due' | 'code' | 'mistakes' | 'weak' | 'topic';
+  type SetKind = 'quick' | 'long' | 'rapid' | 'unseen' | 'due' | 'code' | 'mistakes' | 'weak' | 'topic';
 
   interface SessionSpec {
     kind: SetKind;
@@ -56,6 +56,7 @@
     quick: 10,
     long: 25,
     rapid: 20,
+    unseen: 40,
     due: 20,
     code: 40,
     mistakes: 40,
@@ -84,6 +85,10 @@
         case 'rapid':
           mode = 'rapid-fire';
           title = 'Rapid fire';
+          break;
+        case 'unseen':
+          pool = unseenQuestions(ALL_QUESTIONS, snapshot);
+          title = 'Never tried';
           break;
         case 'due':
           pool = dueQuestions(ALL_QUESTIONS, snapshot);
@@ -152,6 +157,7 @@
       startParam === 'quick' ||
       startParam === 'long' ||
       startParam === 'rapid' ||
+      startParam === 'unseen' ||
       startParam === 'due' ||
       startParam === 'code'
     ) {
@@ -194,6 +200,17 @@
       body: 'Short recall questions, mostly easier ones. Good for a spare ten minutes.',
     },
     {
+      kind: 'unseen',
+      icon: 'eye',
+      title: unseen
+        ? `Never tried, ${Math.min(unseen, SIZES.unseen)} ${unseen === 1 ? 'question' : 'questions'}`
+        : 'Never tried',
+      body: unseen
+        ? 'Only the questions you have not answered yet, mixed across topics.'
+        : 'You have answered every question at least once.',
+      disabled: unseen === 0,
+    },
+    {
       kind: 'due',
       icon: 'clock',
       title: due ? `Due for review, ${Math.min(due, SIZES.due)} questions` : 'Due for review',
@@ -225,7 +242,9 @@
       ? 'Nothing is waiting to be fixed: every question you have answered is currently on a correct answer.'
       : session.spec.kind === 'due'
         ? 'Nothing is due for review right now. Answered questions come back here on a schedule.'
-        : undefined}
+        : session.spec.kind === 'unseen'
+          ? 'You have answered every question at least once.'
+          : undefined}
     onrestart={() => session && start(session.spec)}
   />
 {:else if loading || (fixedMode && !failed)}
