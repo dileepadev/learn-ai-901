@@ -18,11 +18,12 @@ Everything is static. Progress lives in your browser. No backend, no account, no
 | | |
 | :--- | :--- |
 | **12 lessons** | About 4 hours in all, in recommended study order, with 8 interactive demos and 80 inline knowledge checks |
-| **217 questions** | 186 exam-style plus 31 lesson checks. Multiple choice, multi-select, matching and ordering, each with an explanation, a reason why every wrong option is wrong, and a passage quoted word for word from the Microsoft Learn page that backs it up, with a link to that page. Options are shuffled, so the answer is never always A |
+| **257 questions** | 225 exam-style plus 32 lesson checks, each mapped to an official AI-901 skill, in the formats of Microsoft's practice assessment: single and multiple choice, Yes/No statement sets, sentences to complete from a dropdown, drag and drop, and build lists. Each comes with an explanation, a reason why every wrong option is wrong, and a passage quoted word for word from the Microsoft Learn page that backs it up, with a link to that page. Options are shuffled, so the answer is never always A |
 | **Spaced repetition** | A Leitner scheduler tuned for a sprint: intervals run from 8 minutes to 4 days, so the whole bank can resurface before exam day |
 | **Weak-area drilling** | Topics ranked by *weighted readiness left on the table*, so a shaky high-weight topic outranks a neglected small one |
 | **Mistakes mode** | Every question currently sitting on a wrong answer, in one place |
-| **Practice exam** | 45 questions in 45 minutes (or a 15-question mini exam), weighted like the blueprint, nothing marked until the end, mark for review, a wall-clock timer, and an attempt saved after every answer so a reload can be resumed |
+| **Code questions** | 20 questions on Python SDK code, 17 of them with a snippet to complete or read, following the code in the official training units and Microsoft Learn quickstarts: Speech, chat and agent clients, vision, text analysis and Content Understanding. Every class and method in them, right or wrong, is real |
+| **Practice exam** | 45 questions in 45 minutes (or a 15-question mini exam), weighted like the blueprint, nothing marked until the end, mark for review, a review screen that filters by answered, unanswered and marked, a wall-clock timer, and an attempt saved after every answer so a reload can be resumed. Multi-part questions earn a point for each correct part, as on the real exam, and the report breaks your score down by exam section and by topic |
 | **Rapid review** | 78 flashcards with their own review schedule, 11 comparison drills with hidden cells, and 23 one-line facts |
 | **Cram sheet** | 20 key facts, 14 exam traps and 17 renamed-or-retired notes in one printable pass, for the final day |
 | **Study plan** | A three-day sprint: lesson and exam steps tick themselves off, and you tick the rest |
@@ -195,16 +196,20 @@ in `data/questions/`; nothing in `lib/` or `components/` needs to change.
 }
 ```
 
-`type` may be omitted for ordinary single-answer questions. Use `type: 'multi'`, `'match'` or
-`'order'` for the others.
+`type` may be omitted for ordinary single-answer questions. Use `type: 'multi'`, `'match'` (drag and
+drop), `'order'` (build list), `'yesno'` (a set of statements, each with `yes` and a `why`) or
+`'dropdown'` (a sentence with `___` for each blank, and a `blanks` list of options) for the others.
+See `src/data/questions/exam-formats.ts` for worked examples of the last two.
 
 **A lesson** - add a module in `src/data/modules/` and register it in that folder's `index.ts`.
 Lessons are arrays of typed blocks: `p`, `list`, `table`, `code`, `key`, `trap`, `changed`,
 `steps`, `demo` and `check`.
 
-The build **fails** on a duplicate question id, a question whose `reference` is not a Microsoft Learn
+The build **fails** on a duplicate question id, an `objective` that is not the exact wording of a skill
+measured under the question's topic, a question whose `reference` is not a Microsoft Learn
 page or has no `quote`, a
-single-answer question without exactly one correct option, a wrong option without a `why`, a
+single-answer question without exactly one correct option, a wrong option without a `why`, a Yes/No
+statement without a `why`, a dropdown whose `___` blanks do not match its `blanks`, a
 lesson referencing a question id that does not exist, or a lesson quiz that repeats its own
 knowledge checks - so broken content never ships.
 
