@@ -5,14 +5,40 @@ const base = import.meta.env.BASE_URL;
 const href = (p: string) => `${base.replace(/\/$/, '')}${p}`;
 ---
 
-<Base title="Not found - AI-901 Exam Prep">
-  <div class="wrap prose" style="text-align:center; padding: 3rem 0;">
-    <h1>That page doesn't exist</h1>
-    <p class="muted">Let's get you back to studying.</p>
-    <div class="row" style="justify-content: center;">
-      <a class="btn btn-primary" href={href('/')}>Dashboard</a>
+<Base title="Page not found" description="That page does not exist.">
+  <div class="wrap lost">
+    <p class="code num" aria-hidden="true">404</p>
+    <h1>That page does not exist</h1>
+    <p class="muted">The link may be old, or the address mistyped. These will get you back to studying.</p>
+    <div class="row">
+      <a class="btn btn-primary" href={href('/')}>Home</a>
       <a class="btn" href={href('/learn/')}>Lessons</a>
       <a class="btn" href={href('/practice/')}>Practice</a>
     </div>
   </div>
 </Base>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding-block: clamp(2rem, 1rem + 6vw, 6rem);
+    text-align: center;
+  }
+  .lost h1,
+  .lost p {
+    margin: 0;
+  }
+  .lost .row {
+    justify-content: center;
+    margin-top: 1.25rem;
+  }
+  .code {
+    color: var(--accent);
+    font-size: clamp(4rem, 2.5rem + 8vw, 7.5rem);
+    font-weight: 700;
+    letter-spacing: -0.06em;
+    line-height: 1;
+  }
+</style>

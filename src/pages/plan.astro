@@ -1,16 +1,132 @@
 ---
 import Base from '../layouts/Base.astro';
 import StudyPlan from '../components/StudyPlan.svelte';
+import { EXAM_DAY_TIPS } from '../data/roadmap';
+import { EXAM, TOPICS } from '../data/exam';
+import { TOTAL_LESSON_MINUTES } from '../data/modules';
+import { moduleRefs } from '../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
+const topics = [...TOPICS].sort((a, b) => b.weight - a.weight);
+const maxWeight = Math.max(...topics.map((t) => t.weight));
+const hours = Math.round((TOTAL_LESSON_MINUTES / 60) * 10) / 10;
 ---
 
 <Base
-  title="Study plan - AI-901 Exam Prep"
-  description="A three-day sprint plan for Exam AI-901, front-loaded with the heaviest-weighted topics."
+  title="Study plan"
+  description="A three-day sprint plan for Exam AI-901, front-loaded with the heaviest-weighted topics and ending every day with practice."
   active="plan"
 >
   <div class="wrap">
-    <StudyPlan client:only="svelte" base={base} />
+    <header class="page-head">
+      <h1>Your study plan</h1>
+      <p>
+        Three days, front-loaded with the heaviest topics. Every day ends with practice questions rather
+        than more reading, because answering is what makes it stick. Lesson steps tick themselves off;
+        tick the rest as you go.
+      </p>
+    </header>
+
+    <StudyPlan client:load {base} modules={moduleRefs} />
+
+    <section class="why sheet" aria-labelledby="why-title">
+      <h2 id="why-title">Why this order</h2>
+      <p class="muted">
+        Time goes where the marks are. The heavy topics come first, so if you run short, what you skip is
+        what matters least.
+      </p>
+      <ul class="weights">
+        {
+          topics.map((t) => (
+            <li>
+              <span>{t.label}</span>
+              <span class="w-bar" aria-hidden="true">
+                <span style={`width: ${(t.weight / maxWeight) * 100}%`} />
+              </span>
+              <strong class="num">about {t.weight}%</strong>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="small subtle">
+        The two domain ranges come from the official study guide ({EXAM.skillsMeasuredDate}). The split
+        within each domain is this guide's estimate, in proportion to how many skills each lists. All the
+        lessons together take about {hours} hours.
+      </p>
+    </section>
+
+    <section class="tips" aria-labelledby="tips-title">
+      <h2 id="tips-title">On the day</h2>
+      <ol>
+        {
+          EXAM_DAY_TIPS.map((tip) => (
+            <li class="sheet">
+              <strong>{tip.title}</strong>
+              <p>{tip.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
   </div>
 </Base>
+
+<style>
+  .why,
+  .tips {
+    margin-top: 2.5rem;
+  }
+  .weights {
+    display: grid;
+    gap: 0.55rem;
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+  .weights li {
+    display: grid;
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) 6.5rem;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+  }
+  .w-bar {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--track);
+    overflow: hidden;
+  }
+  .w-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+  }
+  .weights strong {
+    text-align: right;
+  }
+  .tips ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tips li {
+    margin: 0;
+  }
+  .tips p {
+    margin: 0.3rem 0 0;
+    color: var(--ink-2);
+  }
+  @media (max-width: 640px) {
+    .weights li {
+      grid-template-columns: 1fr auto;
+    }
+    .w-bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+</style>

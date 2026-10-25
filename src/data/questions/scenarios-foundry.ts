@@ -28,7 +28,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'A hosted agent built with Agent Framework and shipped as a container',
+        text: 'A hosted agent built with Agent Framework and shipped as a container image',
         correct: false,
         why: 'That gives control they do not need, and adds container compute plus runtime code to maintain - the opposite of the stated requirement.',
       },
@@ -40,13 +40,19 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'A custom orchestration service calling the Responses API',
+        text: 'A custom orchestration service that calls the Responses API on a schedule',
         correct: false,
         why: 'More infrastructure for no benefit here.',
       },
     ],
     explanation:
       'Prompt agents are the recommended starting point: define instructions, a model and tools, and Foundry runs it with no code or infrastructure. Escalation behaviour goes in the instructions.',
+    reference: {
+      label: 'Agents in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'You define prompt agents entirely through configuration, including instructions, model selection, and tools. Author them in the Foundry portal for a quick start, or define them programmatically with the SDKs or REST API to integrate with your CI/CD workflows.',
+    },
     tags: ['agents', 'prompt-vs-hosted'],
   },
   {
@@ -81,6 +87,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Hosted agents exist for exactly this: bring code built with Agent Framework, LangGraph, the OpenAI or Anthropic Agent SDKs, or your own, as a container or zip, and Foundry runs it with a managed endpoint, scaling, a dedicated Entra identity and end-to-end observability.',
+    reference: {
+      label: 'Hosted agents in Foundry Agent Service',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents',
+      quote:
+        "Every Hosted agent deployed to a Foundry project gets its own dedicated Microsoft Entra ID (agent identity) and dedicated endpoint - both created automatically at deploy time. You don't need to configure managed identities or routing manually.",
+    },
     tags: ['agents', 'hosted', 'currency', 'hard'],
   },
   {
@@ -95,7 +107,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'State the required format in the system message and include an example of the exact output',
+        text: 'State the format in the system message, with an example of it',
         correct: true,
       },
       {
@@ -106,19 +118,25 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'Fine-tune the model on 10,000 JSON examples',
+        text: 'Fine-tune the model on 10,000 examples of the JSON',
         correct: false,
         why: 'Enormously more expensive than a format instruction that usually solves it outright. Prompt first.',
       },
       {
         id: 'd',
-        text: 'Reduce max_tokens so there is no room for prose',
+        text: 'Reduce max_tokens so there is no room left for prose',
         correct: false,
         why: 'That truncates the JSON instead of removing the prose.',
       },
     ],
     explanation:
       'Format problems are prompt problems first. State the schema explicitly, show one example of it, and - if the model supports it - use structured output. Few-shot examples are the cheapest reliable way to pin down a format.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'When using the Chat Completions API, a series of messages between the User and Assistant (written in the new prompt format), can serve as examples for few-shot learning.',
+    },
     tags: ['prompts', 'format', 'trap'],
   },
   {
@@ -133,7 +151,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The tutorial describes the classic hub-based model; a Foundry project on a Foundry resource needs none of those',
+        text: 'It describes the classic hub model; Foundry projects need none of them',
         correct: true,
       },
       {
@@ -144,19 +162,25 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'Storage and Key Vault are needed, but the hub is optional',
+        text: 'Storage and Key Vault are still needed, but the hub is optional',
         correct: false,
         why: 'The dependent-resource requirement came with the hub. Without a hub, it does not apply.',
       },
       {
         id: 'd',
-        text: 'The tutorial is describing Azure Machine Learning, not Foundry',
+        text: 'The tutorial is about Azure Machine Learning, not about Foundry',
         correct: false,
         why: 'Hubs are an implementation of Azure Machine Learning, so the confusion is understandable - but the tutorial genuinely is about Foundry, in its earlier form.',
       },
     ],
     explanation:
-      'This is the single most common way old study material misleads people. Hub-based projects are the classic path; new investment is in Foundry projects, which are child resources of a Foundry resource and need no separate storage or key vault.',
+      'Hub-based projects are the classic path; new investment is in Foundry projects, which are child resources of a Foundry resource and need no separate storage or key vault.',
+    reference: {
+      label: 'Migrate from hub-based to Foundry projects',
+      url: 'https://learn.microsoft.com/azure/foundry-classic/how-to/migrate-project',
+      quote:
+        'Projects are now child resources; they might be assigned their own admin controls like Azure RBAC, but by default share common settings from their parent resource.',
+    },
     tags: ['foundry', 'currency', 'trap'],
   },
   {
@@ -195,6 +219,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Keyless authentication is the recommendation. `DefaultAzureCredential` is convenient in development; in production prefer a specific credential such as a managed identity, which avoids unintended credential probing.',
+    reference: {
+      label: 'Role-based access control for Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry',
+      quote:
+        'Microsoft recommends using Entra ID authentication for improved security and granular access control.',
+    },
     tags: ['sdk', 'auth', 'security'],
   },
   {
@@ -209,30 +239,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A toolbox: curate the tools once and share them across agents through a single managed endpoint with central authentication, governance and versioning',
+        text: 'A toolbox, shared by all agents through one governed endpoint',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A Foundry IQ knowledge base',
+        text: 'A Foundry IQ knowledge base that every team connects to',
         correct: false,
         why: 'That is the shared *knowledge* layer. Tools are a different concern.',
       },
       {
         id: 'c',
-        text: 'A shared model deployment',
+        text: 'One shared model deployment that all five teams call',
         correct: false,
         why: 'Sharing a deployment does nothing about tool configuration.',
       },
       {
         id: 'd',
-        text: 'A hub, so all five teams share security settings',
+        text: 'An AI hub, so that all five teams share security settings',
         correct: false,
         why: 'Hubs share security configuration across projects; they do not curate tools.',
       },
     ],
     explanation:
       'Toolboxes are the governance answer for tools, exactly as Foundry IQ knowledge bases are for knowledge: define once, share across agents, manage authentication and versioning centrally.',
+    reference: {
+      label: 'What is Toolbox in Microsoft Foundry?',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/toolbox-overview',
+      quote:
+        'Toolbox addresses these challenges by allowing teams to define and manage tools centrally and expose them through a single MCP-compatible endpoint.',
+    },
     tags: ['agents', 'toolbox', 'currency', 'hard'],
   },
   {
@@ -266,7 +302,13 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Citations are the single most important transparency feature of a grounded assistant, and returning extractive data with citations so answers trace back to source documents is a headline Foundry IQ capability.',
+      'Citations are a key transparency feature of a grounded assistant, and returning extractive data with citations so answers trace back to source documents is a headline Foundry IQ capability.',
+    reference: {
+      label: 'What is Foundry IQ?',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'Return extractive data with citations so agents can reason over raw content and trace answers to source documents.',
+    },
     tags: ['rag', 'transparency', 'cross-topic'],
   },
   {
@@ -281,30 +323,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'One Foundry IQ knowledge base can hold all three sources, be shared by both agents, and enforce permissions at query time under the caller\'s identity',
+        text: 'One knowledge base can hold all three, serve both agents, and check permissions',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Each source needs its own knowledge base, and each agent needs its own copy',
+        text: 'Each source needs its own knowledge base, and each agent its own copy',
         correct: false,
         why: 'A knowledge base is deliberately multi-source and shareable across agents. Duplicating it is exactly what the managed knowledge layer removes.',
       },
       {
         id: 'c',
-        text: 'Permissions must be enforced in the application, because retrieval cannot be permission-aware',
+        text: 'Permissions must be checked in the app, because retrieval cannot do it',
         correct: false,
         why: 'Foundry IQ synchronises access control lists, honours Purview sensitivity labels, and can run queries under the caller\'s Entra identity.',
       },
       {
         id: 'd',
-        text: 'Public web pages cannot be a knowledge source',
+        text: 'Public web pages cannot be used as a knowledge source at all',
         correct: false,
         why: 'Public web is a supported knowledge source alongside Blob Storage, SharePoint and OneLake.',
       },
     ],
     explanation:
       'Knowledge base = knowledge sources + retrieval parameters. Multi-source, shareable across agents, permission-aware at query time, and citation-returning.',
+    reference: {
+      label: 'What is Foundry IQ?',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'A knowledge base consists of knowledge sources (connections to internal and external data stores) and parameters that control retrieval behavior. Multiple agents can share the same knowledge base.',
+    },
     tags: ['rag', 'foundry-iq', 'hard'],
   },
   {
@@ -341,6 +389,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Chain-of-thought gives the model room to work rather than leaping to an answer. For exact computation, a code interpreter tool is better still - it does not estimate, it calculates.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Instead of splitting a task into smaller steps, in this approach, the model response is instructed to proceed step-by-step and present all the steps involved.',
+    },
     tags: ['prompts', 'chain-of-thought', 'agents', 'multi-select'],
   },
   {
@@ -355,30 +409,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The code is passing the model name rather than the deployment name',
+        text: 'The code passes the model name, not the deployment name',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The model has been retired',
+        text: 'The model was retired between the playground test and the call',
         correct: false,
         why: 'It just worked in the playground against the same project.',
       },
       {
         id: 'c',
-        text: 'temperature is out of range',
+        text: 'The temperature value is outside the allowed range',
         correct: false,
         why: 'An invalid parameter produces a different error.',
       },
       {
         id: 'd',
-        text: 'The context window is too small',
+        text: 'The prompt is too large for the model\'s context window',
         correct: false,
         why: 'That would produce a token-limit error, not "model not found".',
       },
     ],
     explanation:
       'Client code references the **deployment name** you chose when you deployed, which need not match the model name. Endpoint plus deployment name plus credential is the trio to check whenever a call fails to resolve.',
+    reference: {
+      label: 'Work with chat completion models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/chatgpt',
+      quote:
+        '400/404 (deployment not found): Confirm that model matches your deployment name.',
+    },
     tags: ['sdk', 'troubleshooting'],
   },
   {
@@ -399,6 +459,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Note that the name is chosen early and cannot be changed afterwards - in code the agent is referenced as `<name>:<version>`.',
+    reference: {
+      label: 'Agent development lifecycle',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/development-lifecycle',
+      quote:
+        'If you already know what kind of agent you want to create, name it and then start configuring its model instructions and tools.',
+    },
     tags: ['agents', 'workflow', 'cram'],
   },
   {
@@ -413,30 +479,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Chunks are far too large, so retrieved passages are unfocused and consume the token budget',
+        text: 'Chunks are far too large, so passages are unfocused',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The temperature is too low',
+        text: 'The temperature is too low for a large manual',
         correct: false,
         why: 'Low temperature makes answers focused, not vague. This is a retrieval problem.',
       },
       {
         id: 'c',
-        text: 'The model is too small',
+        text: 'The model is too small to read a 900-page manual',
         correct: false,
         why: 'A larger model given an entire chapter still has to find the relevant sentence in it.',
       },
       {
         id: 'd',
-        text: 'Citations are disabled',
+        text: 'Citations are disabled, so answers lose precision',
         correct: false,
         why: 'Citations affect traceability, not answer quality.',
       },
     ],
     explanation:
       'Chunking is the most common cause of poor RAG quality. Microsoft\'s own troubleshooting guidance points first at chunking strategy, embedding model quality, and search configuration when retrieval returns irrelevant or unfocused passages.',
+    reference: {
+      label: 'RAG in Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview',
+      quote:
+        'During indexing, use chunking to subdivide large documents so that portions can be matched on independently.',
+    },
     tags: ['rag', 'chunking', 'troubleshooting', 'hard'],
   },
   {
@@ -471,6 +543,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Microsoft\'s guidance is explicit: use agentic retrieval when the client is an agent or chatbot, queries are complex or conversational, and you want structured responses with citations. It uses conversation history for context and decomposes the question into parallel subqueries.',
+    reference: {
+      label: 'Agentic retrieval overview - Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/agentic-retrieval-overview',
+      quote:
+        'Use agentic retrieval when you want to provide agents and apps with the most relevant content for answering harder questions, drawing on chat context, your proprietary content, and external sources.',
+    },
     tags: ['rag', 'agentic-retrieval', 'currency'],
   },
   {
@@ -485,30 +563,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Configure at the Foundry resource level; product teams create projects underneath, which inherit those settings and can have their own RBAC',
+        text: 'Set it once on the Foundry resource; team projects inherit it',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Give every team its own subscription',
+        text: 'Give every product team its own Azure subscription',
         correct: false,
         why: 'Heavy-handed, and it multiplies the governance work rather than centralising it.',
       },
       {
         id: 'c',
-        text: 'Configure security separately in each project',
+        text: 'Configure security separately in each team\'s project',
         correct: false,
         why: 'That is exactly the duplication the resource-and-project model removes.',
       },
       {
         id: 'd',
-        text: 'Use one shared project for everyone',
+        text: 'Use one shared project for every team in the organisation',
         correct: false,
         why: 'It gives no separation of work at all.',
       },
     ],
     explanation:
       'The stated design goal is to take IT admins out of the day-to-day loop: establish security, connectivity and governance once at the resource, and let developers create projects as folders to organise their own work.',
+    reference: {
+      label: 'Microsoft Foundry architecture',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/architecture',
+      quote:
+        'Foundry resource: Top-level Azure resource where you manage governance settings such as networking, security, and model deployments.',
+    },
     tags: ['foundry', 'architecture', 'rbac'],
   },
 
@@ -551,6 +635,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Three requirements, three prebuilt features, no training data. Reach for custom capabilities only when the categories or entities are specific to that business.',
+    reference: {
+      label: 'Understand text analysis in Foundry - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-text-analysis-azure/2-azure-language',
+      quote:
+        'Key phrase extraction lists the main concepts from unstructured text.',
+    },
     tags: ['language', 'routing'],
   },
   {
@@ -565,7 +655,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A deployed multimodal model that takes audio directly, because tone survives and there is only one hop of latency',
+        text: 'A multimodal model that takes audio directly: tone survives and there is one hop',
         correct: true,
       },
       {
@@ -582,13 +672,19 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'Text to speech with a custom neural voice',
+        text: 'Text to speech with a custom voice',
         correct: false,
         why: 'It shapes the reply but does nothing to understand the caller.',
       },
     ],
     explanation:
       'Two clues point the same way: acoustic nuance must be preserved, and latency is tight. Both are the standard arguments for a native multimodal audio model over a cascade.',
+    reference: {
+      label: 'Agents in Microsoft Foundry: how voice-based agents work',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture is optimized for natural, low-latency conversation. The realtime model handles spoken input and output directly.',
+    },
     tags: ['speech', 'multimodal', 'hard'],
   },
   {
@@ -603,30 +699,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Text to speech with a custom neural voice, which is a gated capability requiring responsible AI review',
+        text: 'Text to speech with a professional custom voice (Limited Access)',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Speech translation only',
+        text: 'Speech translation alone, using a standard multilingual voice',
         correct: false,
         why: 'Translation handles the languages but not a specific brand voice identity.',
       },
       {
         id: 'c',
-        text: 'SSML prosody adjustments on a standard voice',
+        text: 'SSML prosody adjustments that reshape a standard voice',
         correct: false,
         why: 'SSML bends an existing voice; it cannot create a new voice identity.',
       },
       {
         id: 'd',
-        text: 'Batch transcription',
+        text: 'Batch transcription of the museum\'s existing audio guides',
         correct: false,
         why: 'Wrong direction - that is speech to text.',
       },
     ],
     explanation:
-      'Custom neural voice is trained from studio recordings of a voice actor and is the only way to get a distinctive branded voice. Because voice cloning is sensitive, it is gated behind responsible AI review.',
+      'A professional custom voice is fine-tuned from studio recordings of a voice talent and is the way to get a distinctive branded voice in any of the languages it supports. Because voice cloning is sensitive, custom voice is Limited Access, and the voice talent must record a consent statement before training.',
+    reference: {
+      label: 'Custom voice overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/custom-neural-voice',
+      quote:
+        'Custom voice access is limited based on eligibility and usage criteria.',
+    },
     tags: ['speech', 'custom-voice', 'responsible-ai'],
   },
   {
@@ -642,25 +744,31 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'Custom text classification, trained on the labelled data', correct: true },
       {
         id: 'b',
-        text: 'Prebuilt sentiment analysis',
+        text: 'Prebuilt sentiment analysis on each incoming message',
         correct: false,
         why: 'It returns mood, not product area.',
       },
       {
         id: 'c',
-        text: 'Key phrase extraction',
+        text: 'Key phrase extraction to surface each message\'s topics',
         correct: false,
         why: 'It surfaces topics but does not assign a message to one of eight defined categories.',
       },
       {
         id: 'd',
-        text: 'Entity linking',
+        text: 'Entity linking against the product catalogue',
         correct: false,
         why: 'It disambiguates mentions against a knowledge base - a different job entirely.',
       },
     ],
     explanation:
       'Categories specific to the business plus labelled examples available is the textbook case for custom text classification. With no labelled data, a generative model with a good few-shot prompt is the pragmatic alternative.',
+    reference: {
+      label: 'What is custom text classification?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/custom-text-classification/overview',
+      quote:
+        "It's a cloud-based API service that applies machine-learning intelligence to enable you to build custom models for text classification tasks.",
+    },
     tags: ['language', 'custom-classification'],
   },
   {
@@ -675,14 +783,14 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Azure Language exposes its capabilities through a Model Context Protocol (MCP) server that can be used as an agent tool',
+        text: 'Azure Language\'s MCP server (preview), which an agent can call as a tool',
         correct: true,
       },
       {
         id: 'b',
         text: 'It is not possible; Language features can only be called directly by application code',
         correct: false,
-        why: 'Azure Language is available as an MCP server, reachable as a remote server in the Foundry tool catalog or self-hosted.',
+        why: 'Azure Language offers an MCP server (preview), either as a remote endpoint on your Foundry resource or self-hosted.',
       },
       {
         id: 'c',
@@ -698,7 +806,13 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'This is the shift worth understanding for AI-901: prebuilt capabilities are increasingly reachable as *tools an agent can call*, not just APIs your code calls. Toolboxes then govern which agents get which tools.',
+      'Prebuilt capabilities are increasingly reachable as *tools an agent can call*, not just APIs your code calls. Toolboxes then govern which agents get which tools.',
+    reference: {
+      label: 'Azure Language in Foundry Tools: tools and agents',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/concepts/foundry-tools-agents',
+      quote:
+        'The Azure Language MCP server in the Foundry portal connects agents to Azure Language services through the Model Context Protocol (MCP). This integration helps you build conversational applications that can call Azure Language capabilities as tools.',
+    },
     tags: ['language', 'agents', 'mcp', 'hard', 'currency'],
   },
   {
@@ -714,7 +828,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'Real-time speech to text', correct: true },
       {
         id: 'b',
-        text: 'Batch transcription',
+        text: 'Batch transcription of the session recording',
         correct: false,
         why: 'Batch is asynchronous and processes stored files. Captions must appear as the speaker talks.',
       },
@@ -733,6 +847,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Live and streaming means real-time. Files sitting in storage means batch. The scenario always tells you which.',
+    reference: {
+      label: 'Speech to text overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-to-text',
+      quote:
+        "Real-time speech to text transcribes audio as it's recognized from a microphone or file.",
+    },
     tags: ['speech', 'batch-vs-realtime'],
   },
   {
@@ -767,6 +887,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Verbatim, evidentiary or compliance requirements always point to extractive summarization, which selects source sentences unchanged.',
+    reference: {
+      label: 'What is summarization in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/summarization/overview',
+      quote:
+        'Extractive summarization: Produces a summary by extracting salient sentences within the source text, together the positioning information of these sentences.',
+    },
     tags: ['language', 'summarization', 'trap'],
   },
   {
@@ -781,7 +907,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The cascade, because it produces a transcript as a natural artefact and lets you choose the synthesis voice',
+        text: 'The cascade: it yields a transcript and lets you pick the voice',
         correct: true,
       },
       {
@@ -792,19 +918,25 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'Neither; this requires fine-tuning',
+        text: 'Neither - meeting both requirements needs fine-tuning',
         correct: false,
         why: 'Nothing here calls for changing model behaviour.',
       },
       {
         id: 'd',
-        text: 'The cascade, because multimodal models cannot accept audio',
+        text: 'The cascade, because multimodal models cannot accept audio input',
         correct: false,
         why: 'They can. The right reason is voice control and the audit transcript, not a capability gap.',
       },
     ],
     explanation:
       'A useful counterweight to the usual answer: the cascade wins when you need stage-by-stage control - a specific licensed voice, and a transcript you can log and audit.',
+    reference: {
+      label: 'Agents in Microsoft Foundry: how voice-based agents work',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview#how-voice-based-agents-work',
+      quote:
+        'This architecture provides broader text-model and Azure voice choices. It also provides explicit control over transcription, phrase lists, turn detection, and interim responses, but each stage contributes to end-to-end latency.',
+    },
     tags: ['speech', 'multimodal', 'architecture'],
   },
   {
@@ -824,25 +956,31 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'How negative the review is on a scale of 0 to 1',
+        text: 'How negative the review is, on a scale from 0 to 1',
         correct: false,
         why: 'A common misreading. Sentiment analysis returns confidence scores per category, not an intensity rating.',
       },
       {
         id: 'c',
-        text: 'The proportion of negative words in the text',
+        text: 'The proportion of words in the review that are negative',
         correct: false,
         why: 'It is a model confidence, not a word count.',
       },
       {
         id: 'd',
-        text: 'The percentage of reviewers who agreed',
+        text: 'The percentage of human reviewers who agreed with the label',
         correct: false,
         why: 'No human agreement is involved.',
       },
     ],
     explanation:
       'Sentiment analysis returns confidence scores for positive, neutral and negative, at both document and sentence level. The scores express certainty about the classification.',
+    reference: {
+      label: 'What are sentiment analysis and opinion mining?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/overview',
+      quote:
+        'The sentiment analysis feature assigns sentiment labels, such as "negative," "neutral," and "positive." The service determines these labels using the highest confidence score.',
+    },
     tags: ['language', 'sentiment', 'trap'],
   },
   {
@@ -882,6 +1020,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Two modes, one distinction: is the audio arriving live, or already sitting in storage?',
+    reference: {
+      label: 'Speech to text overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/speech-service/speech-to-text',
+      quote:
+        'Batch transcription is designed for transcribing large amounts of audio stored in files.',
+    },
     tags: ['speech', 'multi-select'],
   },
 
@@ -900,30 +1044,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A user message containing both the question text and the image, as separate content items',
+        text: 'One user message with the question and the image as separate content items',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The image only, with the question in the system message',
+        text: 'The image only, with the question moved into the system message',
         correct: false,
         why: 'The question belongs with the image in the user message; the system message carries standing instructions.',
       },
       {
         id: 'c',
-        text: 'OCR output of the screenshot as plain text',
+        text: 'The text extracted from the screenshot by OCR, as plain text',
         correct: false,
         why: 'That throws away layout, highlighting and everything else visual that helps diagnose the error.',
       },
       {
         id: 'd',
-        text: 'A vector embedding of the image',
+        text: 'A vector embedding of the screenshot, generated beforehand',
         correct: false,
         why: 'Embeddings power search, not visual question answering.',
       },
     ],
     explanation:
       'Multimodal prompting is one request: a user message whose content is a list of items - text plus one or more images, supplied as a URL or base64 data.',
+    reference: {
+      label: 'How to use vision-enabled chat models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'The format is the same as the chat completions API for GPT-4o, except that the message content can be an array containing text and images (either a valid publicly accessible HTTP or HTTPS URL to an image, or a base-64-encoded image).',
+    },
     tags: ['vision', 'multimodal', 'sdk'],
   },
   {
@@ -958,46 +1108,57 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The GPT-image models support editing with a mask plus a prompt, and variations. The mask says what may change; the prompt says what it should become.',
+    reference: {
+      label: 'How to use image generation models from OpenAI',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Supports inpainting and variations with mask + prompt',
+    },
     tags: ['vision', 'image-generation', 'inpainting'],
   },
   {
     id: 'sc-fv-03',
-    topic: 'foundry-vision',
-    objective: 'Build a lightweight application that includes vision capabilities',
-    difficulty: 'hard',
+    topic: 'foundry-extraction',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
+    difficulty: 'medium',
     kind: 'exam',
     scenario:
-      'A team is starting a new project that needs OCR over scanned multi-page contracts, including tables and checkboxes.',
-    prompt: 'Which service should they build on?',
+      'A team needs the text, paragraphs and tables from scanned multi-page contracts. They do not need any fields extracted or generated, and they do not want to deploy a language model for this step.',
+    prompt: 'Which Azure Content Understanding analyzer should they use?',
     options: [
-      { id: 'a', text: 'Azure Document Intelligence', correct: true },
+      { id: 'a', text: '`prebuilt-layout`', correct: true },
       {
         id: 'b',
-        text: 'Azure Vision Image Analysis 4.0',
+        text: '`prebuilt-read`',
         correct: false,
-        why: 'It is deprecated with a published retirement date, and Microsoft\'s migration guidance explicitly directs OCR scenarios to Document Intelligence.',
+        why: 'It extracts words and paragraphs, but without layout analysis, so tables are not returned as tables.',
       },
       {
         id: 'c',
-        text: 'An image generation model',
+        text: '`prebuilt-contract`',
         correct: false,
-        why: 'Wrong direction - generation creates images.',
+        why: 'A domain-specific analyzer that extracts contract fields, which the team does not need.',
       },
       {
         id: 'd',
-        text: 'The Face service',
+        text: '`prebuilt-documentSearch`',
         correct: false,
-        why: 'That is for face scenarios only.',
+        why: 'A RAG analyzer that also writes figure descriptions and a summary of the document, which is more than the team needs.',
       },
     ],
     explanation:
-      'Document Intelligence is the specialist for document OCR, layout, tables, selection marks and reading order. Content Understanding is the right choice when you need declared fields across several modalities.',
-    tags: ['vision', 'document-intelligence', 'currency', 'hard'],
+      'The content extraction analyzers do OCR and layout without any model: `prebuilt-read` for plain text, and `prebuilt-layout` when you also need structure such as tables and sections.',
+    reference: {
+      label: 'Prebuilt analyzers in Azure Content Understanding in Foundry Tools',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote: 'Extracts content and layout elements such as words, figures, paragraphs, and tables from documents.',
+    },
+    tags: ['content-understanding', 'layout'],
   },
   {
     id: 'sc-fv-04',
     topic: 'foundry-vision',
-    objective: 'Identify features and capabilities of computer vision and image-generation models',
+    objective: 'Build a lightweight application that includes vision capabilities',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1006,12 +1167,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Face identification falls under Microsoft\'s Limited Access policy and requires registration with an eligible use case',
+        text: 'Face identification is Limited Access and needs an approved use case',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Face detection is Limited Access, so this cannot be built',
+        text: 'Face detection is Limited Access, so this cannot be built at all',
         correct: false,
         why: 'Detection - finding faces - is broadly available. It is identification and verification that are gated.',
       },
@@ -1023,13 +1184,19 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'Emotion inference must be enabled first',
+        text: 'Emotion inference must be enabled for the feature first',
         correct: false,
         why: 'Emotion inference was retired on responsible AI grounds, and it is unrelated to identification.',
       },
     ],
     explanation:
       'Touchless access control is one of the use cases Microsoft names for the Face service, but identification is Limited Access. Detection is not.',
+    reference: {
+      label: 'Limited Access features of Face',
+      url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/computer-vision/limited-access-identity',
+      quote:
+        'Customers and partners who wish to use Limited Access features of the Face API, including Face identification and Face verification, are required to register for access by submitting a registration form. Note that these features are only available with Standard (S0) and Enterprise (E0) pricing tiers and are not supported in the Free (F0) tier. The Face Detection operation is available without registration.',
+    },
     tags: ['vision', 'face', 'responsible-ai'],
   },
   {
@@ -1044,30 +1211,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Sora-2 generates video from text and is in preview, so preview terms and availability apply',
+        text: 'Sora 2 is in preview, so preview terms and availability apply',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Video generation is generally available with a full SLA',
+        text: 'Video generation is generally available, with a full SLA',
         correct: false,
         why: 'It is in preview.',
       },
       {
         id: 'c',
-        text: 'Video generation is not available on Azure at all',
+        text: 'Video generation is not available on Azure in any form',
         correct: false,
         why: 'It is available, in preview.',
       },
       {
         id: 'd',
-        text: 'GPT-image-2 can produce short video clips',
+        text: 'gpt-image-2 can produce a short clip as well as stills',
         correct: false,
         why: 'The GPT-image models produce still images, however high the resolution.',
       },
     ],
     explanation:
-      'The exam concentrates on generally available features but may include commonly used preview features. Knowing what is preview and what is GA is itself examinable.',
+      'The study guide says most questions cover generally available features, but preview features may appear when they are commonly used. Previews come without a service-level agreement.',
+    reference: {
+      label: 'Sora 2 video generation overview (preview)',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/video-generation',
+      quote:
+        'Sora 2 video generation is currently in preview.',
+    },
     tags: ['vision', 'video-generation', 'currency'],
   },
   {
@@ -1082,30 +1255,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Generate a rich description of each image and index it, or use multimodal embeddings so images and text share one vector space',
+        text: 'Index rich image descriptions, or use multimodal embeddings',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Image classification with one label per photo',
+        text: 'Image classification, assigning one category label per photo',
         correct: false,
         why: 'A single label like "shirt" cannot support a query about fabric, colour and collar style.',
       },
       {
         id: 'c',
-        text: 'OCR over the photos',
+        text: 'OCR over every photo, indexing the text it finds',
         correct: false,
         why: 'There is no text on the garments to read.',
       },
       {
         id: 'd',
-        text: 'An image generation model',
+        text: 'An image generation model to redraw each product',
         correct: false,
         why: 'Wrong direction - the images already exist.',
       },
     ],
     explanation:
       'Two routes to the same end: describe the images and index the text (Content Understanding\'s image-for-search analyzers do exactly this), or embed images and text into a shared vector space with a multimodal embedding model such as Cohere Embed.',
+    reference: {
+      label: 'Migrate from Azure Vision Image Analysis',
+      url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
+      quote:
+        'Features: A multilingual multimodal embedding model supported in the Microsoft Foundry portal. It transforms different modalities such as images, texts, and interleaved images and texts into a single vector representation.',
+    },
     tags: ['vision', 'embeddings', 'search', 'hard'],
   },
   {
@@ -1120,12 +1299,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A multimodal model generating a description, then text to speech - serving inclusiveness',
+        text: 'A multimodal model\'s description, read out by text to speech - inclusiveness',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Object detection returning bounding boxes - serving inclusiveness',
+        text: 'Object detection returning labelled bounding boxes - serving inclusiveness',
         correct: false,
         why: 'Coordinates are not a useful spoken description. The capability is wrong even though the principle is right.',
       },
@@ -1144,12 +1323,18 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Accessibility features are the canonical inclusiveness example, and this one chains two capabilities: multimodal visual understanding for the description, then speech synthesis to deliver it.',
+    reference: {
+      label: 'How to use vision-enabled chat models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'Vision-enabled chat models are large multimodal models (LMM) developed by OpenAI that can analyze images and provide textual responses to questions about them.',
+    },
     tags: ['vision', 'multimodal', 'inclusiveness', 'cross-topic'],
   },
   {
     id: 'sc-fv-08',
     topic: 'foundry-vision',
-    objective: 'Identify features and capabilities of computer vision and image-generation models',
+    objective: 'Create new visual outputs by using generative models',
     difficulty: 'medium',
     kind: 'exam',
     type: 'multi',
@@ -1179,6 +1364,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Training adds noise progressively; generation reverses it. The prompt embedding steers each denoising step, which is how the text ends up controlling what appears.',
+    reference: {
+      label: 'Deploy and use MAI image models in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/how-to/use-foundry-models-mai-image',
+      quote:
+        'Each model uses a diffusion-based approach to progressively refine images from a natural language prompt, enabling strong alignment between the input text and the generated output.',
+    },
     tags: ['vision', 'diffusion', 'multi-select'],
   },
   {
@@ -1193,30 +1384,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Whether the output must conform to a fixed schema with confidence scores, or can be free-form prose',
+        text: 'Whether output must fit a fixed schema with confidence scores',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Which service supports higher image resolution',
+        text: 'Which service supports the higher image resolution',
         correct: false,
         why: 'Not the deciding factor for either service in this scenario.',
       },
       {
         id: 'c',
-        text: 'Whether the images are colour or greyscale',
+        text: 'Whether the photos are taken in colour or greyscale',
         correct: false,
         why: 'Both handle either.',
       },
       {
         id: 'd',
-        text: 'Whether the team writes Python or C#',
+        text: 'Whether the development team writes Python or C#',
         correct: false,
         why: 'Both offer SDKs across languages.',
       },
     ],
     explanation:
       'This is the deciding question every time. A downstream system that ingests fields needs guaranteed structure and per-field confidence, which is Content Understanding. Open-ended explanation for a human reader is the multimodal model.',
+    reference: {
+      label: 'Content Understanding image overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/image/overview',
+      quote:
+        'Azure Content Understanding standardizes the extraction of data from images, making it easier to analyze large volumes of unstructured image data.',
+    },
     tags: ['vision', 'content-understanding', 'architecture', 'hard'],
   },
 
@@ -1226,7 +1423,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
   {
     id: 'sc-fe-01',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1235,18 +1432,18 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Create a custom analyzer: extend the prebuilt document analyzer with a field schema describing the six fields',
+        text: 'A custom analyzer: the document base plus a schema for the six fields',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Label several hundred documents and train a model',
+        text: 'Label several hundred delivery notes and train a model on them',
         correct: false,
-        why: 'Content Understanding analyzers are *configured*, not trained. You describe the fields in natural language rather than labelling a corpus.',
+        why: 'Content Understanding analyzers are *configured* from a schema. You describe the fields in natural language; labelled examples are optional rather than the starting point.',
       },
       {
         id: 'c',
-        text: 'Prompt a chat model with each document and parse the prose reply',
+        text: 'Prompt a chat model with each note and parse its prose reply',
         correct: false,
         why: 'No schema guarantee, no confidence scores, and fragile parsing at scale.',
       },
@@ -1259,6 +1456,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Custom analyzers are the answer when no prebuilt covers the document type. The key insight is that field *descriptions* do the work labelled training data would otherwise do.',
+    reference: {
+      label: 'Create a custom analyzer with Content Understanding',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      quote:
+        'To create a custom analyzer, define a field schema that describes the structured data you want to extract. In the following example, you create an analyzer based on the prebuilt document analyzer for processing a receipt.',
+    },
     tags: ['content-understanding', 'custom-analyzer'],
   },
   {
@@ -1273,36 +1476,42 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A video analyzer, which segments automatically on scene or topic change and describes each segment',
+        text: 'A video analyzer, which segments by scene or topic and describes each part',
         correct: true,
       },
       {
         id: 'b',
-        text: 'An image analyzer applied to sampled frames',
+        text: 'An image analyzer applied to frames sampled every few seconds',
         correct: false,
         why: 'Individual frame descriptions do not produce chapters, and they lose the spoken content entirely.',
       },
       {
         id: 'c',
-        text: 'A document analyzer applied to the transcript',
+        text: 'A document analyzer applied to the course transcript after it is exported',
         correct: false,
         why: 'It could summarise text, but it has no notion of timestamps or scene changes.',
       },
       {
         id: 'd',
-        text: 'Text to speech',
+        text: 'Text to speech that narrates a summary of each chapter',
         correct: false,
         why: 'Wrong direction.',
       },
     ],
     explanation:
       'Video analyzers segment on topic shifts, scene changes and visual cues, then return transcripts plus per-segment descriptions covering people, places and actions - exactly the chapter structure described.',
+    reference: {
+      label: 'Content Understanding video overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/video/overview',
+      quote:
+        'Segmentation: Automatic scene segmentation breaking the video into logical chunks based on categories you define',
+    },
     tags: ['content-understanding', 'video', 'segmentation'],
   },
   {
     id: 'sc-fe-03',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -1331,12 +1540,18 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Choosing from a predefined set of categories is Classify, by definition. Extract for values literally present, Classify for a fixed set you defined, Generate for something that needs writing.',
+    reference: {
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Classify: Classify content from a predefined set of categories, such as call sentiment or chart type, and route it to the correct analyzer for analysis.',
+    },
     tags: ['content-understanding', 'field-methods', 'hard'],
   },
   {
     id: 'sc-fe-04',
     topic: 'foundry-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1345,30 +1560,36 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The confidence threshold they set: fields scoring below it are routed for review',
+        text: 'The confidence threshold they set for routing to review',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The number of fields in the schema',
+        text: 'The number of fields defined in the analyzer schema',
         correct: false,
         why: 'More fields means more values, but the review decision is driven by confidence, not count.',
       },
       {
         id: 'c',
-        text: 'The temperature setting',
+        text: 'The temperature setting on the analyzer\'s model',
         correct: false,
         why: 'Not a parameter of analyzer-based extraction.',
       },
       {
         id: 'd',
-        text: 'Whether the analyzer is prebuilt or custom',
+        text: 'Whether the analyzer they use is prebuilt or custom',
         correct: false,
         why: 'Both provide confidence scores.',
       },
     ],
     explanation:
       'Confidence scores from 0 to 1 per field are what make straight-through processing viable. The threshold is the business dial: raise it for more human review and fewer errors, lower it for more automation.',
+    reference: {
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Provides reliability estimates from 0 to 1 for each extracted field value. High scores indicate accurate data extraction, enabling straight-through processing in automation workflows.',
+    },
     tags: ['content-understanding', 'confidence'],
   },
   {
@@ -1383,36 +1604,42 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'An image analyzer with three fields: the reading and serial generated from the image, and the seal condition classified',
+        text: 'An image analyzer: reading and serial generated, seal condition classified',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A document analyzer using Extract for all three fields',
+        text: 'A document analyzer that uses the Extract method for all three fields',
         correct: false,
         why: 'These are photographs, not documents, and Extract is supported for documents only.',
       },
       {
         id: 'c',
-        text: 'OCR alone',
+        text: 'OCR alone, reading the digits printed on each meter',
         correct: false,
         why: 'OCR would read the digits but cannot judge whether a seal is intact.',
       },
       {
         id: 'd',
-        text: 'An audio analyzer',
+        text: 'An audio analyzer run over the field engineer\'s notes',
         correct: false,
         why: 'Wrong modality.',
       },
     ],
     explanation:
       'Two things to notice: the modality decides the base analyzer, and the method is chosen per field. A judgement from a fixed set of options is Classify; reading values off an image is Generate, because Extract is a document-only method.',
+    reference: {
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        'Extract: Directly extract values as they appear in the input content (supported for documents only), such as dates from receipts or item details from invoices.',
+    },
     tags: ['content-understanding', 'image', 'field-methods'],
   },
   {
     id: 'sc-fe-06',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -1421,7 +1648,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Segmentation to split the bundle, and classification to route each section to the right analyzer',
+        text: 'Segmentation to split the bundle, and classification to route each part',
         correct: true,
       },
       {
@@ -1445,6 +1672,12 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Segmentation divides content into logical sections; classification routes each to the appropriate analyzer. Microsoft ships a composed mortgage analyzer that classifies and routes a wide range of US mortgage documents automatically.',
+    reference: {
+      label: 'Content Understanding classification and segmentation',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/classifier',
+      quote:
+        'Classify, segment, and analyze: Once the segments are classified, route each segment to the desired extraction analyzer for further field extraction.',
+    },
     tags: ['content-understanding', 'segmentation', 'classification', 'hard'],
   },
   {
@@ -1480,12 +1713,18 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Audio analyzers transcribe, label speakers, and can generate summaries and classify things like call sentiment - all in one analyze call, which is why they beat stitching Speech and Language together.',
+    reference: {
+      label: 'Content Understanding audio overview',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/audio/overview',
+      quote:
+        'Diarization. Distinguishes between speakers in a conversation, attributing parts of the transcript to specific speakers.',
+    },
     tags: ['content-understanding', 'audio', 'multi-select'],
   },
   {
     id: 'sc-fe-08',
     topic: 'foundry-extraction',
-    objective: 'Build a lightweight application with information extraction capabilities',
+    objective: 'Build a lightweight application with information extraction capabilities by using Content Understanding',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1494,36 +1733,42 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'No - you define a field schema with descriptions and the analyzer applies it immediately',
+        text: 'No - a field schema with good descriptions works immediately',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Yes - at least 50 labelled examples per field',
+        text: 'Yes - at least 50 labelled examples for every field',
         correct: false,
         why: 'That is the workflow for custom models in older document-processing services, not Content Understanding.',
       },
       {
         id: 'c',
-        text: 'Yes - you must fine-tune a model first',
+        text: 'Yes - a model must be fine-tuned on your documents first',
         correct: false,
         why: 'No fine-tuning is involved.',
       },
       {
         id: 'd',
-        text: 'Only for audio and video, not for documents',
+        text: 'Only for audio and video analyzers, not for documents',
         correct: false,
         why: 'None of the modalities require training.',
       },
     ],
     explanation:
-      'This is the headline benefit: schema-driven field extraction with no complex prompt engineering and no labelled training set. Describe the field well, and the service does the rest.',
+      'This is the headline benefit: schema-driven field extraction with no complex prompt engineering and no labelled training set required. Describe the field well, and the service does the rest - labelled examples are an optional extra for improving accuracy, not a prerequisite.',
+    reference: {
+      label: 'What is Azure Content Understanding in Foundry Tools?',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/overview',
+      quote:
+        "Simplify field extraction. Content Understanding's field extraction makes it easier to generate structured output from unstructured content. Define a schema to extract, classify, or generate field values with no complex prompt engineering.",
+    },
     tags: ['content-understanding', 'custom-analyzer', 'trap'],
   },
   {
     id: 'sc-fe-09',
     topic: 'foundry-extraction',
-    objective: 'Extract information from documents and forms by using Azure Content Understanding',
+    objective: 'Extract information from documents and forms by using Azure Content Understanding in Foundry Tools',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -1533,7 +1778,7 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       { id: 'a', text: 'A RAG analyzer, such as the document-for-search variant', correct: true },
       {
         id: 'b',
-        text: 'A domain-specific analyzer for invoices',
+        text: 'A domain-specific analyzer, such as the invoice analyzer',
         correct: false,
         why: 'Wrong document type, and a tuned invoice schema is not what a retrieval pipeline needs.',
       },
@@ -1545,13 +1790,19 @@ export const foundryScenarioQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'No analyzer - index the raw PDFs directly',
+        text: 'No analyzer at all - index the raw PDF files directly',
         correct: false,
         why: 'Raw PDFs are not retrievable text. Extraction has to happen first.',
       },
     ],
     explanation:
       'Content Understanding ships analyzer types for different jobs: base analyzers as building blocks, RAG analyzers optimised for search and AI applications, domain-specific analyzers for particular document types, and custom analyzers built on top of a base.',
+    reference: {
+      label: 'Prebuilt analyzers in Azure Content Understanding',
+      url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/concepts/prebuilt-analyzers',
+      quote:
+        'RAG analyzers - Optimized for retrieval-augmented generation scenarios with semantic analysis and markdown extraction for document ingestion, search applications, and knowledge bases.',
+    },
     tags: ['content-understanding', 'rag', 'analyzer-types'],
   },
 ];

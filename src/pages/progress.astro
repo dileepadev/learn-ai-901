@@ -1,16 +1,49 @@
 ---
 import Base from '../layouts/Base.astro';
 import ProgressReport from '../components/ProgressReport.svelte';
+import Icon from '../components/Icon.astro';
+import { EXAM } from '../data/exam';
+import { moduleCoverage, questionRefs } from '../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
 ---
 
 <Base
-  title="Your progress - AI-901 Exam Prep"
-  description="Readiness breakdown, retention schedule, milestones and data controls."
+  title="Your progress"
+  description="Your AI-901 readiness by topic, review schedule, milestones and session history, plus backup and reset."
   active="progress"
 >
   <div class="wrap">
-    <ProgressReport client:only="svelte" base={base} />
+    <header class="page-head">
+      <h1>Your progress</h1>
+      <p>How ready you are, topic by topic, and what is stored in this browser.</p>
+    </header>
+    <ProgressReport client:load {base} refs={questionRefs} modules={moduleCoverage} />
+
+    <section class="sources" aria-labelledby="src-title">
+      <h2 id="src-title">Where this content comes from</h2>
+      <p class="muted">
+        Lessons and questions are written against the skills measured as of {EXAM.skillsMeasuredDate} and
+        checked against Microsoft Learn. Every question links to the page that backs up its answer. This is
+        an independent study aid, not a Microsoft product, and its questions are not real exam questions.
+      </p>
+      <ul>
+        <li><a href={EXAM.studyGuideUrl}>Official AI-901 study guide<Icon name="external" size={14} label="(external)" /></a></li>
+        <li><a href={EXAM.examPageUrl}>Exam AI-901 page<Icon name="external" size={14} label="(external)" /></a></li>
+        <li><a href={EXAM.practiceAssessmentUrl}>Microsoft's practice assessment<Icon name="external" size={14} label="(external)" /></a></li>
+      </ul>
+    </section>
   </div>
 </Base>
+
+<style>
+  .sources {
+    margin-top: 2.5rem;
+    max-width: var(--measure);
+  }
+  .sources a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+</style>

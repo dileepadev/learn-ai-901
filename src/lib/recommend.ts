@@ -5,7 +5,8 @@
  * concrete actions. The first item is always the single highest-value thing to
  * do with that much time.
  */
-import type { Module, Progress, Question, TopicId } from '../data/types';
+import type { Progress, TopicId } from '../data/types';
+import type { ModuleRef, QuestionRef } from './catalog';
 import { computeOverall, computeReadiness, daysUntilExam } from './scoring';
 import { dueQuestions, unseenQuestions } from './queue';
 
@@ -33,8 +34,8 @@ export interface Recommendation {
 
 export interface RecommendInput {
   progress: Progress;
-  modules: Module[];
-  questions: Question[];
+  modules: ModuleRef[];
+  questions: QuestionRef[];
   /** Minutes available right now. */
   budget: number;
   /** Prefix for internal links (Astro's `import.meta.env.BASE_URL`). */
@@ -68,7 +69,7 @@ export function recommend(input: RecommendInput): Recommendation[] {
     const resuming = Boolean(inProgress);
     out.push({
       kind: 'learn',
-      title: resuming ? `Finish “${nextModule.title}”` : `Learn: ${nextModule.title}`,
+      title: resuming ? `Finish “${nextModule.title}”` : `Start lesson ${nextModule.order}: ${nextModule.title}`,
       why: resuming
         ? 'You already started this one - finishing it closes a gap in your coverage score.'
         : nextModule.summary,
@@ -84,11 +85,11 @@ export function recommend(input: RecommendInput): Recommendation[] {
   if (overall.mistakeIds.length >= 3) {
     out.push({
       kind: 'mistakes',
-      title: `Redo ${overall.mistakeIds.length} question${overall.mistakeIds.length === 1 ? '' : 's'} you got wrong`,
+      title: `Retry the ${overall.mistakeIds.length} question${overall.mistakeIds.length === 1 ? '' : 's'} you got wrong`,
       why: 'Re-answering a miss while the explanation is fresh is the highest-yield minute you can spend.',
       href: join(base, '/practice/mistakes/'),
       minutes: Math.min(20, Math.max(4, Math.round(overall.mistakeIds.length * 0.8))),
-      cta: 'Fix misses',
+      cta: 'Retry',
       score: 78 + Math.min(20, overall.mistakeIds.length),
     });
   }
@@ -98,13 +99,13 @@ export function recommend(input: RecommendInput): Recommendation[] {
   if (weakest && overall.distinctAnswered >= 8 && weakest.score < 0.75) {
     out.push({
       kind: 'weak',
-      title: `Drill your weakest area: ${weakest.label}`,
+      title: `Drill your weakest topic: ${weakest.label}`,
       why: `${weakest.label} is worth about ${weakest.weight}% of the exam and you're scoring ${
         weakest.accuracy === null ? 'nothing yet' : `${Math.round(weakest.accuracy * 100)}%`
       } on it.`,
       href: join(base, `/practice/weak/?topic=${weakest.topic}`),
       minutes: 12,
-      cta: 'Practice',
+      cta: 'Drill',
       score: 70 + weakest.weight * 0.6,
     });
   }
@@ -115,7 +116,7 @@ export function recommend(input: RecommendInput): Recommendation[] {
       kind: 'review',
       title: `${due} questions are due for review`,
       why: 'These are scheduled to resurface right as you would start to forget them.',
-      href: join(base, '/practice/'),
+      href: join(base, '/practice/?start=due'),
       minutes: Math.min(25, Math.round(due * 0.7)),
       cta: 'Review',
       score: 62 + Math.min(20, due / 3),
@@ -155,7 +156,7 @@ export function recommend(input: RecommendInput): Recommendation[] {
       kind: 'practice',
       title: `${unseen} questions you haven't tried yet`,
       why: 'Breadth first: seeing every question once beats perfecting a small slice of the bank.',
-      href: join(base, '/practice/'),
+      href: join(base, '/practice/?start=quick'),
       minutes: 15,
       cta: 'Practice',
       score: 58,
@@ -166,11 +167,11 @@ export function recommend(input: RecommendInput): Recommendation[] {
   if (daysLeft !== null && daysLeft <= 1) {
     out.unshift({
       kind: 'cram',
-      title: daysLeft <= 0 ? 'Exam day: run the final cram sheet' : 'Tomorrow is exam day - cram mode',
+      title: daysLeft <= 0 ? 'Exam day: one pass through the cram sheet' : 'Exam tomorrow: switch to the cram sheet',
       why: 'Every "know this" fact, trap and comparison in one pass. No new material this close in.',
       href: join(base, '/cram/'),
       minutes: 25,
-      cta: 'Open cram mode',
+      cta: 'Open cram sheet',
       score: 200,
     });
   }
@@ -198,8 +199,8 @@ export const TIME_BUDGETS = [
 /** Topics sorted worst-first, for the weak-area picker. */
 export function weakTopicIds(
   p: Progress,
-  questions: Question[],
-  modules: Module[],
+  questions: QuestionRef[],
+  modules: ModuleRef[],
   limit = 3,
 ): TopicId[] {
   return computeReadiness(p, questions, modules)

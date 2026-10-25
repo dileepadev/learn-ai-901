@@ -2,14 +2,14 @@
   /** Click through a real question moving along the RAG pipeline. */
   let step = $state(0);
 
-  const QUESTION = 'How much annual leave do I get after five years?';
+  const QUESTION = 'How many days of holiday do I get after five years?';
 
   const STAGES = [
     {
       label: 'Ingest',
       when: 'Ahead of time',
       what: 'Source documents are connected. In Foundry IQ these are knowledge sources: Blob Storage, SharePoint, OneLake, public web.',
-      detail: 'handbook.pdf · benefits-2026.docx · policy-leave.md · 11,997 more',
+      detail: 'handbook.pdf, benefits-2026.docx, policy-leave.md and 11,997 more',
       kind: 'pre',
     },
     {
@@ -30,7 +30,7 @@
     {
       label: 'Retrieve',
       when: 'At query time',
-      what: 'The question is embedded and matched semantically. Note that "annual leave" is found even though the user said "holiday" nowhere near it - that is what vectors buy you.',
+      what: 'The question is embedded and matched by meaning. The best passage is headed "Annual leave", although the user asked about "holiday" - a plain keyword search would have missed it. That is what vectors buy you.',
       detail:
         '1. §4.2 Annual leave (score 0.91)\n2. §4.5 Carry-over rules (score 0.78)\n3. §9.1 Long-service awards (score 0.64)',
       kind: 'query',
@@ -40,7 +40,7 @@
       when: 'At query time',
       what: 'The retrieved passages are inserted into the prompt as grounding data, alongside a system message telling the model to answer only from them.',
       detail:
-        'system: Answer only from the context. If it is not there, say you do not know.\ncontext: §4.2 … §4.5 …\nuser: How much annual leave do I get after five years?',
+        'system: Answer only from the context. If it is not there, say you do not know.\ncontext: §4.2 … §4.5 …\nuser: How many days of holiday do I get after five years?',
       kind: 'query',
     },
     {
@@ -48,7 +48,7 @@
       when: 'At query time',
       what: 'The model answers from the context and returns citations, so a human can verify every claim.',
       detail:
-        '"After five years of continuous service you receive 28 days of annual leave per year. [handbook.pdf §4.2]"',
+        '"After five years of continuous service you get 28 days of annual leave a year. [handbook.pdf §4.2]"',
       kind: 'query',
     },
   ];
@@ -92,7 +92,7 @@
 
   <div class="nav">
     <button type="button" class="btn btn-sm" disabled={step === 0} onclick={() => (step -= 1)}>
-      ← Previous
+      Previous stage
     </button>
     <button
       type="button"
@@ -100,7 +100,7 @@
       disabled={step === STAGES.length - 1}
       onclick={() => (step += 1)}
     >
-      Next stage →
+      Next stage
     </button>
   </div>
 
@@ -153,8 +153,8 @@
     padding: 0.3rem 0.6rem 0.3rem 0.3rem;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--fg-muted);
+    background: var(--surface);
+    color: var(--ink-2);
     cursor: pointer;
     white-space: nowrap;
     transition:
@@ -162,16 +162,16 @@
       border-color 0.13s;
   }
   .node:hover {
-    background: var(--bg-hover);
+    background: var(--hover);
   }
   .node.done {
-    color: var(--fg);
+    color: var(--ink);
     border-color: var(--border-strong);
   }
   .node.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--accent-fg);
+    color: var(--on-accent);
   }
 
   .node-num {
@@ -180,25 +180,25 @@
     width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     font-size: 0.68rem;
-    font-weight: 800;
-    color: var(--fg-muted);
+    font-weight: 700;
+    color: var(--ink-2);
   }
   .node.active .node-num {
-    background: var(--accent-fg);
+    background: var(--on-accent);
     color: var(--accent);
   }
 
   .panel {
     border: 1px solid var(--border);
-    border-left: 3px solid var(--border-strong);
-    border-radius: var(--radius);
-    padding: 0.8rem 0.9rem;
-    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
   }
   .panel.query {
-    border-left-color: var(--accent);
+    border-color: var(--accent-edge);
   }
 
   .panel-head {
@@ -217,7 +217,7 @@
   .detail {
     font-size: 0.75rem;
     padding: 0.55rem 0.65rem;
-    background: var(--bg-sunken);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     white-space: pre-wrap;

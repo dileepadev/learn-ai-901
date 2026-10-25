@@ -1,0 +1,267 @@
+---
+import Base from '../../../layouts/Base.astro';
+import LessonBody from '../../../components/lesson/LessonBody.astro';
+import LessonProgress from '../../../components/lesson/LessonProgress.svelte';
+import Icon from '../../../components/Icon.astro';
+import { MODULES } from '../../../data/modules';
+import { topicLabel } from '../../../data/exam';
+import type { Module } from '../../../data/types';
+
+export function getStaticPaths() {
+  return MODULES.map((module, i) => ({
+    params: { id: module.id },
+    props: { module, prev: MODULES[i - 1], next: MODULES[i + 1] },
+  }));
+}
+
+interface Props {
+  module: Module;
+  prev?: Module;
+  next?: Module;
+}
+
+const { module: mod, prev, next } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+const path = href(`/learn/${mod.id}/`);
+const quizHref = href(`/learn/${mod.id}/quiz/`);
+const sections = mod.sections.map((s) => ({ id: s.id, title: s.title }));
+const progressProps = {
+  moduleId: mod.id,
+  title: mod.title,
+  path,
+  sections,
+  quizHref,
+  quizCount: mod.quiz.length,
+};
+---
+
+<Base title={mod.title} description={mod.summary} active="learn">
+  <div class="wrap lesson">
+    <header class="lesson-head">
+      <nav class="crumbs small" aria-label="Breadcrumb">
+        <a href={href('/learn/')}>Lessons</a>
+        <Icon name="chevron-right" size={14} />
+        <span aria-current="page">Lesson {mod.order} of {MODULES.length}</span>
+      </nav>
+      <h1>{mod.title}</h1>
+      <p class="summary">{mod.summary}</p>
+      <ul class="meta" aria-label="About this lesson">
+        <li class="chip chip-accent">{topicLabel(mod.topic)}</li>
+        <li class="chip"><Icon name="clock" size={14} /> {mod.minutes} minutes</li>
+        {mod.priority === 'high' && <li class="chip chip-warn">High priority</li>}
+      </ul>
+      <div class="outcomes">
+        <p class="outcomes-title">After this lesson you can</p>
+        <ul>
+          {mod.outcomes.map((outcome) => <li>{outcome}</li>)}
+        </ul>
+      </div>
+    </header>
+
+    <aside class="lesson-rail">
+      <LessonProgress client:idle variant="rail" {...progressProps} />
+    </aside>
+
+    <article class="lesson-body">
+      <LessonBody module={mod} />
+    </article>
+
+    <footer class="lesson-end">
+      <LessonProgress client:visible variant="footer" {...progressProps} />
+      <nav class="pager" aria-label="Other lessons">
+        {
+          prev ? (
+            <a class="sheet pager-link" href={href(`/learn/${prev.id}/`)} rel="prev">
+              <span class="small subtle">Previous lesson</span>
+              <span class="pager-title">{prev.title}</span>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+        {
+          next ? (
+            <a class="sheet pager-link next" href={href(`/learn/${next.id}/`)} rel="next">
+              <span class="small subtle">Next lesson</span>
+              <span class="pager-title">{next.title}</span>
+            </a>
+          ) : (
+            <a class="sheet pager-link next" href={href('/exam/')}>
+              <span class="small subtle">You have reached the last lesson</span>
+              <span class="pager-title">Sit a full practice exam</span>
+            </a>
+          )
+        }
+      </nav>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  .lesson {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    grid-template-areas:
+      'rail head'
+      'rail body'
+      'rail end';
+    column-gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    align-items: start;
+  }
+
+  .lesson-head {
+    grid-area: head;
+    margin-bottom: 2.5rem;
+  }
+  .lesson-rail {
+    grid-area: rail;
+    position: sticky;
+    top: calc(var(--header-h) + 1.25rem);
+    max-height: calc(100dvh - var(--header-h) - 2.5rem);
+    overflow-y: auto;
+    padding-top: 0.25rem;
+  }
+  .lesson-body {
+    grid-area: body;
+    min-width: 0;
+  }
+  .lesson-end {
+    grid-area: end;
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 3rem;
+  }
+
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+    color: var(--ink-3);
+  }
+  .crumbs a {
+    color: var(--ink-2);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+
+  .summary {
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: 1.125rem;
+    line-height: 1.55;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .meta li {
+    margin: 0;
+  }
+
+  .outcomes {
+    max-width: var(--measure);
+    padding: 1.1rem 1.25rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .outcomes-title {
+    margin: 0 0 0.6rem;
+    color: var(--ink-2);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .outcomes ul {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .outcomes li {
+    position: relative;
+    margin: 0;
+    padding-left: 1.6rem;
+  }
+  /* A small check: these are what you will be able to do. */
+  .outcomes li::before {
+    content: '';
+    position: absolute;
+    left: 0.1rem;
+    top: 0.42em;
+    width: 0.45rem;
+    height: 0.8rem;
+    border: solid var(--success);
+    border-width: 0 2px 2px 0;
+    rotate: 40deg;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .pager-link {
+    display: grid;
+    gap: 0.2rem;
+  }
+  .pager-link:hover {
+    border-color: var(--accent-edge);
+  }
+  .pager-link.next {
+    text-align: right;
+  }
+  .pager-title {
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+  }
+  .pager-link:hover .pager-title {
+    color: var(--accent);
+  }
+
+  @media (max-width: 960px) {
+    .lesson {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'head'
+        'rail'
+        'body'
+        'end';
+    }
+    .lesson-head {
+      margin-bottom: 1.25rem;
+    }
+    .lesson-rail {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      margin-bottom: 1.75rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+    .pager-link.next {
+      text-align: left;
+    }
+  }
+</style>

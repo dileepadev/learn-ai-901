@@ -68,10 +68,19 @@ interface QuestionBase {
   /** Optional case/scenario setup rendered above the prompt. */
   scenario?: string;
   prompt: string;
+  /**
+   * A Python snippet shown under the prompt, verbatim. In a dropdown question
+   * whose code contains `___`, the blanks sit in the code instead of the prompt.
+   */
+  code?: string;
   /** Why the correct answer is correct. Always shown after answering. */
   explanation: string;
-  /** Optional source link for verification. */
-  reference?: { label: string; url: string };
+  /**
+   * The Microsoft Learn page that backs up the answer, and a short passage
+   * quoted from it word for word (em dashes set as spaced hyphens), shown to
+   * the learner after they answer.
+   */
+  reference: { label: string; url: string; quote: string };
   /** Short tags used by Rapid Review and weak-area drilling. */
   tags?: string[];
 }
@@ -96,7 +105,10 @@ export interface MultiChoiceQuestion extends QuestionBase {
   options: ChoiceOption[];
 }
 
-/** Match each item on the left to the correct item on the right. */
+/**
+ * Drag and drop: drag each value on the right to the item on the left it
+ * belongs with. A value may be used once, more than once, or not at all.
+ */
 export interface MatchQuestion extends QuestionBase {
   type: 'match';
   /** Label above the left column, e.g. "Scenario". */
@@ -106,26 +118,66 @@ export interface MatchQuestion extends QuestionBase {
   pairs: { id: string; left: string; right: string; why?: string }[];
 }
 
-/** Put the steps in the correct order. `items` are given in correct order. */
+/**
+ * Build list: move the steps into the answer area in the correct order.
+ * `items` are given in correct order.
+ */
 export interface OrderQuestion extends QuestionBase {
   type: 'order';
   items: { id: string; text: string }[];
+}
+
+/**
+ * "For each of the following statements, select Yes if the statement is
+ * true." Every statement is marked, and earns its point, on its own.
+ */
+export interface YesNoQuestion extends QuestionBase {
+  type: 'yesno';
+  statements: { id: string; text: string; yes: boolean; why: string }[];
+}
+
+/**
+ * "Select the answer that correctly completes the sentence." The prompt is the
+ * sentence, with `___` marking each blank, in the same order as `blanks`. A
+ * question with blanks in its `code` completes the code instead.
+ */
+export interface DropdownQuestion extends QuestionBase {
+  type: 'dropdown';
+  blanks: { id: string; options: ChoiceOption[] }[];
 }
 
 export type Question =
   | SingleChoiceQuestion
   | MultiChoiceQuestion
   | MatchQuestion
-  | OrderQuestion;
+  | OrderQuestion
+  | YesNoQuestion
+  | DropdownQuestion;
 
 export type QuestionType = Question['type'];
+
+/** Marks a blank in a dropdown question's prompt or code. */
+export const BLANK = '___';
+
+/** The text whose `___` marks are a dropdown question's blanks: its code, if the code has any. */
+export function blankText(q: DropdownQuestion): string {
+  return q.code?.includes(BLANK) ? q.code : q.prompt;
+}
 
 /** A learner's response, normalised across question types. */
 export type Answer =
   | { type: 'single'; optionId: string | null }
   | { type: 'multi'; optionIds: string[] }
   | { type: 'match'; assignments: Record<string, string | null> }
-  | { type: 'order'; itemIds: string[] };
+  | { type: 'order'; itemIds: string[] }
+  | { type: 'yesno'; values: Record<string, boolean | null> }
+  | { type: 'dropdown'; choices: Record<string, string | null> };
+
+/** Points on offer and points earned, as Microsoft scores multi-part questions. */
+export interface Points {
+  earned: number;
+  possible: number;
+}
 
 /* ------------------------------------------------------------------ *
  * Lessons
@@ -282,6 +334,11 @@ export interface SessionResult {
   missed: string[];
   /** Seconds allowed, for timed modes. */
   limitSeconds?: number;
+  /**
+   * Points across the paper, one per correctly answered part. Practice exams
+   * record this, and their percentage is taken from it.
+   */
+  points?: Points;
   /** Per-topic tally for the results breakdown. */
   byTopic: Partial<Record<TopicId, { total: number; correct: number }>>;
 }
@@ -306,7 +363,10 @@ export interface Progress {
   sessions: SessionResult[];
   /** ISO dates (YYYY-MM-DD) on which the learner studied. */
   activeDays: string[];
+  /** One-off markers such as "opened the cram sheet". */
   achievements: string[];
+  /** Study-plan steps the learner ticked off by hand. */
+  planDone: string[];
 }
 
 /* ------------------------------------------------------------------ *
@@ -322,7 +382,9 @@ export type AuthoredQuestion =
   | (Omit<SingleChoiceQuestion, 'type'> & { type?: 'single' })
   | MultiChoiceQuestion
   | MatchQuestion
-  | OrderQuestion;
+  | OrderQuestion
+  | YesNoQuestion
+  | DropdownQuestion;
 
 export function normalizeQuestion(q: AuthoredQuestion): Question {
   if (!('type' in q) || q.type === undefined) {

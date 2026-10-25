@@ -1,0 +1,65 @@
+---
+import Base from '../../../layouts/Base.astro';
+import LessonQuiz from '../../../components/lesson/LessonQuiz.svelte';
+import Icon from '../../../components/Icon.astro';
+import { MODULES } from '../../../data/modules';
+import { getQuestions } from '../../../data/questions';
+import type { Module } from '../../../data/types';
+
+export function getStaticPaths() {
+  return MODULES.map((module, i) => ({
+    params: { id: module.id },
+    props: { module, next: MODULES[i + 1] },
+  }));
+}
+
+interface Props {
+  module: Module;
+  next?: Module;
+}
+
+const { module: mod, next } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+const questions = getQuestions(mod.quiz);
+---
+
+<Base
+  title={`${mod.title} quiz`}
+  description={`A ${questions.length}-question quiz on ${mod.title}, with every answer explained.`}
+  active="learn"
+>
+  <div class="wrap">
+    <nav class="crumbs small" aria-label="Breadcrumb">
+      <a href={href('/learn/')}>Lessons</a>
+      <Icon name="chevron-right" size={14} />
+      <a href={href(`/learn/${mod.id}/`)}>{mod.title}</a>
+      <Icon name="chevron-right" size={14} />
+      <span aria-current="page">Quiz</span>
+    </nav>
+    <LessonQuiz
+      client:load
+      moduleId={mod.id}
+      title={`${mod.title}: lesson quiz`}
+      {questions}
+      {base}
+      doneHref={next ? href(`/learn/${next.id}/`) : href('/learn/')}
+      doneLabel={next ? `Next lesson: ${next.title}` : 'All lessons'}
+    />
+  </div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    max-width: 50rem;
+    margin: 0 auto 1rem;
+    color: var(--ink-3);
+  }
+  .crumbs a {
+    color: var(--ink-2);
+  }
+</style>

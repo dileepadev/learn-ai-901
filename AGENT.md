@@ -40,7 +40,8 @@ src/data/          All content. Most changes go here.
   review.ts        Flashcards, comparisons, quick facts
   resources.ts     Official links
   types.ts         Every content type
-src/components/    Svelte islands (the interactive UI)
+src/lib/           Engine: progress store, SRS, scoring, catalog refs, exam session
+src/components/    Svelte islands (the interactive UI); lesson/ renders lessons statically
 src/pages/         Astro pages (the static shell)
 src/layouts/       Base.astro
 tests/smoke.mjs    Playwright smoke suite
@@ -54,14 +55,27 @@ tests/smoke.mjs    Playwright smoke suite
   (skills measured as of **April 15, 2026**) and current Microsoft Learn docs.
   Use the Microsoft Learn MCP when it is available.
 - Never invent a fact, a service name, or a URL. If you cannot verify it, leave it out and say so.
-- Give every question a real `reference` link.
+- Never claim what the exam asks about ("a favourite exam question"). Microsoft does not publish that.
+  Keep questions in scope: the skills measured, at the depth of the official learning path. Background
+  beyond that belongs in a `learn` check, which stays out of practice exams and readiness.
+- Give every question a real `reference`: a Microsoft Learn page that backs up the answer, plus a
+  `quote` copied word for word from that page. Learners see it after they answer. Only change to
+  the quote: set em dashes as spaced hyphens. The build rejects a missing quote or a non-Learn URL.
 - Use **current** product naming: Microsoft Foundry (not Azure AI Foundry or Azure AI Studio),
   Foundry Tools (not Cognitive Services or Azure AI services), prompt agents and hosted agents,
   Azure Content Understanding, Foundry resource and project (not AI hub).
 
-**The build validates content for you.** It fails on a duplicate question or module id, a
-single-answer question without exactly one correct option, a multi-answer question with fewer
-than two, and a lesson referencing a question id that does not exist. Run `npm run check`.
+Questions come in the formats of Microsoft's practice assessment: `single`, `multi`, `match` (drag
+and drop), `order` (build list), `yesno` (statement sets) and `dropdown` (complete the sentence).
+Multi-part formats earn a point per correct part, as the real exam does. Every Yes/No statement and
+every wrong dropdown option needs its own `why`.
+
+**The build validates content for you.** It fails on a duplicate question or module id, an
+`objective` that is not the exact skills-measured wording for the question's topic (or the topic's
+heading, for a question that spans every skill in it), a single-answer question without exactly one
+correct option, a multi-answer question with fewer than two, a dropdown whose `___` blanks do not
+match its `blanks` or whose blank lacks exactly one correct option, and a lesson referencing a
+question id that does not exist. Run `npm run check`.
 
 ## Writing style
 
@@ -75,6 +89,11 @@ than two, and a lesson referencing a question id that does not exist. Run `npm r
 - Match the surrounding code - naming, comment density, idiom.
 - Build internal links from `import.meta.env.BASE_URL`, never hardcode `/learn-ai-901`.
 - Keep bundle size in mind: no new runtime dependency without a good reason.
+- Islands must not import `data/questions` or `data/modules` just to count or score. Pass the
+  build-time refs from `lib/pageData` as props, and `await import('../data/questions')` only
+  when a session actually starts.
+- Islands are server-rendered, so read progress through `liveProgress()` (`lib/live.svelte.ts`),
+  never during the first render, or hydration will not match.
 - Keep components typed. `any` is a smell.
 
 ## Git

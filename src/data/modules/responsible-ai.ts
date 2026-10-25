@@ -7,7 +7,7 @@ export const responsibleAi: Module = {
   summary:
     'Worth roughly 18% of the exam and almost entirely scenario-matching. Learn to map any situation to a principle in one read.',
   topic: 'responsible-ai',
-  minutes: 20,
+  minutes: 21,
   priority: 'high',
   icon: '⚖️',
   outcomes: [
@@ -15,7 +15,7 @@ export const responsibleAi: Module = {
     'Map a scenario to the right principle, including the pairs that get confused',
     'Name the standard mitigation for each principle',
   ],
-  quiz: ['rai-003', 'rai-004', 'rai-005', 'rai-008', 'rai-013', 'rai-016', 'rai-019', 'rai-021'],
+  quiz: ['rai-003', 'rai-004', 'rai-007', 'rai-008', 'rai-010', 'rai-019', 'rai-020', 'sc-rai-06', 'yn-rai-01', 'dd-rai-01'],
   sections: [
     {
       id: 'six',
@@ -112,14 +112,20 @@ export const responsibleAi: Module = {
           t: 'table',
           headers: ['Foundry capability', 'Principle it serves'],
           rows: [
-            ['Content filters (hate, violence, sexual, self-harm) on a deployment', 'Reliability and safety'],
-            ['Prompt shields against prompt injection', 'Privacy and security'],
+            ['Guardrail controls for hate, sexual, violence and self-harm content', 'Reliability and safety'],
+            ['Groundedness detection (preview), which flags answers the sources do not support', 'Reliability and safety'],
+            ['Prompt shields against user prompt attacks and indirect attacks hidden in documents', 'Privacy and security'],
             ['Foundry IQ permission-aware retrieval and Purview sensitivity labels', 'Privacy and security'],
             ['Citations returned with grounded answers', 'Transparency'],
             ['Content Credentials (C2PA) in generated images', 'Transparency'],
-            ['Evaluations and observability / tracing', 'Accountability, reliability'],
-            ['Limited Access gating on face identification', 'Fairness, privacy'],
+            ['Evaluations, tracing and monitoring', 'Accountability, reliability and safety'],
+            ['Limited Access gating on face identification', 'Privacy and security, fairness'],
           ],
+        },
+        {
+          t: 'changed',
+          title: 'Content filters now live inside guardrails',
+          body: 'In Foundry, safety settings are configured as **guardrails**: named sets of controls. Each control pairs a **risk** (hate, violence, prompt attacks, PII and more) with an **intervention point** (user input, output, and for agents the tool call and tool response) and an **action** (annotate, or annotate and block). Models get the default `Microsoft.DefaultV2` guardrail; agent guardrails are in preview. Older notes say "content filters on a deployment" - same idea, older wording.',
         },
         { t: 'check', qid: 'rai-017' },
       ],

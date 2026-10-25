@@ -1,95 +1,158 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
-import ThemeToggle from '../components/ThemeToggle.svelte';
+import { Font } from 'astro:assets';
+import Icon from '../components/Icon.astro';
 import HeaderProgress from '../components/HeaderProgress.svelte';
+import { moduleCoverage, questionRefs } from '../lib/pageData';
+import type { IconName } from '../lib/icons';
+
+export type NavId =
+  | 'home'
+  | 'plan'
+  | 'learn'
+  | 'practice'
+  | 'exam'
+  | 'review'
+  | 'cram'
+  | 'resources'
+  | 'progress';
 
 interface Props {
   title: string;
   description?: string;
   /** Which nav item to highlight. */
-  active?: string;
-  /** Kept for API compatibility; header remains stable across all pages. */
-  bare?: boolean;
+  active?: NavId;
 }
 
 const {
   title,
-  description = 'An interactive study app for Microsoft Exam AI-901: Microsoft Azure AI Fundamentals. 12 lessons, 200+ practice questions with explanations, spaced repetition, weak-area drilling and a timed exam simulator.',
+  description = 'A free, interactive study guide for Microsoft Exam AI-901: Azure AI Fundamentals. Twelve lessons, 217 practice questions with explanations, spaced repetition and a timed practice exam.',
   active,
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const href = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const siteName = 'Learn AI-901';
+const fullTitle = active === 'home' ? title : `${title} - ${siteName}`;
 
-const nav = [
-  { id: 'home', label: 'Dashboard', path: '/' },
-  { id: 'plan', label: 'Plan', path: '/plan/' },
-  { id: 'learn', label: 'Learn', path: '/learn/' },
-  { id: 'practice', label: 'Practice', path: '/practice/' },
-  { id: 'exam', label: 'Exam', path: '/exam/' },
-  { id: 'review', label: 'Review', path: '/review/' },
-  { id: 'resources', label: 'Resources', path: '/resources/' },
+// The header readiness chip works from build-time refs (lib/pageData), so no
+// page has to download the question bank just to draw it.
+
+interface NavItem {
+  id: NavId;
+  label: string;
+  path: string;
+  icon: IconName;
+}
+
+const nav: NavItem[] = [
+  { id: 'home', label: 'Home', path: '/', icon: 'home' },
+  { id: 'plan', label: 'Plan', path: '/plan/', icon: 'plan' },
+  { id: 'learn', label: 'Learn', path: '/learn/', icon: 'learn' },
+  { id: 'practice', label: 'Practice', path: '/practice/', icon: 'practice' },
+  { id: 'exam', label: 'Exam', path: '/exam/', icon: 'exam' },
+  { id: 'review', label: 'Review', path: '/review/', icon: 'review' },
+  { id: 'resources', label: 'Resources', path: '/resources/', icon: 'resources' },
 ];
+
+// The phone tab bar keeps the five things people do every session.
+const tabs = nav.filter((n) => ['home', 'learn', 'practice', 'exam', 'review'].includes(n.id));
+const moreLinks: NavItem[] = [
+  { id: 'plan', label: 'Study plan', path: '/plan/', icon: 'plan' },
+  { id: 'cram', label: 'Cram sheet', path: '/cram/', icon: 'cram' },
+  { id: 'progress', label: 'Your progress', path: '/progress/', icon: 'progress' },
+  { id: 'resources', label: 'Official resources', path: '/resources/', icon: 'resources' },
+];
+
+const isCurrent = (id: NavId) => active === id || (id === 'review' && active === 'cram');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafafc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d13" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={href('/sitemap-index.xml')} />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E"
-    />
-    <ClientRouter />
+    <Font cssVariable="--font-inter" preload={[{ weight: 400, style: 'normal', subset: 'latin' }]} />
     <script is:inline>
-      // Apply the stored theme before first paint to avoid a flash.
-      function applyTheme() {
-        try {
-          const t = localStorage.getItem('ai901:theme');
-          if (t === 'dark' || t === 'light') {
-            document.documentElement.dataset.theme = t;
-          } else {
-            delete document.documentElement.dataset.theme;
+      // Before first paint: apply the stored theme, and mark returning visitors
+      // so progress numbers wait for their real values instead of flashing zero.
+      (function () {
+        var root = document.documentElement;
+        function prime() {
+          try {
+            var theme = localStorage.getItem('ai901:theme');
+            if (theme === 'dark' || theme === 'light') root.dataset.theme = theme;
+            else delete root.dataset.theme;
+            if (localStorage.getItem('ai901:progress')) root.dataset.hasProgress = '';
+            else delete root.dataset.hasProgress;
+          } catch (e) {
+            /* storage blocked: follow the system theme and show fresh-visitor content */
           }
-        } catch (e) {
-          /* private mode: fall back to the system preference */
         }
-      }
-      applyTheme();
-      document.addEventListener('astro:after-swap', applyTheme);
-    </script>
-    <script is:inline>
-      function scrollActiveNav() {
-        const activeLink = document.querySelector('.site-nav .nav-link.current');
-        if (activeLink) {
-          activeLink.scrollIntoView({ behavior: 'instant', inline: 'center', block: 'nearest' });
+        prime();
+        document.addEventListener('astro:after-swap', prime);
+
+        // Theme button: system, then the theme that differs from the system, then the other.
+        document.addEventListener('click', function (event) {
+          var button = event.target instanceof Element ? event.target.closest('[data-theme-toggle]') : null;
+          if (!button) return;
+          var systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+          var order = systemDark ? ['system', 'light', 'dark'] : ['system', 'dark', 'light'];
+          var current = root.dataset.theme || 'system';
+          var next = order[(order.indexOf(current) + 1) % order.length];
+          try {
+            if (next === 'system') localStorage.removeItem('ai901:theme');
+            else localStorage.setItem('ai901:theme', next);
+          } catch (e) {
+            /* keep the choice for this page only */
+          }
+          if (next === 'system') delete root.dataset.theme;
+          else root.dataset.theme = next;
+          syncThemeButtons();
+        });
+
+        function syncThemeButtons() {
+          var current = root.dataset.theme || 'system';
+          var labels = { system: 'Theme: following your system', light: 'Theme: light', dark: 'Theme: dark' };
+          document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
+            b.setAttribute('data-current', current);
+            b.setAttribute('aria-label', labels[current] + '. Select to change.');
+            b.setAttribute('title', labels[current]);
+          });
         }
-      }
-      document.addEventListener('astro:page-load', scrollActiveNav);
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scrollActiveNav);
-      } else {
-        scrollActiveNav();
-      }
+        document.addEventListener('astro:page-load', syncThemeButtons);
+      })();
     </script>
+    <ClientRouter />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-header" transition:name="site-header">
+    <header class="site-header">
       <div class="wrap header-inner">
-        <a class="brand" href={href('/')}>
-          <span class="brand-mark" aria-hidden="true">AI</span>
-          <span class="brand-text">
-            <strong>AI-901</strong>
-            <span class="tiny subtle">Exam prep</span>
-          </span>
+        <a class="brand" href={href('/')} aria-label="Learn AI-901 home">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="9" />
+            <path d="M9.5 16.5l4.2 4.2 8.8-9.4" />
+          </svg>
+          <span class="brand-text">Learn <strong>AI-901</strong></span>
         </a>
 
         <nav class="site-nav" aria-label="Main">
@@ -97,8 +160,8 @@ const nav = [
             nav.map((item) => (
               <a
                 href={href(item.path)}
-                class:list={['nav-link', { current: active === item.id }]}
-                aria-current={active === item.id ? 'page' : undefined}
+                class="nav-link"
+                aria-current={isCurrent(item.id) ? 'page' : undefined}
               >
                 {item.label}
               </a>
@@ -106,189 +169,362 @@ const nav = [
           }
         </nav>
 
-        <div class="header-right" transition:persist="header-right">
-          <HeaderProgress client:only="svelte" base={base} active={active === 'progress'} />
-          <ThemeToggle client:only="svelte" />
+        <div class="header-tools">
+          <div class="header-progress" transition:persist="header-progress">
+            <HeaderProgress
+              client:idle
+              base={base}
+              refs={questionRefs}
+              modules={moduleCoverage}
+            />
+          </div>
+          <button class="icon-btn theme-toggle" type="button" data-theme-toggle data-current="system" aria-label="Change theme">
+            <Icon name="system" class="t-system" />
+            <Icon name="sun" class="t-light" />
+            <Icon name="moon" class="t-dark" />
+          </button>
+          <button class="icon-btn more-btn" type="button" popovertarget="more-menu" aria-label="More pages">
+            <Icon name="more" />
+          </button>
         </div>
       </div>
     </header>
 
-    <main id="main">
+    <div id="more-menu" class="more-menu" popover>
+      <nav aria-label="More pages">
+        {
+          moreLinks.map((item) => (
+            <a href={href(item.path)} aria-current={active === item.id ? 'page' : undefined}>
+              <Icon name={item.icon} />
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <main id="main" tabindex="-1">
       <slot />
     </main>
 
     <footer class="site-footer">
-      <div class="wrap">
-        <p class="tiny subtle">
-          Built for the current <strong>Exam AI-901</strong> skills measured (April 15, 2026), verified
-          against Microsoft Learn. Progress is stored only in this browser.{' '}
+      <div class="wrap footer-inner">
+        <div class="footer-about">
+          <a class="brand brand-sm" href={href('/')} aria-label="Learn AI-901 home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+              <rect width="32" height="32" rx="9" />
+              <path d="M9.5 16.5l4.2 4.2 8.8-9.4" />
+            </svg>
+            <span class="brand-text">Learn <strong>AI-901</strong></span>
+          </a>
+          <p>
+            Written against the Exam AI-901 skills measured as of April 15, 2026, and checked against
+            Microsoft Learn. Not affiliated with Microsoft. Your progress stays in this browser.
+          </p>
+        </div>
+        <nav aria-label="Footer">
           <a href="https://learn.microsoft.com/credentials/certifications/resources/study-guides/ai-901"
             >Official study guide</a
-          >{' '}&middot;{' '}
-          <a href={href('/resources/')}>Official resources &amp; links</a>{' '}&middot;{' '}
-          <a href={href('/progress/')}>Your progress &amp; data</a>
-        </p>
+          >
+          <a href={href('/cram/')}>Cram sheet</a>
+          <a href={href('/progress/')}>Your progress and data</a>
+          <a href={href('/resources/')}>Official resources</a>
+          <a href="https://github.com/dileepadev/learn-ai-901">Source on GitHub</a>
+        </nav>
       </div>
     </footer>
+
+    <nav class="tabbar" aria-label="Sections">
+      {
+        tabs.map((item) => (
+          <a href={href(item.path)} aria-current={isCurrent(item.id) ? 'page' : undefined}>
+            <Icon name={item.icon} size={22} />
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
+    </nav>
 
     <style>
       .site-header {
         position: sticky;
         top: 0;
         z-index: 40;
-        background: color-mix(in srgb, var(--bg) 88%, transparent);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
         border-bottom: 1px solid var(--border);
-        box-shadow: 0 1px 3px rgb(20 22 31 / 0.03);
+        -webkit-backdrop-filter: saturate(1.6) blur(16px);
+        backdrop-filter: saturate(1.6) blur(16px);
       }
 
       .header-inner {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        min-height: 56px;
+        gap: 1.5rem;
+        height: var(--header-h);
       }
 
       .brand {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.6rem;
-        text-decoration: none;
-        color: var(--fg);
         flex-shrink: 0;
-        transition: opacity 0.14s ease;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        letter-spacing: -0.012em;
       }
       .brand:hover {
-        opacity: 0.9;
+        color: var(--ink);
+      }
+      .brand strong {
+        font-weight: 700;
       }
 
+      /* A tick in a tile: the point of the app is knowing you are ready. */
       .brand-mark {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 9px;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-        color: var(--accent-fg);
-        font-size: 0.76rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
       }
-
-      .brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.15;
+      .brand-mark rect {
+        fill: var(--accent);
       }
-      .brand-text strong {
-        font-size: 0.96rem;
-        letter-spacing: -0.015em;
+      .brand-mark path {
+        fill: none;
+        stroke: var(--on-accent);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
       .site-nav {
         display: flex;
         align-items: center;
-        gap: 0.2rem;
-        margin-left: auto;
-        padding: 3px;
-        background: var(--bg-sunken);
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-      }
-      .site-nav::-webkit-scrollbar {
-        display: none;
+        gap: 0.125rem;
       }
 
       .nav-link {
-        padding: 0.32rem 0.72rem;
+        display: flex;
+        align-items: center;
+        height: 2.25rem;
+        padding: 0 0.75rem;
         border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 550;
-        color: var(--fg-muted);
+        color: var(--ink-2);
+        font-weight: 500;
+        font-size: 0.9375rem;
         text-decoration: none;
         white-space: nowrap;
         transition:
-          background 0.14s ease,
-          color 0.14s ease,
-          box-shadow 0.14s ease;
+          background 0.15s ease,
+          color 0.15s ease;
       }
       .nav-link:hover {
-        background: var(--bg-hover);
-        color: var(--fg);
+        background: var(--hover);
+        color: var(--ink);
       }
-      .nav-link.current {
-        background: var(--bg-elevated);
-        color: var(--accent);
-        font-weight: 650;
-        box-shadow: var(--shadow-sm);
+      .nav-link[aria-current='page'] {
+        background: var(--surface-2);
+        box-shadow: inset 0 0 0 1px var(--border);
+        color: var(--ink);
+        font-weight: 600;
       }
 
-      .header-right {
+      .header-tools {
         display: flex;
         align-items: center;
-        gap: 0.55rem;
-        flex-shrink: 0;
-        min-width: 140px;
-        justify-content: flex-end;
+        gap: 0.35rem;
+        margin-left: auto;
+      }
+
+      .theme-toggle :global(.icon) {
+        display: none;
+      }
+      .theme-toggle[data-current='system'] :global(.t-system),
+      .theme-toggle[data-current='light'] :global(.t-light),
+      .theme-toggle[data-current='dark'] :global(.t-dark) {
+        display: block;
+      }
+
+      .more-btn {
+        display: none;
+      }
+
+      .more-menu {
+        position: fixed;
+        inset: auto;
+        top: calc(var(--header-h) + 0.5rem);
+        right: var(--gutter);
+        margin: 0;
+        min-width: 15rem;
+        padding: 0.4rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+        transform-origin: top right;
+        transition:
+          opacity 0.16s ease,
+          transform 0.2s var(--ease),
+          overlay 0.2s allow-discrete,
+          display 0.2s allow-discrete;
+      }
+      .more-menu:popover-open {
+        opacity: 1;
+        transform: none;
+      }
+      @starting-style {
+        .more-menu:popover-open {
+          opacity: 0;
+          transform: translateY(-4px) scale(0.98);
+        }
+      }
+      .more-menu nav {
+        display: grid;
+      }
+      .more-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        min-height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: var(--radius);
+        color: var(--ink);
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .more-menu a :global(.icon) {
+        color: var(--ink-3);
+      }
+      .more-menu a:hover {
+        background: var(--hover);
+      }
+      .more-menu a[aria-current='page'] {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .more-menu a[aria-current='page'] :global(.icon) {
+        color: var(--accent);
       }
 
       main {
-        padding: 1.6rem 0 3.5rem;
+        flex: 1;
+        padding: clamp(1.5rem, 1rem + 2vw, 3rem) 0 5rem;
+      }
+      main:focus {
+        outline: none;
       }
 
       .site-footer {
         border-top: 1px solid var(--border);
-        padding: 1.2rem 0 2rem;
+        background: var(--surface);
+        padding: 2.25rem 0 calc(2.25rem + var(--tabbar-h));
+        color: var(--ink-3);
+        font-size: 0.875rem;
       }
-      .site-footer p {
+      .footer-inner {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1.5rem 3rem;
+      }
+      .footer-about {
+        display: grid;
+        gap: 0.75rem;
+        max-width: 52ch;
+      }
+      .footer-about p {
         margin: 0;
-        max-width: 62ch;
+      }
+      .brand-sm {
+        font-size: 0.95rem;
+      }
+      .brand-sm .brand-mark {
+        width: 24px;
+        height: 24px;
+      }
+      .footer-inner nav {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        align-content: start;
+        gap: 0.5rem 2.25rem;
+      }
+      .footer-inner nav a {
+        color: var(--ink-2);
+        text-decoration: none;
+      }
+      .footer-inner nav a:hover {
+        color: var(--ink);
       }
 
-      @media (max-width: 768px) {
-        .header-inner {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          grid-template-areas:
-            'brand actions'
-            'nav nav';
-          row-gap: 0.5rem;
-          column-gap: 0.75rem;
-          padding-top: 0.5rem;
-          padding-bottom: 0.55rem;
-          min-height: auto;
-        }
+      .tabbar {
+        display: none;
+      }
 
-        .brand {
-          grid-area: brand;
-        }
-
-        .brand-text {
-          display: flex;
-        }
-
-        .header-right {
-          grid-area: actions;
-          min-width: 0;
-        }
-
+      @media (max-width: 960px) {
         .site-nav {
-          grid-area: nav;
-          margin-left: 0;
-          width: 100%;
-          justify-content: flex-start;
-          padding: 2px;
-          gap: 0.15rem;
+          display: none;
         }
+        .more-btn {
+          display: inline-grid;
+        }
+        .tabbar {
+          position: fixed;
+          inset: auto 0 0 0;
+          z-index: 40;
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          height: var(--tabbar-h);
+          padding: 0 0.25rem env(safe-area-inset-bottom, 0px);
+          border-top: 1px solid var(--border);
+          background: color-mix(in srgb, var(--surface) 86%, transparent);
+          -webkit-backdrop-filter: saturate(1.6) blur(16px);
+          backdrop-filter: saturate(1.6) blur(16px);
+        }
+        .tabbar a {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.2rem;
+          color: var(--ink-3);
+          font-size: 0.72rem;
+          font-weight: 550;
+          text-decoration: none;
+        }
+        .tabbar a :global(.icon) {
+          width: 3.25rem;
+          height: 1.85rem;
+          padding: 0.2rem 0;
+          border-radius: 999px;
+          transition: background 0.2s ease;
+        }
+        .tabbar a[aria-current='page'] {
+          color: var(--accent);
+          font-weight: 650;
+        }
+        .tabbar a[aria-current='page'] :global(.icon) {
+          background: var(--accent-soft);
+          stroke-width: 2.1;
+        }
+      }
 
-        .nav-link {
-          padding: 0.28rem 0.58rem;
-          font-size: 0.81rem;
+      @media (max-width: 560px) {
+        .footer-inner nav {
+          grid-template-columns: 1fr 1fr;
+          gap: 0.6rem 1.25rem;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .brand-text {
+          font-size: 0.95rem;
+        }
+        .header-tools {
+          gap: 0.1rem;
         }
       }
     </style>

@@ -16,7 +16,7 @@ export const mlAndTransformers: Module = {
     'Say what self-attention buys you over older sequential models',
     'Explain why models hallucinate - and why that motivates RAG',
   ],
-  quiz: ['mc-003', 'mc-004', 'mc-016'],
+  quiz: ['mc-019', 'mc-020', 'mc-021', 'sc-mc-05', 'sc-wl-08', 'sc-mc-07', 'dd-mc-02'],
   sections: [
     {
       id: 'pipeline',

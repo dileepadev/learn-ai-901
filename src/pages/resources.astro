@@ -1,16 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
 import ResourcesHub from '../components/ResourcesHub.svelte';
-
-const base = import.meta.env.BASE_URL;
+import { OFFICIAL_RESOURCES } from '../data/resources';
 ---
 
 <Base
-  title="Official Resources & Study Links - AI-901 Exam Prep"
-  description="All official Microsoft documentation, Microsoft Foundry portals, study guides, official practice tests, and GitHub labs for Microsoft Exam AI-901."
+  title="Official resources"
+  description="Every official link worth having for Exam AI-901: the study guide, practice assessment, exam sandbox, Microsoft Learn training, labs, and the Microsoft Foundry and Foundry Tools documentation."
   active="resources"
 >
   <div class="wrap">
-    <ResourcesHub client:only="svelte" base={base} />
+    <header class="page-head">
+      <h1>Official resources</h1>
+      <p>
+        {OFFICIAL_RESOURCES.length} links to Microsoft Learn, the exam itself, the labs and the product
+        documentation. Each one was checked before it went in.
+      </p>
+    </header>
+    <ResourcesHub client:load />
   </div>
 </Base>

@@ -1,10 +1,5 @@
 import type { AuthoredQuestion } from '../types';
 
-const REF = {
-  label: 'Microsoft Responsible AI Standard',
-  url: 'https://www.microsoft.com/ai/responsible-ai',
-};
-
 /**
  * Topic: Describe principles of responsible AI (~18% of the exam).
  *
@@ -45,7 +40,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Fairness means an AI system treats all people equitably and does not produce different quality of service for different groups. Unequal approval rates for equally qualified people is the textbook fairness failure.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'AI systems should treat everyone fairly and avoid affecting similar groups differently. For example, when AI systems provide guidance on medical treatment, loan applications, or employment, they should make the same recommendations to people with similar symptoms, financial circumstances, or qualifications.',
+    },
     tags: ['fairness', 'scenario'],
   },
   {
@@ -80,7 +80,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Transparency requires that people know when they are interacting with an AI system and can understand its capabilities and limitations. "Users did not know it was AI" is always transparency.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'AI can sometimes seem like "magic", but it\'s important to make users aware of how the system works and any potential limitations it may have.',
+    },
     tags: ['transparency', 'scenario'],
   },
   {
@@ -116,7 +121,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Inclusiveness means AI should empower everyone and engage people across abilities, languages and backgrounds. A voice-only channel excludes users who are deaf, non-speaking, or have atypical speech. The fix is offering multiple modalities, not a better microphone.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'An AI agent that offers speech-based interaction should also generate text captions to avoid making the system unusable for users with a hearing impairment.',
+    },
     tags: ['inclusiveness', 'scenario'],
   },
   {
@@ -152,7 +162,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Reliability and safety means an AI system performs consistently and safely under both expected conditions and unexpected ones. Failing on an edge case that endangers people - glare, weather, sensor noise - is the canonical example. Mitigations: rigorous testing across adverse conditions, guardrails, and human fallback.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'To build trust, AI systems must operate reliably, safely, and consistently. They should function as designed, respond safely to unexpected conditions, and resist harmful manipulation.',
+    },
     tags: ['reliability', 'scenario'],
   },
   {
@@ -188,7 +203,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Accountability means the people who design and deploy an AI system remain answerable for how it operates. Hallmarks: named human owners, governance and oversight, and a way for affected people to seek review. "The algorithm decided, nobody can change it" is always accountability.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        "People who design and deploy AI systems must be accountable for how those systems operate. Organizations should use industry standards to develop accountability norms. These norms help ensure that AI systems are not the final authority on decisions that affect people's lives and that humans maintain meaningful control over highly autonomous systems.",
+    },
     tags: ['accountability', 'scenario', 'trap'],
   },
   {
@@ -223,7 +243,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Privacy and security means AI systems must protect personal and sensitive data and resist misuse. Any leak of PII, cross-tenant data bleed, or exposure of confidential content lands here. Mitigations include RBAC, PII detection and redaction, and encryption.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'As AI becomes more common, protecting privacy and securing personal and business information is more important and complex. Privacy and data security require close attention because AI systems need data to make accurate predictions and decisions.',
+    },
     tags: ['privacy', 'scenario'],
   },
   {
@@ -271,7 +296,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Unequal quality of service across groups is fairness (note: an accent gap is fairness, not reliability). Disclosure and citations are transparency. Protecting data is privacy and security. Accessibility is inclusiveness. Human ownership and sign-off is accountability. Graceful degradation and testing is reliability and safety.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'Microsoft created a Responsible AI Standard, a framework for building AI systems based on six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
+    },
     tags: ['all-principles', 'matching'],
   },
   {
@@ -287,31 +317,36 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The model will learn historical bias from the training data; audit the data for representation and compare error rates across groups.',
+        text: 'It will learn the historical bias; audit the data and compare error rates per group',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The model will be unreliable; increase the size of the training set.',
+        text: 'It will be unreliable; add more years of the same hiring data to the training set',
         correct: false,
         why: 'More of the same biased data amplifies the problem rather than fixing it. Volume is not the issue - representativeness is.',
       },
       {
         id: 'c',
-        text: 'The model will leak candidate data; encrypt the training set.',
+        text: 'It will leak candidate data; encrypt the training set before the next training run',
         correct: false,
         why: 'Encryption addresses privacy and security, which is not the risk described here.',
       },
       {
         id: 'd',
-        text: 'The model will be opaque; publish the model weights.',
+        text: 'It will be opaque; publish the model weights so anyone can inspect them',
         correct: false,
         why: 'Publishing weights does not make outcomes fair, and transparency in the responsible AI sense means disclosure and explanation to affected people, not open-sourcing.',
       },
     ],
     explanation:
       'Models learn the patterns in their training data, including discriminatory ones. The fairness mitigation is to examine the data for demographic representation and to evaluate model performance separately across sub-populations, so a gap in error rates is visible before deployment.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        "AI models are trained using data, which is generally sourced and selected by humans. There's substantial risk that the data selection criteria, or the data itself reflects unconscious bias that may cause a model to produce discriminatory outputs. AI developers need to take care to minimize bias in training data and test AI systems for fairness.",
+    },
     tags: ['fairness', 'bias', 'hard'],
   },
   {
@@ -356,7 +391,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Privacy and security is about controlling who can see what and keeping sensitive data out of places it should not go. PII redaction and permission-aware retrieval are the two classic controls; in Foundry, permission-aware retrieval is exactly what Foundry IQ provides for grounded agents.',
-    reference: REF,
+    reference: {
+      label: 'What is PII detection in Azure Language?',
+      url: 'https://learn.microsoft.com/azure/ai-services/language-service/personally-identifiable-information/overview',
+      quote:
+        'PII detection is useful when you need to apply privacy controls before storage, analytics, sharing, or downstream AI processing.',
+    },
     tags: ['privacy', 'multi-select'],
   },
   {
@@ -371,31 +411,36 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Citations linking each claim back to its source document, plus a note that answers are AI-generated',
+        text: 'Citations to source documents, plus a note that answers are AI-generated',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Vector search over embeddings, plus semantic reranking',
+        text: 'Vector search over embeddings, plus semantic reranking of the results',
         correct: false,
         why: 'Those improve retrieval relevance - an accuracy benefit, not a transparency one.',
       },
       {
         id: 'c',
-        text: 'Content filters for hate and violence, plus rate limiting',
+        text: 'Content filters for hate and violence, plus per-user rate limiting',
         correct: false,
         why: 'Those serve reliability and safety.',
       },
       {
         id: 'd',
-        text: 'Encryption at rest, plus a private endpoint',
+        text: 'Encryption at rest, plus a private endpoint for the search index',
         correct: false,
         why: 'Those serve privacy and security.',
       },
     ],
     explanation:
-      'Transparency is about the user being able to understand what the system is and where its answers came from. Citations are the single most important transparency feature of a grounded assistant - and returning grounded answers with citations is a headline capability of Foundry IQ.',
-    reference: REF,
+      'Transparency is about the user being able to understand what the system is and where its answers came from. Citations are a key transparency feature of a grounded assistant - and returning grounded answers with citations is a headline capability of Foundry IQ.',
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'AI can sometimes seem like "magic", but it\'s important to make users aware of how the system works and any potential limitations it may have.',
+    },
     tags: ['transparency', 'rag', 'hard'],
   },
   {
@@ -414,7 +459,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Six: Fairness, Reliability and safety, Privacy and security, Inclusiveness, Transparency, and Accountability. A memory hook: **FRPITA** - or remember that Accountability and Transparency are the two "governance" principles that sit over the other four.',
-    reference: REF,
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'Microsoft created a Responsible AI Standard, a framework for building AI systems based on six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
+    },
     tags: ['definition'],
   },
   {
@@ -448,10 +498,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Content safety guardrails keep the system behaving safely across expected and adversarial inputs, which is reliability and safety. In Foundry, these are the built-in content filters available on Serverless API deployments, configurable per deployment.',
+      'Content safety controls keep the system behaving safely across expected and adversarial inputs, which is reliability and safety. In Foundry these controls live in **guardrails**: models get the default `Microsoft.DefaultV2` guardrail, and you can assign a custom guardrail to a deployment or an agent.',
     reference: {
-      label: 'Content filtering in Microsoft Foundry',
-      url: 'https://learn.microsoft.com/azure/ai-foundry/openai/concepts/content-filter',
+      label: 'Guardrails and controls overview in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview',
+      quote:
+        'Microsoft Foundry provides safety and security guardrails that you can apply to core models and agents. Agent guardrails are in preview. Guardrails consist of a set of controls. The controls define a risk to be detected, intervention points to scan for the risk, and the response action to take in the model or agent when the risk is detected.',
     },
     tags: ['reliability', 'content-safety'],
   },
@@ -467,31 +519,36 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Inclusiveness asks whether the system engages people across abilities, languages and cultures - limiting support to one region leaves whole populations unable to benefit.',
+        text: 'It asks whether people across abilities, languages and cultures can benefit - one region is not enough',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Inclusiveness is satisfied as long as the model is accurate for the languages it does support.',
+        text: 'It is satisfied as long as the model is accurate for every language it does support',
         correct: false,
         why: 'That is a reliability argument. Accuracy for the included group says nothing about the excluded one.',
       },
       {
         id: 'c',
-        text: 'Inclusiveness only applies to physical accessibility such as screen readers.',
+        text: 'It only covers physical accessibility, such as screen readers and keyboard navigation',
         correct: false,
         why: 'Accessibility is part of inclusiveness, but the principle explicitly covers language and cultural reach as well.',
       },
       {
         id: 'd',
-        text: 'Inclusiveness is a subset of fairness and needs no separate consideration.',
+        text: 'It is a subset of fairness, so a fair system is automatically inclusive',
         correct: false,
         why: 'They are distinct principles. Fairness is about equitable treatment of those who use the system; inclusiveness is about whether people can participate at all.',
       },
     ],
     explanation:
       'Inclusiveness means AI should empower everyone and engage people. It spans disability and accessibility, language coverage, and cultural context. The distinction to hold onto: fairness = equitable outcomes for users; inclusiveness = everyone can be a user.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        "The potential of AI to improve lives and drive success should be open to everyone. AI developers should strive to ensure that their solutions don't exclude some users.",
+    },
     tags: ['inclusiveness', 'fairness-vs-inclusiveness', 'hard'],
   },
   {
@@ -536,14 +593,19 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Accountability puts humans in charge of the system: clear ownership, governance and oversight, and meaningful recourse for people affected by its decisions.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        "Ultimately, the people and organizations that develop and distribute AI solutions are accountable for their actions. It's important for organizations developing AI models and applications to define and apply a framework of governance to help ensure that they apply responsible AI principles to their work.",
+    },
     tags: ['accountability', 'multi-select'],
   },
   {
     id: 'rai-015',
     topic: 'responsible-ai',
     moduleId: 'responsible-ai',
-    objective: 'Describe principles of responsible AI',
+    objective: 'Describe considerations for transparency in an AI solution',
     difficulty: 'hard',
     kind: 'exam',
     scenario:
@@ -571,8 +633,13 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Transparency covers disclosure that AI is involved, communicating capabilities and limitations, and provenance. Content Credentials (C2PA) cryptographically mark an image as AI-generated, which is a provenance/transparency control - a favourite exam detail.',
-    reference: REF,
+      'Transparency covers disclosure that AI is involved, communicating capabilities and limitations, and provenance. Content Credentials (C2PA) cryptographically mark an image as AI-generated, which is a provenance/transparency control.',
+    reference: {
+      label: 'Content provenance for Foundry models',
+      url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
+      quote:
+        'For supported Foundry Models sold by Azure, customers can leverage available content provenance capabilities to help provide transparency about AI-generated content and support their own transparency objectives.',
+    },
     tags: ['transparency', 'c2pa', 'hard'],
   },
   {
@@ -610,15 +677,20 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Fairness is measured by comparing performance *across sub-populations*, not by a single aggregate metric. The classic trap on this exam is a distractor offering overall accuracy as evidence of fairness.',
-    reference: REF,
+      'Fairness is measured by comparing performance *across sub-populations*, not by a single aggregate metric. A high overall accuracy can hide a much lower accuracy for one group.',
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'The fairness assessment component of the Responsible AI dashboard helps assess model fairness across sensitive groups, such as gender, ethnicity, age, and other characteristics.',
+    },
     tags: ['fairness', 'trap'],
   },
   {
     id: 'rai-017',
     topic: 'responsible-ai',
     moduleId: 'responsible-ai',
-    objective: 'Describe principles of responsible AI',
+    objective: 'Describe considerations for privacy and security in an AI solution',
     difficulty: 'medium',
     kind: 'exam',
     scenario:
@@ -628,7 +700,7 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Privacy and security - Foundry IQ enforces permissions at query time so agents return only content the caller is authorised to see',
+        text: 'Privacy and security - Foundry IQ enforces each caller\'s permissions at query time',
         correct: true,
       },
       {
@@ -639,13 +711,13 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'Fairness - all employees get the same answers',
+        text: 'Fairness - every employee gets exactly the same answer to the same question',
         correct: false,
         why: 'The requirement is the opposite: different employees must legitimately get different answers based on their permissions.',
       },
       {
         id: 'd',
-        text: 'Reliability and safety - content filters block sensitive categories',
+        text: 'Reliability and safety - content filters block sensitive document categories',
         correct: false,
         why: 'Content filters block harmful content categories such as hate or violence. They have no concept of who is allowed to see which document.',
       },
@@ -655,6 +727,8 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'Synchronize access control lists (ACLs) for supported sources and honor Microsoft Purview sensitivity labels. Enforce permissions at query time so agents return only authorized content.',
     },
     tags: ['privacy', 'foundry-iq', 'cross-topic'],
   },
@@ -670,31 +744,36 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Hand the conversation to a human agent when the model\'s confidence is low or the topic is high-risk',
+        text: 'Hand over to a human when confidence is low or the topic is high-risk',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Translate the interface into more languages',
+        text: 'Translate the interface into more languages for international customers',
         correct: false,
         why: 'That is inclusiveness.',
       },
       {
         id: 'c',
-        text: 'Add a footer stating who owns the system',
+        text: 'Add a footer naming the team that owns and maintains the system',
         correct: false,
         why: 'That leans towards accountability and transparency.',
       },
       {
         id: 'd',
-        text: 'Reduce the model\'s temperature to zero for all requests',
+        text: 'Reduce the model\'s temperature to zero for every request',
         correct: false,
         why: 'Lower temperature makes output more deterministic, but deterministic wrong answers are still wrong. It is a tuning choice, not a safety control.',
       },
     ],
     explanation:
       'Human-in-the-loop fallback is the standard reliability and safety pattern: the system degrades gracefully instead of confidently producing something harmful.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'An AI-powered robotic solution that uses computer vision to detect objects should avoid unintentional harm or damage. One way to accomplish this goal is to use probability values to determine "confidence" in object identification before interacting with physical objects, and avoid any action if the confidence level is below a specific threshold.',
+    },
     tags: ['reliability'],
   },
   {
@@ -733,8 +812,13 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Hallucination is a reliability and safety risk. Undisclosed AI involvement is transparency. Missing ownership and recourse is accountability. Being able to run this mapping quickly is most of what the responsible AI section of the exam asks for.',
-    reference: REF,
+      'Hallucination is a reliability and safety risk. Undisclosed AI involvement is transparency. Missing ownership and recourse is accountability. Practise this mapping until it is automatic.',
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'Microsoft created a Responsible AI Standard, a framework for building AI systems based on six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
+    },
     tags: ['all-principles', 'hard'],
   },
   {
@@ -773,7 +857,12 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Prompt injection (including indirect injection through retrieved documents) is an adversarial attack on the instructions given to a model. Defending against it protects data and system integrity, which is privacy and security. Foundry provides prompt shields as part of its content safety guardrails.',
-    reference: REF,
+    reference: {
+      label: 'Prompt Shields in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/content-filter-prompt-shields',
+      quote:
+        'User prompt attacks - Malicious prompts that attempt to bypass system instructions or safety training. Prompt Shields scan these attacks at the user input intervention point.',
+    },
     tags: ['privacy', 'prompt-injection'],
   },
   {
@@ -796,8 +885,13 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
       { id: 'm6', left: 'Assign an executive owner and a formal incident process', right: 'Accountability' },
     ],
     explanation:
-      'Each mitigation is the canonical control for its principle. If you can produce this table from memory, the responsible AI portion of the exam is largely handled.',
-    reference: REF,
+      'Each mitigation is the canonical control for its principle. It is worth knowing this table well enough to produce it from memory.',
+    reference: {
+      label: 'What is Responsible AI? - Azure Machine Learning',
+      url: 'https://learn.microsoft.com/azure/machine-learning/concept-responsible-ai',
+      quote:
+        'Microsoft created a Responsible AI Standard, a framework for building AI systems based on six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability.',
+    },
     tags: ['all-principles', 'matching', 'cram'],
   },
   {
@@ -808,35 +902,84 @@ export const responsibleAiQuestions: AuthoredQuestion[] = [
     difficulty: 'medium',
     kind: 'learn',
     prompt:
-      'Which statement about transparency is correct for the AI-901 exam?',
+      'Which statement about the transparency principle is correct?',
     options: [
       {
         id: 'a',
-        text: 'People should know when they are interacting with AI and should be able to understand the system\'s capabilities and limitations.',
+        text: 'People should know they are using AI and understand what it can and cannot do',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Transparency requires publishing the model\'s source code and training data.',
+        text: 'It requires publishing the model\'s source code and its training data',
         correct: false,
         why: 'Open-sourcing is not what the principle asks for. Transparency is about meaningful disclosure to the people affected.',
       },
       {
         id: 'c',
-        text: 'Transparency requires that the model always explain its reasoning token by token.',
+        text: 'It requires the model to explain its reasoning token by token, every time',
         correct: false,
         why: 'Explainability helps, but the principle is about clear communication of what the system is and does, not a mechanical trace of every inference.',
       },
       {
         id: 'd',
-        text: 'Transparency is only required for models that make legally binding decisions.',
+        text: 'It only applies to models that make legally binding decisions about people',
         correct: false,
         why: 'It applies broadly, not only to regulated decisions.',
       },
     ],
     explanation:
       'Transparency = intelligibility and disclosure: users know AI is involved, and stakeholders understand what the system can and cannot do, plus where its information comes from.',
-    reference: REF,
+    reference: {
+      label: 'Responsible AI - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/7-responsible-ai',
+      quote:
+        'AI can sometimes seem like "magic", but it\'s important to make users aware of how the system works and any potential limitations it may have.',
+    },
     tags: ['transparency', 'definition'],
+  },
+  {
+    id: 'rai-023',
+    topic: 'responsible-ai',
+    objective: 'Describe considerations for privacy and security in an AI solution',
+    difficulty: 'hard',
+    kind: 'exam',
+    scenario:
+      'An agent can call an external shipping API. The team must stop it from ever sending customers\' personal data to that API.',
+    prompt: 'Where should the personal-data control in the agent\'s guardrail apply?',
+    options: [
+      {
+        id: 'a',
+        text: 'At the tool call, which scans what the agent proposes to send to a tool',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: 'On user input only, checking each message before the agent ever sees it',
+        correct: false,
+        why: 'Personal data can come from a retrieved document or an earlier lookup, not just the user\'s message. Checking input alone leaves the tool call unguarded.',
+      },
+      {
+        id: 'c',
+        text: 'On the final output only, before the reply reaches the user',
+        correct: false,
+        why: 'By the time the reply is checked, the tool call has already happened.',
+      },
+      {
+        id: 'd',
+        text: 'Through a lower temperature on the agent\'s model',
+        correct: false,
+        why: 'Temperature controls randomness. It has nothing to do with what data reaches a tool.',
+      },
+    ],
+    explanation:
+      'Foundry guardrails apply controls at intervention points: user input, output, and - for agents, in preview - the tool call and the tool response. To keep personal data away from a tool, scan the tool call. That is privacy and security in practice.',
+    reference: {
+      label: 'Guardrails and controls overview in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview',
+      quote:
+        'Tool call (Preview) - The action and data the agent proposes to send to a tool. Agents only.',
+    },
+    tags: ['privacy', 'guardrails', 'agents', 'currency'],
   },
 ];

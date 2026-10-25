@@ -20,30 +20,36 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The assistant\'s persona, rules, tone and output format - set once by the developer',
+        text: 'The assistant\'s persona, rules, tone and output format',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The end user\'s current question',
+        text: 'The end user\'s current question, exactly as typed',
         correct: false,
         why: 'That is the user message by definition.',
       },
       {
         id: 'c',
-        text: 'The model\'s previous replies',
+        text: 'The model\'s previous replies in the conversation',
         correct: false,
         why: 'Those are assistant messages, replayed to give the model conversation history.',
       },
       {
         id: 'd',
-        text: 'The API key',
+        text: 'The API key the client uses to authenticate',
         correct: false,
         why: 'Credentials go in the request header, never in message content.',
       },
     ],
     explanation:
-      'System message = standing instructions from the developer. User message = what the person asked right now. Assistant message = what the model said before. Keeping them straight is the foundation of every prompt question on this exam.',
+      'System message = standing instructions from the developer. User message = what the person asked right now. Assistant message = what the model said before. Keeping the three roles straight is the foundation of prompt design.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'In the context of the Chat Completion API, instructions take the form of the system message, and few-shot examples are indicated by providing a series of example user and assistant interactions to help prime the model.',
+    },
     tags: ['prompts', 'roles'],
   },
   {
@@ -78,6 +84,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Few-shot prompting demonstrates the pattern you want - useful for enforcing an exact output format or a labelling scheme. It is an inference-time technique, so it costs prompt tokens but requires no training.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'A common way to adapt language models to new tasks is to use few-shot learning. In few-shot learning, a set of training examples is provided as part of the prompt to give additional context to the model.',
+    },
     tags: ['prompts', 'few-shot'],
   },
   {
@@ -93,30 +105,36 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Strengthen the system message with explicit scope boundaries and tone rules',
+        text: 'Add explicit scope and tone rules to the system message',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Lower the temperature to 0',
+        text: 'Lower the temperature to 0 so replies stay consistent',
         correct: false,
         why: 'That makes off-topic answers more consistent, not fewer. Temperature does not encode scope.',
       },
       {
         id: 'c',
-        text: 'Fine-tune the model on brand documents',
+        text: 'Fine-tune the model on the company\'s brand documents',
         correct: false,
         why: 'Expensive and slow for something a well-written system message solves. Prompt first, fine-tune only if prompting genuinely cannot achieve it.',
       },
       {
         id: 'd',
-        text: 'Reduce max_tokens so replies are shorter',
+        text: 'Reduce max_tokens so that replies are shorter',
         correct: false,
         why: 'Shorter off-brand answers are still off-brand.',
       },
     ],
     explanation:
       'Behavioural boundaries - what the assistant will and will not discuss, and how it should sound - belong in the system message. It is the cheapest, fastest and most maintainable control surface.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'In the context of the Chat Completion API, instructions take the form of the system message, and few-shot examples are indicated by providing a series of example user and assistant interactions to help prime the model.',
+    },
     tags: ['prompts', 'system-message', 'trap'],
   },
   {
@@ -161,6 +179,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Good system prompts are specific about role, scope, format and failure behaviour. "If the answer is not in the provided context, say you do not know" is one of the highest-value sentences you can add to a grounded assistant.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Give the model an "out". It can sometimes be helpful to give the model an alternative path if it\'s unable to complete the assigned task.',
+    },
     tags: ['prompts', 'hard', 'multi-select'],
   },
 
@@ -177,7 +201,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The project is a child of the Foundry resource; security, networking and governance are set on the resource and inherited by projects, which organise the work',
+        text: 'The project is a child of the resource and inherits its security and governance settings',
         correct: true,
       },
       {
@@ -188,13 +212,13 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'c',
-        text: 'They are unrelated - you choose one or the other',
+        text: 'They are unrelated - you choose one or the other for each workload',
         correct: false,
         why: 'You work inside a project, and that project belongs to a resource.',
       },
       {
         id: 'd',
-        text: 'A project requires a separate Azure Storage account and Key Vault to exist first',
+        text: 'A project needs its own Azure Storage account and Key Vault before it can exist',
         correct: false,
         why: 'That was the hub-based model. Foundry projects do not require you to provision separate storage and key vault resources.',
       },
@@ -202,8 +226,10 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     explanation:
       'Foundry projects are child resources of a Foundry resource. Admins configure security, connectivity and governance once at the resource level; developers then create projects as folders to organise their work, inheriting those settings by default.',
     reference: {
-      label: 'What is Microsoft Foundry?',
-      url: 'https://learn.microsoft.com/azure/foundry/what-is-foundry',
+      label: 'Create a project in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/how-to/create-projects',
+      quote:
+        'Foundry projects as Azure child resources may get assigned their own access controls, but share common settings such as network security, deployments, and Azure tool integration from their parent resource.',
     },
     tags: ['foundry', 'architecture', 'currency'],
   },
@@ -215,37 +241,39 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     difficulty: 'hard',
     kind: 'exam',
     prompt:
-      'Older study material describes creating an "AI hub" before you can create a project. What is the current guidance?',
+      'You are creating a Foundry project for a new generative AI app. Which statement about AI hubs is correct?',
     options: [
       {
         id: 'a',
-        text: 'Hub-based projects are now the classic model; new investment is in Foundry projects on a Foundry resource, and a hub is only needed for selected cases such as open-source model hosting and Azure Machine Learning capabilities',
+        text: 'Hubs are now the classic model; Foundry projects need none, and hubs remain for a few cases',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Hubs are required for every Foundry project',
+        text: 'A hub is still required, with Storage and Key Vault, before you can create any project',
         correct: false,
         why: 'They are not. Serverless API deployments and Foundry projects explicitly do not require an AI Hub.',
       },
       {
         id: 'c',
-        text: 'Hubs have been deleted from Azure entirely',
+        text: 'Hubs have been deleted from Azure entirely and cannot be used',
         correct: false,
         why: 'They still exist and are still supported for specific scenarios - they are simply no longer the default.',
       },
       {
         id: 'd',
-        text: 'Hubs and projects are two names for the same object',
+        text: 'Hubs and projects are two names for the same Azure object',
         correct: false,
         why: 'They are distinct resource types with different capabilities.',
       },
     ],
     explanation:
-      'Microsoft moved most hub capabilities under the Foundry resource type. If a practice question or older note insists on hubs, storage accounts and key vaults as prerequisites, it predates the current model.',
+      'Microsoft moved most hub capabilities under the Foundry resource type. Hubs remain for prompt flow, Azure Machine Learning capabilities and some open-source hosting. A Foundry project needs a Foundry resource, not a hub.',
     reference: {
       label: 'Migrate from hub-based to Foundry projects',
       url: 'https://learn.microsoft.com/azure/foundry-classic/how-to/migrate-project',
+      quote:
+        'New generative AI and model-centric features are available only through the Foundry resource and its Foundry projects. Currently, some capabilities still require a hub next to your Foundry resource.',
     },
     tags: ['foundry', 'currency', 'hard', 'trap'],
   },
@@ -267,6 +295,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Portal flow: project → catalog → deploy → playground → wire into code. The playground is the fastest way to sanity-check a system prompt before writing any client code.',
+    reference: {
+      label: 'Deploy Microsoft Foundry Models in the Foundry portal',
+      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/how-to/deploy-foundry-models',
+      quote:
+        'When the deployment completes, you land on the Foundry Playgrounds where you can interactively test the model.',
+    },
     tags: ['foundry', 'portal', 'workflow'],
   },
   {
@@ -280,30 +314,36 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The Azure AI capabilities available alongside models in Foundry - Language, Speech, Vision, Content Understanding and others',
+        text: 'Azure AI services such as Language, Speech, Vision and Content Understanding',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The command-line utilities for managing Azure subscriptions',
+        text: 'The command-line utilities you use to manage Azure subscriptions',
         correct: false,
         why: 'That is the Azure CLI.',
       },
       {
         id: 'c',
-        text: 'Third-party plugins installed from a marketplace',
+        text: 'Third-party plugins installed from the Azure Marketplace',
         correct: false,
         why: 'Foundry Tools are first-party Azure AI capabilities, not community add-ons.',
       },
       {
         id: 'd',
-        text: 'The debugging panel in the Foundry portal',
+        text: 'The debugging and tracing panel in the Foundry portal',
         correct: false,
         why: 'Observability and tracing are separate features.',
       },
     ],
     explanation:
-      'The services once called Azure AI services (and before that Cognitive Services) are now presented as Foundry Tools: Azure Language in Foundry Tools, Azure Speech in Foundry Tools, Azure Vision in Foundry Tools, Azure Content Understanding in Foundry Tools. Expect the exam to use the new names.',
+      'The services once called Azure AI services (and before that Cognitive Services) are now presented as Foundry Tools: Azure Language in Foundry Tools, Azure Speech in Foundry Tools, Azure Vision in Foundry Tools, Azure Content Understanding in Foundry Tools. The AI-901 skills measured use these names too.',
+    reference: {
+      label: 'Create a Foundry resource',
+      url: 'https://learn.microsoft.com/azure/ai-services/multi-service-resource',
+      quote:
+        'Within that boundary, a single surface brings together your agents, model deployments, and evaluations, with Azure OpenAI and Foundry Tools (formerly Azure AI services) reachable through one endpoint and key.',
+    },
     tags: ['foundry', 'naming', 'currency'],
   },
   {
@@ -323,7 +363,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'The Azure subscription ID and the resource group name',
+        text: 'The Azure subscription ID, the resource group name and the region',
         correct: false,
         why: 'Those identify resources for management operations. Inference calls go to an endpoint.',
       },
@@ -335,13 +375,19 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'd',
-        text: 'The training dataset URI',
+        text: 'The URI of the dataset the model was trained on',
         correct: false,
         why: 'Irrelevant to calling a hosted model.',
       },
     ],
     explanation:
-      'Endpoint + deployment name + credential. In current samples the endpoint is the project endpoint (`https://<resource>.services.ai.azure.com/api/projects/<project>`), stored as `PROJECT_ENDPOINT`, and Microsoft Entra credentials are preferred over keys.',
+      'Endpoint + deployment name + credential. In current samples the endpoint is the project endpoint (`https://<resource>.services.ai.azure.com/api/projects/<project>`), usually read from configuration, and Microsoft Entra credentials are preferred over keys. With instant access (preview), a model name can stand in for the deployment name.',
+    reference: {
+      label: 'Quickstart: Get started with Microsoft Foundry SDK',
+      url: 'https://learn.microsoft.com/azure/foundry/quickstarts/get-started-code',
+      quote:
+        'your_project_endpoint: Your project endpoint, in the format https://<resource-name>.services.ai.azure.com/api/projects/<project-name>.',
+    },
     tags: ['sdk', 'chat-client'],
   },
   {
@@ -361,7 +407,7 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
       {
         id: 'b',
-        text: 'Embedding the API key in the client source code',
+        text: 'An API key embedded in the client source code, so no secrets store is needed',
         correct: false,
         why: 'Keys in source are a leak waiting to happen. Even when keys are used, they belong in configuration or a secret store.',
       },
@@ -380,6 +426,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Both Serverless API and managed compute support keys and Microsoft Entra authentication; Entra (keyless) is the recommendation, with `DefaultAzureCredential` for development and a specific credential such as a managed identity in production.',
+    reference: {
+      label: 'Role-based access control for Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry',
+      quote:
+        'RBAC roles apply when you authenticate using Microsoft Entra ID. If you use key-based authentication instead, the key grants full access without role restrictions. Microsoft recommends using Entra ID authentication for improved security and granular access control.',
+    },
     tags: ['sdk', 'auth', 'security'],
   },
 
@@ -415,6 +467,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Model = the reasoning engine. Instructions = who it is and what it may do. Tools = how it acts on the world. Remove tools and you have a chatbot, not an agent.',
+    reference: {
+      label: 'Agents in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Prompt agents: the fastest path. Define instructions, a model, and tools, and Foundry runs the agent for you with no code or infrastructure to manage.',
+    },
     tags: ['agents', 'definition', 'cram'],
   },
   {
@@ -425,22 +483,22 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     difficulty: 'medium',
     kind: 'exam',
     prompt:
-      'Foundry Agent Service offers two agent types. Which describes a **prompt agent**?',
+      'Foundry Agent Service offers prompt agents, voice-based prompt agents and hosted agents. Which describes a **prompt agent**?',
     options: [
       {
         id: 'a',
-        text: 'A declaratively defined agent - instructions, model and tools - that Foundry runs for you with no code or infrastructure to manage',
+        text: 'A declarative agent - instructions, model and tools - that Foundry runs for you',
         correct: true,
       },
       {
         id: 'b',
-        text: 'An agent you package as a container and Foundry runs with a managed endpoint',
+        text: 'An agent you package as a container, which Foundry runs with a managed endpoint',
         correct: false,
         why: 'That is a *hosted* agent - the type you use when you bring your own code and framework.',
       },
       {
         id: 'c',
-        text: 'An agent that runs entirely in the browser',
+        text: 'An agent that runs entirely in the user\'s browser, with no service involved',
         correct: false,
         why: 'Neither agent type runs client-side.',
       },
@@ -452,10 +510,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Prompt agents are configuration-only and the recommended starting point: author them in the portal or with the SDK/REST, and Foundry runs them. Hosted agents let you bring code built with Agent Framework, LangGraph, the OpenAI or Anthropic Agent SDKs, or your own, shipped as a container or zip.',
+      'Prompt agents are configuration-only and the recommended starting point: author them in the portal or with the SDK/REST, and Foundry runs them. Voice-based prompt agents are the same idea for real-time spoken conversations, running on Voice Live. Hosted agents let you bring code built with Agent Framework, LangGraph, the OpenAI or Anthropic Agent SDKs, or your own, shipped as a container or zip.',
     reference: {
       label: 'Agents in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Prompt agents: the fastest path. Define instructions, a model, and tools, and Foundry runs the agent for you with no code or infrastructure to manage.',
     },
     tags: ['agents', 'currency', 'prompt-vs-hosted'],
   },
@@ -486,12 +546,19 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
         left: 'Call Foundry models and tools from code you already run elsewhere, with no agent resource in Foundry',
         right: 'Responses API directly',
       },
+      {
+        id: 'p4',
+        left: 'Answer customer phone calls in real time, with no voice orchestration code to host',
+        right: 'Voice-based prompt agent',
+      },
     ],
     explanation:
-      'Three rungs on the same ladder: least to manage (prompt agent) → your code, Foundry-hosted (hosted agent) → your code, your host (Responses API). Prompt agents and hosted agents are the two *agent types*; the Responses API path creates an ephemeral agent with no persisted resource.',
+      'Least to manage (prompt agent, or a voice-based prompt agent when people talk rather than type) → your code, Foundry-hosted (hosted agent) → your code, your host (Responses API). Prompt, voice-based prompt and hosted agents are the three *agent types*; the Responses API path creates an ephemeral agent with no persisted resource.',
     reference: {
       label: 'Agents in Microsoft Foundry - choose how to build',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Already run agent code elsewhere? Call the Responses API directly to use Foundry models and tools, with no agent resource to manage.',
     },
     tags: ['agents', 'currency', 'matching', 'hard'],
   },
@@ -535,6 +602,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Foundry Toolbox overview',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/toolbox-overview',
+      quote:
+        'Toolbox provides a centralized way to manage and share tools in Microsoft Foundry. With Toolbox, you define a curated set of tools once and expose them through a single MCP-compatible endpoint that agents can consume across frameworks and runtimes.',
     },
     tags: ['agents', 'tools'],
   },
@@ -550,33 +619,35 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Create an AIProjectClient against the project endpoint, then create a conversation and send requests that reference the agent',
+        text: 'Get a client bound to the agent, create a conversation, and send responses',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Download the agent definition and run it locally',
+        text: 'Download the agent definition and run the agent locally in the app',
         correct: false,
         why: 'A prompt agent runs in Foundry Agent Service. The client calls it; it does not execute the agent itself.',
       },
       {
         id: 'c',
-        text: 'Send raw SQL to the agent endpoint',
+        text: 'Send raw SQL queries to the agent\'s endpoint and parse the rows',
         correct: false,
         why: 'Not how any of this works.',
       },
       {
         id: 'd',
-        text: 'Redeploy the underlying model on every call',
+        text: 'Redeploy the underlying model on every call so it picks up the agent',
         correct: false,
         why: 'Deployment happens once; inference calls reuse it.',
       },
     ],
     explanation:
-      'The shape is: authenticate → `AIProjectClient(endpoint, credential)` → get an OpenAI-compatible client from the project → create a conversation → send a request referencing the agent → read the reply. The service keeps conversation history across turns.',
+      'The shape is: authenticate → `AIProjectClient(endpoint, credential)` → `get_openai_client(agent_name=...)` for an OpenAI-compatible client bound to the agent → `conversations.create()` → `responses.create(conversation=..., input=...)` → read `output_text`. The conversation keeps history across turns.',
     reference: {
       label: 'Quickstart: Create a prompt agent',
       url: 'https://learn.microsoft.com/azure/foundry/agents/quickstarts/prompt-agent',
+      quote:
+        'Use the agent you created to interact by asking a question and a related follow-up. The conversation maintains history across these interactions.',
     },
     tags: ['agents', 'sdk', 'currency'],
   },
@@ -612,6 +683,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The playground lets you chat with the agent, inspect tool calls, iterate on instructions, and then take a preconfigured code snippet straight into your development environment.',
+    reference: {
+      label: 'Agent development lifecycle',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/development-lifecycle',
+      quote:
+        "From the Code tab in the agent playground's chat pane, you can take a code snippet that references your agent to a dedicated Visual Studio Code for the Web cloud environment.",
+    },
     tags: ['agents', 'portal'],
   },
   {
@@ -625,24 +702,24 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A curated set of tools - web search, file search, code interpreter, MCP servers, custom functions - shared across agents through one managed endpoint with central authentication and versioning',
+        text: 'A governed set of tools shared across agents through one managed endpoint',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The local SDK package you install to build agents',
+        text: 'The local SDK package you install before you can start building agents',
         correct: false,
         why: 'That is just the SDK.',
       },
       {
         id: 'c',
-        text: 'A folder of sample notebooks',
+        text: 'A folder of sample notebooks that ships with the portal',
         correct: false,
         why: 'Samples are documentation, not a platform concept.',
       },
       {
         id: 'd',
-        text: 'A UI panel showing an agent\'s recent tool calls',
+        text: 'A UI panel in the portal that lists an agent\'s most recent tool calls',
         correct: false,
         why: 'That is observability/tracing.',
       },
@@ -652,6 +729,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Toolbox overview',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/toolbox-overview',
+      quote:
+        'Toolbox provides a centralized way to manage and share tools in Microsoft Foundry. With Toolbox, you define a curated set of tools once and expose them through a single MCP-compatible endpoint that agents can consume across frameworks and runtimes.',
     },
     tags: ['agents', 'toolbox', 'currency', 'hard'],
   },
@@ -692,6 +771,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Compare agent types',
       url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Hosted agents: the most control. Bring your own code and framework, and Foundry runs it as a container with a managed endpoint, scaling, and identity.',
     },
     tags: ['agents', 'prompt-vs-hosted', 'multi-select'],
   },
@@ -715,7 +796,13 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
       { id: 'r6', text: 'The model generates an answer with citations' },
     ],
     explanation:
-      'Everything up to indexing happens ahead of time; retrieval and generation happen per query. The exam mostly tests that you know retrieval happens *before* generation and that grounding data goes into the prompt.',
+      'Everything up to indexing happens ahead of time; retrieval and generation happen per query. The key points: retrieval happens *before* generation, and the grounding data goes into the prompt.',
+    reference: {
+      label: 'RAG and indexes in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'RAG addresses this by retrieving relevant content from your data and including it in the model input. The model can then generate responses grounded in the retrieved content.',
+    },
     tags: ['rag', 'pipeline', 'cram'],
   },
   {
@@ -729,24 +816,24 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A managed knowledge layer that gives agents a configurable, multi-source knowledge base and returns permission-aware, cited answers using agentic retrieval',
+        text: 'A managed knowledge layer that gives agents permission-aware, cited answers',
         correct: true,
       },
       {
         id: 'b',
-        text: 'A benchmark suite that scores how intelligent a model is',
+        text: 'A benchmark suite that scores how intelligent each model in the catalog is',
         correct: false,
         why: 'The name suggests it, but IQ here refers to the knowledge layer, not a model score.',
       },
       {
         id: 'c',
-        text: 'A fine-tuning service',
+        text: 'A fine-tuning service that teaches models your company\'s private data',
         correct: false,
         why: 'It does not modify models at all.',
       },
       {
         id: 'd',
-        text: 'A monitoring dashboard for agents',
+        text: 'A monitoring dashboard that tracks agent quality and cost',
         correct: false,
         why: 'That is Foundry Observability.',
       },
@@ -756,6 +843,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'Foundry IQ is a managed knowledge layer for enterprise data. It connects structured and unstructured data across Azure, SharePoint, OneLake, and the web so agents can access permission-aware knowledge.',
     },
     tags: ['rag', 'foundry-iq', 'currency'],
   },
@@ -771,24 +860,24 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'A model decomposes a complex query into several focused subqueries, runs them in parallel, reranks the results, and returns structured grounding data with citations',
+        text: 'It plans parallel subqueries, reranks the results and returns cited grounding data',
         correct: true,
       },
       {
         id: 'b',
-        text: 'It skips the index and sends the whole corpus to the model',
+        text: 'It skips the index and sends the whole document corpus to the model',
         correct: false,
         why: 'No corpus of any size fits in a context window; retrieval is still essential.',
       },
       {
         id: 'c',
-        text: 'It replaces embeddings with keyword search only',
+        text: 'It replaces embeddings with keyword search, so it only matches exact words',
         correct: false,
         why: 'It can issue keyword, vector or hybrid queries - it adds capability rather than removing it.',
       },
       {
         id: 'd',
-        text: 'It runs the model on the client device',
+        text: 'It runs the model on the client device to keep retrieval private',
         correct: false,
         why: 'Nothing about where inference runs changes.',
       },
@@ -798,6 +887,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Agentic RAG in Microsoft Foundry',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Traditional RAG patterns often use a single query to retrieve information from your data. Agentic retrieval, also known as agentic RAG, is an evolution in retrieval architecture that uses a model to break down complex inputs into multiple focused subqueries, run them in parallel, and return structured grounding data that works well with chat completion models.',
     },
     tags: ['rag', 'agentic-retrieval', 'hard', 'currency'],
   },
@@ -813,18 +904,18 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Retrieval and context windows work best on focused passages; whole documents dilute relevance and blow the token budget',
+        text: 'Focused passages match precisely and fit the token budget; whole documents do not',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Because models cannot read PDF files',
+        text: 'Because language models cannot read PDF or Word files directly, only plain text',
         correct: false,
         why: 'Extraction handles the file format. Chunking is about passage size, not file type.',
       },
       {
         id: 'c',
-        text: 'To encrypt the documents',
+        text: 'To encrypt each part of the document separately before it is indexed',
         correct: false,
         why: 'Chunking has nothing to do with encryption.',
       },
@@ -837,6 +928,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'A 90-page handbook embedded as one vector represents everything and therefore nothing. Chunked passages give precise matches and fit comfortably in the prompt. Foundry IQ automates chunking and embedding for indexed knowledge sources.',
+    reference: {
+      label: 'RAG in Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview',
+      quote:
+        'During indexing, use chunking to subdivide large documents so that portions can be matched on independently. Include a vectorization step to create embeddings used for vector queries.',
+    },
     tags: ['rag', 'chunking'],
   },
   {
@@ -882,6 +979,12 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Grounding failures come from two places: the model was not told to stay within the context, or retrieval did not supply the right context. Microsoft\'s own troubleshooting guidance names both - enable citations and use clear system messages, and revisit chunking, embedding quality and search configuration.',
+    reference: {
+      label: 'RAG and indexes in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/retrieval-augmented-generation',
+      quote:
+        'Hallucination despite grounding: Even with retrieved content, models can still generate inaccurate responses. Enable citations and use clear system messages and prompts to instruct the model to stick to retrieved content.',
+    },
     tags: ['rag', 'hallucination', 'hard', 'multi-select'],
   },
   {
@@ -923,6 +1026,8 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'What is Foundry IQ?',
       url: 'https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq',
+      quote:
+        'Connect one knowledge base to multiple agents. Supported knowledge sources include internal data stores (such as Azure Blob Storage, SharePoint, and OneLake) and public web data.',
     },
     tags: ['rag', 'foundry-iq'],
   },
@@ -937,30 +1042,36 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Finding passages whose meaning is close to the query, even when they share no keywords',
+        text: 'Finding passages close in meaning to the query, even with no shared words',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Storing the model\'s weights',
+        text: 'Storing the model\'s weights so they load faster at inference time',
         correct: false,
         why: 'Weights live in the model, not in your search index.',
       },
       {
         id: 'c',
-        text: 'Caching previous answers',
+        text: 'Caching previous answers so repeated questions cost nothing',
         correct: false,
         why: 'That would be a response cache - a different thing entirely.',
       },
       {
         id: 'd',
-        text: 'Compressing documents to save storage',
+        text: 'Compressing documents so the knowledge base uses less storage',
         correct: false,
         why: 'Embeddings are not a storage optimisation; the original text is still needed to build the prompt.',
       },
     ],
     explanation:
       'Vector search matches on semantics rather than exact words, so "how much holiday do I get" retrieves a passage titled "Annual leave entitlement". Hybrid search combines vector and keyword matching for the best of both.',
+    reference: {
+      label: 'Vector search overview - Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/vector-search-overview',
+      quote:
+        'Vector search is an information retrieval approach that supports indexing and querying over numeric representations of content. Because the content is numeric rather than plain text, matching is based on vectors that are most similar to the query vector.',
+    },
     tags: ['rag', 'vector-search'],
   },
   {
@@ -971,37 +1082,39 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     difficulty: 'hard',
     kind: 'exam',
     prompt:
-      'A sample from an older tutorial calls `create_thread()`, `create_message()` and `create_and_process_run()` against a connection string. What should you know about this for the current exam?',
+      'You find a code sample that calls `create_thread()`, `create_message()` and `create_and_process_run()` against a connection string. Which statement about the sample is correct?',
     options: [
       {
         id: 'a',
-        text: 'It reflects the earlier Assistants-style agent API; current Foundry samples use a project endpoint, agent versions, and conversations with the Responses API',
+        text: 'It is the older Assistants-style API; current samples use agent versions and the Responses API',
         correct: true,
       },
       {
         id: 'b',
-        text: 'It is the current recommended pattern for all new agent clients',
+        text: 'It is the current recommended pattern for every new agent client, in every SDK language',
         correct: false,
         why: 'It is the older pattern. Current quickstarts set `PROJECT_ENDPOINT`, create agent versions, and use conversations plus responses.',
       },
       {
         id: 'c',
-        text: 'Threads and runs are concepts from Azure Machine Learning pipelines',
+        text: 'Threads and runs are concepts borrowed from Azure Machine Learning training pipelines',
         correct: false,
         why: 'They came from the Assistants API, not Azure ML.',
       },
       {
         id: 'd',
-        text: 'Connection strings are the only supported authentication method',
+        text: 'Connection strings are the only authentication method Foundry supports',
         correct: false,
         why: 'Microsoft Entra credentials against a project endpoint are the current recommendation.',
       },
     ],
     explanation:
-      'You are unlikely to be asked to write this code from memory, but you may be asked to recognise the current shape. Modern flow: `AIProjectClient(endpoint, credential)` → `agents.create_version(...)` with a `PromptAgentDefinition` → `conversations.create()` → `responses.create()`.',
+      'Recognise the older shape, and know the current one. Modern flow (azure-ai-projects 2.x): `AIProjectClient(endpoint, credential)` → `agents.create_version(...)` with a `PromptAgentDefinition` → `conversations.create()` → `responses.create()`.',
     reference: {
-      label: 'Quickstart: Create a prompt agent',
-      url: 'https://learn.microsoft.com/azure/foundry/agents/quickstarts/prompt-agent',
+      label: 'Use the Azure OpenAI Responses API',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/responses',
+      quote:
+        'Use the Azure OpenAI Responses API to generate stateful, multi-turn responses. It brings together capabilities from chat completions and the Assistants API in one unified experience.',
     },
     tags: ['agents', 'sdk', 'currency', 'hard'],
   },
@@ -1017,33 +1130,35 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Instant access (preview), which lets you call supported models by name with no Serverless API or managed compute deployment',
+        text: 'Instant access (preview), which calls supported models by name',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Nothing - a deployment is always required first',
+        text: 'Nothing - a deployment is always required before the first call',
         correct: false,
         why: 'This used to be true and is a good example of stale study material.',
       },
       {
         id: 'c',
-        text: 'You must download the model weights locally',
+        text: 'You download the model weights and run them locally first',
         correct: false,
         why: 'Not an option for hosted models.',
       },
       {
         id: 'd',
-        text: 'You must open a support ticket for temporary access',
+        text: 'You open a support ticket to request temporary model access',
         correct: false,
         why: 'No ticket is involved.',
       },
     ],
     explanation:
-      'Instant access (preview) removes the deployment step for trying supported models. Note it is a preview feature - the exam concentrates on GA behaviour but may include commonly used preview features.',
+      'Instant access (preview) removes the deployment step for trying supported models - during the preview, from projects in West US 3. You still deploy when you need reserved throughput, data residency, custom guardrails or a fine-tuned model. The study guide says most questions cover generally available features, but preview features may appear when they are commonly used.',
     reference: {
       label: 'Deployment overview for Microsoft Foundry Models',
       url: 'https://learn.microsoft.com/azure/foundry/concepts/deployments-overview',
+      quote:
+        'If you only need to try a supported model, you can skip deployment entirely and use instant access (preview), which calls models by name without creating a Serverless API or managed compute deployment.',
     },
     tags: ['foundry', 'deployment', 'currency'],
   },
@@ -1059,30 +1174,36 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'The agent pursues a goal over multiple steps and can invoke tools to act, rather than returning a single response',
+        text: 'It pursues a goal over several steps and can call tools to act',
         correct: true,
       },
       {
         id: 'b',
-        text: 'The agent always uses a larger model',
+        text: 'It always uses a larger model than a plain chat call would',
         correct: false,
         why: 'Model size is unrelated; agents can and often do run on small models.',
       },
       {
         id: 'c',
-        text: 'The agent runs on the client rather than in the cloud',
+        text: 'It runs on the client device rather than in the cloud',
         correct: false,
         why: 'Foundry agents run in Agent Service.',
       },
       {
         id: 'd',
-        text: 'The agent never uses a system prompt',
+        text: 'It never uses a system prompt or any other instructions',
         correct: false,
         why: 'An agent\'s instructions play exactly that role.',
       },
     ],
     explanation:
       'Chat completion: one prompt, one answer. Agent: a goal, a loop of reasoning and tool calls, and a result. Tools are what make the difference.',
+    reference: {
+      label: 'What is Microsoft Foundry?',
+      url: 'https://learn.microsoft.com/azure/foundry/what-is-foundry',
+      quote:
+        'Most projects on Foundry center on an agent: a model paired with instructions and tools that can reason over a request and take action.',
+    },
     tags: ['agents', 'definition'],
   },
   {
@@ -1117,6 +1238,218 @@ export const foundryGenAiQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Asking for intermediate steps gives the model room to work the problem out in tokens rather than leaping to an answer. For exact arithmetic, better still: give the agent a code interpreter tool.',
+    reference: {
+      label: 'Prompt engineering techniques',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/prompt-engineering',
+      quote:
+        'Instead of splitting a task into smaller steps, in this approach, the model response is instructed to proceed step-by-step and present all the steps involved. Doing so reduces the possibility of inaccuracy of outcomes and makes assessing the model response easier.',
+    },
     tags: ['prompts', 'chain-of-thought'],
+  },
+  {
+    id: 'fg-041',
+    topic: 'foundry-genai-agents',
+    moduleId: 'foundry-platform',
+    objective: 'Deploy a model and interact with it in the Foundry portal',
+    difficulty: 'easy',
+    kind: 'learn',
+    prompt:
+      'A developer needs to build and test agents in an existing Foundry project. Which built-in role gives them that with least privilege?',
+    options: [
+      { id: 'a', text: 'Foundry User', correct: true },
+      {
+        id: 'b',
+        text: 'Foundry Account Owner',
+        correct: false,
+        why: 'It manages resources, projects and model deployments, but it cannot build in a project - it has no data actions there.',
+      },
+      {
+        id: 'c',
+        text: 'Owner on the subscription',
+        correct: false,
+        why: 'Far broader than needed - and even Owner lacks the project data actions needed to build agents.',
+      },
+      {
+        id: 'd',
+        text: 'Azure AI Developer',
+        correct: false,
+        why: 'Despite the name, it is scoped to Azure Machine Learning workspaces and hubs, not to Foundry projects.',
+      },
+    ],
+    explanation:
+      'Foundry User (formerly Azure AI User) grants reader access plus the data actions needed to build and test in a project, and nothing more. Foundry Agent Consumer is narrower still: it can only call agent endpoints.',
+    reference: {
+      label: 'Role-based access control for Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry',
+      quote:
+        'Grants reader access to Foundry project, Foundry resource, and data actions for your Foundry project. If you can assign roles, this role is assigned to you automatically. Otherwise, your subscription Owner or a user with role assignment permissions grants it. Least-privilege access role for developers building and testing agents.',
+    },
+    tags: ['rbac', 'foundry', 'currency'],
+  },
+  {
+    id: 'fg-042',
+    topic: 'foundry-genai-agents',
+    moduleId: 'prompts-and-chat',
+    objective: 'Create a lightweight chat client application by using the Foundry SDK',
+    difficulty: 'medium',
+    kind: 'exam',
+    prompt:
+      'A chat client uses the current Foundry SDK and has created an `AIProjectClient` for the project endpoint. Which call sends the user\'s prompt to a deployed model?',
+    options: [
+      {
+        id: 'a',
+        text: '`get_openai_client()`, then `responses.create(model=..., input=...)`',
+        correct: true,
+      },
+      {
+        id: 'b',
+        text: '`from_connection_string(...)`, then `create_and_process_run()`',
+        correct: false,
+        why: 'That is the older 1.x, Assistants-style pattern. Current samples use a project endpoint and the Responses API.',
+      },
+      {
+        id: 'c',
+        text: '`agents.create_version()` for every message the user sends',
+        correct: false,
+        why: 'That creates a new agent version. A plain chat client does not need an agent at all.',
+      },
+      {
+        id: 'd',
+        text: 'A request to `management.azure.com` with the deployment name',
+        correct: false,
+        why: 'That is the Azure Resource Manager control plane for managing resources. Inference goes to the project endpoint.',
+      },
+    ],
+    explanation:
+      'With azure-ai-projects 2.x, you get an OpenAI-compatible client from the project and call the Responses API, passing the deployment name as `model`, optional `instructions` for the system prompt, and the user `input`. The reply is in `response.output_text`.',
+    reference: {
+      label: 'Use the Azure OpenAI Responses API',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/responses',
+      quote:
+        'Generate a simple text response using the Responses API.',
+    },
+    tags: ['sdk', 'chat-client', 'responses-api', 'currency'],
+  },
+  {
+    id: 'fg-043',
+    topic: 'foundry-genai-agents',
+    moduleId: 'agents',
+    objective: 'Create and test a single-agent solution in the Foundry portal',
+    difficulty: 'medium',
+    kind: 'exam',
+    scenario:
+      'A utility company wants an assistant that answers customer phone calls in real time, using its own instructions and tools. The team does not want to host or maintain any speech orchestration code.',
+    prompt: 'What should they build in Foundry Agent Service?',
+    options: [
+      { id: 'a', text: 'A voice-based prompt agent, which runs on Voice Live', correct: true },
+      {
+        id: 'b',
+        text: 'A hosted agent that chains speech to text, a model and text to speech in its own code',
+        correct: false,
+        why: 'That can work, but it means writing and maintaining the voice orchestration - exactly what the team wants to avoid.',
+      },
+      {
+        id: 'c',
+        text: 'A text prompt agent, plus batch transcription of each call afterwards',
+        correct: false,
+        why: 'Batch transcription processes recordings after the fact. It cannot hold a live conversation.',
+      },
+      {
+        id: 'd',
+        text: 'Content Understanding with an audio analyzer',
+        correct: false,
+        why: 'Content Understanding extracts structure from recordings. It does not talk to callers.',
+      },
+    ],
+    explanation:
+      'Voice-based prompt agents (preview) are managed agents for spoken conversations: you configure the model, instructions, voice, audio settings and tools, and Foundry runs the agent over Voice Live, which handles speech recognition, turn-taking and speech synthesis. Phone channels such as Teams Phone and Twilio can connect to it.',
+    reference: {
+      label: 'Agents in Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/agents/overview',
+      quote:
+        'Voice-based prompt agents: managed real-time voice agents. Configure the model, instructions, audio, and tools, then connect to the agent through Voice Live.',
+    },
+    tags: ['agents', 'voice', 'currency'],
+  },
+  {
+    id: 'fg-044',
+    topic: 'foundry-genai-agents',
+    moduleId: 'rag-foundry-iq',
+    objective: 'Create and test a single-agent solution in the Foundry portal',
+    difficulty: 'hard',
+    kind: 'exam',
+    prompt:
+      'A Foundry IQ knowledge base must draw on a SharePoint site without copying its content into a search index. Which kind of knowledge source fits?',
+    options: [
+      { id: 'a', text: 'A remote knowledge source, queried live at retrieval time', correct: true },
+      {
+        id: 'b',
+        text: 'An indexed knowledge source, refreshed on a schedule',
+        correct: false,
+        why: 'Indexed sources ingest content into a search index - the copying the requirement rules out.',
+      },
+      {
+        id: 'c',
+        text: 'A model fine-tuned on the SharePoint documents',
+        correct: false,
+        why: 'Fine-tuning changes behaviour, not knowledge, and gives no citations or permission checks.',
+      },
+      {
+        id: 'd',
+        text: 'A larger context window, with the site pasted into every prompt',
+        correct: false,
+        why: 'No context window holds a whole site, and permissions could not be enforced per user.',
+      },
+    ],
+    explanation:
+      'Knowledge sources are either **indexed** - ingested into a search index with automatic chunking, vectorising and permission sync (Blob Storage, OneLake, SharePoint, an existing index) - or **remote**, queried live with nothing stored (SharePoint through the Copilot Retrieval API, the web through Grounding with Bing).',
+    reference: {
+      label: 'What is a knowledge source? - Azure AI Search',
+      url: 'https://learn.microsoft.com/azure/search/agentic-knowledge-source-overview',
+      quote:
+        "A remote knowledge source connects directly to an external platform. Content is never ingested into Azure AI Search. Instead, it's retrieved at query time via each platform's native APIs.",
+    },
+    tags: ['foundry-iq', 'rag', 'currency'],
+  },
+  {
+    id: 'fg-045',
+    topic: 'foundry-genai-agents',
+    moduleId: 'foundry-platform',
+    objective: 'Create a lightweight client application for an agent',
+    difficulty: 'hard',
+    kind: 'exam',
+    scenario:
+      'A web app\'s managed identity needs to send requests to one published agent. It must not be able to create or change agents, or reach any other agent in the project.',
+    prompt: 'Which role assignment fits?',
+    options: [
+      { id: 'a', text: 'Foundry Agent Consumer, scoped to that agent', correct: true },
+      {
+        id: 'b',
+        text: 'Foundry User, scoped to the Foundry resource',
+        correct: false,
+        why: 'That also grants the data actions to build and change things in projects - more than calling one agent needs.',
+      },
+      {
+        id: 'c',
+        text: 'Foundry Owner, scoped to the project',
+        correct: false,
+        why: 'A highly privileged role with full management rights. The opposite of least privilege.',
+      },
+      {
+        id: 'd',
+        text: 'Cognitive Services User, scoped to the resource',
+        correct: false,
+        why: 'Microsoft advises against Cognitive Services roles for Foundry work; they are designed for direct access to AI Services resources.',
+      },
+    ],
+    explanation:
+      'Foundry Agent Consumer is the least-privilege role for principals that only interact with agents. At agent scope it covers that one agent\'s endpoint; at project scope it covers every agent in the project.',
+    reference: {
+      label: 'Role-based access control for Microsoft Foundry',
+      url: 'https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry',
+      quote:
+        'Grants access to interact with agent endpoints in a Foundry project. Least-privilege access role for principals that only need to interact with agents.',
+    },
+    tags: ['rbac', 'agents', 'currency'],
   },
 ];

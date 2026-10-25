@@ -17,30 +17,36 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Include an image content item - a URL or base64 data - alongside a text content item in the same user message',
+        text: 'An image content item (URL or base64) next to a text item in one user message',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Upload the image to the model deployment first and reference it by ID',
+        text: 'Upload the image to the model deployment first, then reference it by its ID',
         correct: false,
         why: 'No pre-upload step is needed for a chat request; the image travels with the message.',
       },
       {
         id: 'c',
-        text: 'Convert the image to text with OCR and send only the text',
+        text: 'Run OCR on the image and send only the extracted text',
         correct: false,
         why: 'That defeats the purpose. A multimodal model reasons about the image itself, including layout, charts and objects that OCR would miss.',
       },
       {
         id: 'd',
-        text: 'Send the image in the system message',
+        text: 'Put the image in the system message, outside the user turn',
         correct: false,
         why: 'Visual input belongs in the user message with the question about it.',
       },
     ],
     explanation:
       'A multimodal user message carries a list of content items: text plus one or more images. That single request shape is what "interpret visual input in prompts" means in practice.',
+    reference: {
+      label: 'How to use vision-enabled chat models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'The format is the same as the chat completions API for GPT-4o, except that the message content can be an array containing text and images (either a valid publicly accessible HTTP or HTTPS URL to an image, or a base-64-encoded image).',
+    },
     tags: ['vision', 'multimodal', 'sdk'],
   },
   {
@@ -51,37 +57,39 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     difficulty: 'medium',
     kind: 'exam',
     prompt:
-      'Which models does Foundry currently offer for generating images from a text prompt?',
+      'A team is choosing an OpenAI model in Foundry to generate marketing images from text prompts. Which family should they look at?',
     options: [
       {
         id: 'a',
-        text: 'The GPT-image family (gpt-image-1, gpt-image-1-mini, gpt-image-1.5, gpt-image-2), with DALL·E 3 also available',
+        text: 'The GPT-image series, such as gpt-image-2 or gpt-image-2.5-flare',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Only DALL·E 2',
+        text: 'DALL·E 3, still the flagship OpenAI image model in Foundry',
         correct: false,
-        why: 'Badly out of date. The GPT-image family is now the current line-up.',
+        why: 'dall-e-3 was retired on 4 March 2026, and existing deployments no longer work. Notes that answer "DALL·E" are out of date.',
       },
       {
         id: 'c',
-        text: 'text-embedding-3-large',
+        text: 'text-embedding-3-large, an OpenAI model in the catalog',
         correct: false,
         why: 'That is an embedding model - it produces vectors, not images.',
       },
       {
         id: 'd',
-        text: 'Whisper',
+        text: 'gpt-4o-transcribe, another OpenAI model in the catalog',
         correct: false,
-        why: 'Whisper is a speech recognition model.',
+        why: 'That is a speech-to-text model. It turns audio into text and produces no images.',
       },
     ],
     explanation:
-      'Image generation in Foundry now centres on the GPT-image models, which also support editing (inpainting) and variations. Sora-2 is the video generation model, in preview. Older AI-900 notes naming only DALL·E are a currency red flag.',
+      'Image generation in Foundry is the GPT-image series - gpt-image-1, gpt-image-1-mini, gpt-image-1.5, gpt-image-2 and the gpt-image-2.5 models - which also support editing with a mask (inpainting). Sora 2 is the video model, in preview. DALL·E 3 was retired in March 2026.',
     reference: {
-      label: 'Foundry Models sold by Azure - image generation',
-      url: 'https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure',
+      label: 'How to use image generation models from OpenAI',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'The DALL-E image generation model dall-e-3 was retired on March 4, 2026, and is no longer available for new deployments. Existing deployments are non-functional. Use a gpt-image- series model for image generation instead.',
     },
     tags: ['vision', 'image-generation', 'currency'],
   },
@@ -95,10 +103,10 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     prompt:
       'A marketing team needs a short generated video clip from a text description. Which Foundry model handles that?',
     options: [
-      { id: 'a', text: 'Sora-2 (video generation, in preview)', correct: true },
+      { id: 'a', text: 'Sora 2 (video generation, in preview)', correct: true },
       {
         id: 'b',
-        text: 'gpt-image-2',
+        text: 'gpt-image-2, generating a sequence of stills',
         correct: false,
         why: 'It produces still images, however high-resolution.',
       },
@@ -117,6 +125,12 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Sora creates video scenes from text instructions and is in public preview. Keep the direction straight: generation creates media, Content Understanding and Vision consume it.',
+    reference: {
+      label: 'Sora 2 video generation overview (preview)',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/concepts/video-generation',
+      quote:
+        'Sora 2 is an AI model from OpenAI that creates realistic and imaginative video scenes from text instructions and/or input images or video.',
+    },
     tags: ['vision', 'video-generation', 'currency'],
   },
   {
@@ -132,24 +146,24 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'Azure Content Understanding with a custom image analyzer defining those fields',
+        text: 'Content Understanding with a custom image analyzer for those fields',
         correct: true,
       },
       {
         id: 'b',
-        text: 'Azure Vision Image Analysis tags and captions',
+        text: 'Azure Vision Image Analysis, using its tags and captions',
         correct: false,
         why: 'Generic tags and a caption do not produce your named fields - and Image Analysis 4.0 is deprecated, with a retirement date announced.',
       },
       {
         id: 'c',
-        text: 'An image generation model',
+        text: 'An image generation model that redraws the damaged vehicle',
         correct: false,
         why: 'Wrong direction: generation creates images, it does not analyse them.',
       },
       {
         id: 'd',
-        text: 'Speech to text',
+        text: 'Azure Speech batch transcription of the claim call',
         correct: false,
         why: 'Wrong modality entirely.',
       },
@@ -159,45 +173,53 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     reference: {
       label: 'Create a custom analyzer',
       url: 'https://learn.microsoft.com/azure/ai-services/content-understanding/tutorial/create-custom-analyzer',
+      quote:
+        'To create a custom analyzer, define a field schema that describes the structured data you want to extract. In the following example, you create an analyzer based on a prebuilt image analyzer for processing images of charts and graphs.',
     },
     tags: ['vision', 'content-understanding', 'hard', 'currency'],
   },
   {
     id: 'fv-005',
-    topic: 'foundry-vision',
+    topic: 'ai-workloads',
     moduleId: 'vision',
     objective: 'Identify features and capabilities of computer vision and image-generation models',
     difficulty: 'medium',
     kind: 'exam',
     prompt:
-      'Which statement about face capabilities is correct for the current exam?',
+      'Which statement about the face capabilities available in Azure is correct?',
     options: [
       {
         id: 'a',
-        text: 'Face detection is broadly available, but facial identification and verification are gated under Microsoft\'s Limited Access policy',
+        text: 'Detection is broadly available; identification and verification are Limited Access',
         correct: true,
       },
       {
         id: 'b',
-        text: 'All face capabilities including emotion inference are freely available',
+        text: 'All face capabilities, including emotion inference, are freely available',
         correct: false,
         why: 'Microsoft retired emotion and gender inference, and limited several other attributes, on responsible AI grounds.',
       },
       {
         id: 'c',
-        text: 'Face detection is not offered on Azure at all',
+        text: 'Face detection is not offered on Azure at all any more',
         correct: false,
         why: 'Detection is offered; it is recognition that is gated.',
       },
       {
         id: 'd',
-        text: 'Face identification requires no approval as long as you own the images',
+        text: 'Identification needs no approval as long as you own the images',
         correct: false,
         why: 'Limited Access applies regardless of image ownership.',
       },
     ],
     explanation:
-      'Locating faces is routine. Deciding *who* a face belongs to is a Limited Access scenario requiring registration and an eligible use case - and emotion and gender inference were retired outright. This is a favourite responsible-AI-flavoured vision question.',
+      'Locating faces is routine. Deciding *who* a face belongs to is a Limited Access scenario requiring registration and an eligible use case - and emotion and gender inference were retired outright.',
+    reference: {
+      label: 'Limited Access features of Face',
+      url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/computer-vision/limited-access-identity',
+      quote:
+        'Customers and partners who wish to use Limited Access features of the Face API, including Face identification and Face verification, are required to register for access by submitting a registration form.',
+    },
     tags: ['vision', 'face', 'responsible-ai'],
   },
   {
@@ -205,42 +227,44 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     topic: 'foundry-vision',
     moduleId: 'vision',
     objective: 'Build a lightweight application that includes vision capabilities',
-    difficulty: 'hard',
+    difficulty: 'medium',
     kind: 'exam',
-    prompt:
-      'A team\'s existing app calls Azure Vision Image Analysis 4.0 for OCR. What should they know?',
+    scenario:
+      'A Python app calls a GPT-image model deployed in Microsoft Foundry through the Responses API, with the image generation tool, to create product illustrations.',
+    prompt: 'How does the app turn the response into an image file?',
     options: [
       {
         id: 'a',
-        text: 'Image Analysis 4.0 is deprecated with a published retirement date; Microsoft directs OCR scenarios to Document Intelligence and face scenarios to the Face service',
+        text: 'It reads the base64 image data from the image generation call in the response output, decodes it and saves the bytes',
         correct: true,
       },
       {
         id: 'b',
-        text: 'It is the recommended service for all new OCR work',
+        text: "It reads the response's output_text and saves it with a .png extension",
         correct: false,
-        why: 'It is deprecated. Building new work on it is exactly what the migration guidance advises against.',
+        why: "output_text carries the model's text. The image comes back as base64 data on the image generation call.",
       },
       {
         id: 'c',
-        text: 'It has been removed from Azure already',
+        text: 'It sends the prompt on to Azure Content Understanding, which returns the finished image',
         correct: false,
-        why: 'It still functions; a retirement date has been announced, after which calls will fail.',
+        why: 'Content Understanding analyses content you already have. It does not generate images.',
       },
       {
         id: 'd',
-        text: 'It was renamed to Content Understanding with no other change',
+        text: "It downloads the closest match from the model's built-in library of stock images",
         correct: false,
-        why: 'Content Understanding is a separate, newer, generative multimodal service - not a rename.',
+        why: 'An image generation model creates a new image. Nothing is fetched from a library.',
       },
     ],
     explanation:
-      'For AI-901, the practical takeaway is where new work should go: multimodal models for visual reasoning, Content Understanding for structured extraction across modalities, Document Intelligence for document OCR and layout, and the Face service for face scenarios.',
+      'Images are binary, but a JSON response is text, so the image arrives as **base64** text. The app finds the image generation call in the output, decodes the base64 string, and writes the bytes to a file.',
     reference: {
-      label: 'Migrate from Azure Vision Image Analysis',
-      url: 'https://learn.microsoft.com/azure/ai-services/computer-vision/migration-options',
+      label: 'Image generation models - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/3-image-generation',
+      quote: 'Base64 encoding converts binary data into safe ASCII text, allows binary files to be embedded inside JSON or URLs.',
     },
-    tags: ['vision', 'currency', 'hard', 'trap'],
+    tags: ['vision', 'image-generation', 'sdk'],
   },
   {
     id: 'fv-007',
@@ -274,6 +298,12 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'The GPT-image models support editing with a mask and a prompt (inpainting) as well as variations. Some also offer face preservation for consistent portraits.',
+    reference: {
+      label: 'How to use image generation models from OpenAI',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Supports inpainting and variations with mask + prompt',
+    },
     tags: ['vision', 'image-generation', 'inpainting'],
   },
   {
@@ -307,7 +337,13 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
       },
     ],
     explanation:
-      'Content Credentials cryptographically mark an asset as AI-generated so downstream viewers can verify its origin. Provenance is a transparency control - a reliable cross-topic exam question.',
+      'Content Credentials cryptographically mark an asset as AI-generated so downstream viewers can verify its origin. Provenance is a transparency control.',
+    reference: {
+      label: 'Content provenance for Foundry models',
+      url: 'https://learn.microsoft.com/azure/foundry/responsible-ai/content-safety/provenance-disclosure',
+      quote:
+        "Content provenance technologies can improve transparency around AI-generated content, but it's important to understand their limitations.",
+    },
     tags: ['vision', 'c2pa', 'responsible-ai', 'cross-topic'],
   },
   {
@@ -344,39 +380,51 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     ],
     explanation:
       'Multimodal models excel at open-ended reasoning and explanation about visual input. When you need a strict schema with confidence scores, or precise geometry, use the purpose-built service instead.',
+    reference: {
+      label: 'How to use vision-enabled chat models',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/gpt-with-vision',
+      quote:
+        'Vision-enabled chat models are large multimodal models (LMM) developed by OpenAI that can analyze images and provide textual responses to questions about them.',
+    },
     tags: ['vision', 'multimodal', 'multi-select'],
   },
   {
     id: 'fv-010',
-    topic: 'foundry-vision',
+    topic: 'ai-workloads',
     moduleId: 'vision',
     objective: 'Identify features and capabilities of computer vision and image-generation models',
     difficulty: 'easy',
     kind: 'learn',
     prompt: 'What output does image classification produce?',
     options: [
-      { id: 'a', text: 'One label (with a confidence score) for the image as a whole', correct: true },
+      { id: 'a', text: 'One label, with a confidence score, for the whole image', correct: true },
       {
         id: 'b',
-        text: 'A bounding box for each object',
+        text: 'A label and a bounding box for each object it finds',
         correct: false,
         why: 'That is object detection.',
       },
       {
         id: 'c',
-        text: 'A pixel-level mask',
+        text: 'A pixel-level mask outlining each region of interest',
         correct: false,
         why: 'That is segmentation.',
       },
       {
         id: 'd',
-        text: 'The text visible in the image',
+        text: 'The text that is visible anywhere in the image',
         correct: false,
         why: 'That is OCR.',
       },
     ],
     explanation:
       'Classification answers "what is this a picture of?" - one label for the whole frame. If the question needs *where* or *how many*, classification is not enough.',
+    reference: {
+      label: 'Computer vision tasks and techniques - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/introduction-computer-vision/2-overview',
+      quote:
+        "One of the oldest computer vision solutions is a technique called image classification, in which a model that has been trained with a large number of images is used to predict a text label based on an image's contents.",
+    },
     tags: ['vision', 'definition'],
   },
   {
@@ -392,30 +440,36 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
     options: [
       {
         id: 'a',
-        text: 'gpt-image-1-mini, which is cost-efficient and faster for large-scale or iterative generation',
+        text: 'gpt-image-1-mini, which is cheaper and faster for bulk drafts',
         correct: true,
       },
       {
         id: 'b',
-        text: 'gpt-image-2 at high quality for every draft',
+        text: 'gpt-image-2 at high quality, for every draft in the series',
         correct: false,
         why: 'It is the realism-optimised model with higher latency and cost - sensible for final renders, wasteful for hundreds of drafts.',
       },
       {
         id: 'c',
-        text: 'Sora-2',
+        text: 'Sora 2, generating a short clip and sampling frames from it',
         correct: false,
         why: 'A video model, not an image model.',
       },
       {
         id: 'd',
-        text: 'An embedding model',
+        text: 'An embedding model, comparing drafts in vector space',
         correct: false,
         why: 'Produces vectors, not images.',
       },
     ],
     explanation:
       'The mini variant trades dedicated face preservation for lower cost and faster generation, which makes it a good fit for high-volume, non-portrait iteration. The pattern generalises: match model tier to the job rather than always reaching for the largest.',
+    reference: {
+      label: 'How to use image generation models from OpenAI',
+      url: 'https://learn.microsoft.com/azure/foundry/openai/how-to/dall-e',
+      quote:
+        'Cost-efficient and faster for large-scale or iterative generation',
+    },
     tags: ['vision', 'image-generation', 'model-selection', 'hard'],
   },
   {
@@ -433,11 +487,16 @@ export const foundryVisionQuestions: AuthoredQuestion[] = [
       { id: 'x1', left: 'Explain, in prose, what a chart in a screenshot shows', right: 'Multimodal model' },
       { id: 'x2', left: 'Create a new illustration from a written description', right: 'Image generation model' },
       { id: 'x3', left: 'Return named fields with confidence scores from a photo of a form', right: 'Content Understanding' },
-      { id: 'x4', left: 'Extract text and layout from a scanned multi-page PDF', right: 'Document Intelligence' },
       { id: 'x5', left: 'Identify which registered employee a face belongs to', right: 'Face service (Limited Access)' },
     ],
     explanation:
-      'Five different jobs, five different tools. Getting this routing right is most of the vision section.',
+      'Four different jobs, four different tools: reasoning about an image, creating one, extracting named fields, and identifying a person, which is Limited Access.',
+    reference: {
+      label: 'Multimodal models for image analysis - Microsoft Learn training',
+      url: 'https://learn.microsoft.com/training/modules/get-started-vision-azure/2-vision-enabled-models',
+      quote:
+        'Multimodal models are AI models that can understand and work with more than one type of data at the same time, such as text, images, audio, or video. For instance, the multimodal model could describe an image in natural language or answer a question about a photo.',
+    },
     tags: ['vision', 'matching', 'cram'],
   },
 ];

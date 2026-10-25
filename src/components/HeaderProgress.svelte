@@ -1,124 +1,115 @@
 <script lang="ts">
-  /** Compact readiness pill in the site header. */
-  import { progress, get } from '../lib/store';
-  import { computeReadiness } from '../lib/scoring';
-  import { ALL_QUESTIONS } from '../data/questions';
-  import { MODULES } from '../data/modules';
+  /**
+   * Readiness chip in the site header. It persists across page navigations,
+   * and works from build-time refs rather than the question bank itself.
+   */
+  import { decodeQuestionRefs } from '../lib/catalog';
+  import { computeReadiness, type ScoredModule } from '../lib/scoring';
+  import { liveProgress } from '../lib/live.svelte';
 
   interface Props {
     base: string;
-    active?: boolean;
-  }
-  let { base, active = false }: Props = $props();
-
-  let readiness = $state(computeReadiness(get(), ALL_QUESTIONS, MODULES).overall);
-  let isCurrent = $state(false);
-
-  function checkCurrent() {
-    if (typeof window !== 'undefined') {
-      isCurrent = active || window.location.pathname.replace(/\/$/, '').endsWith('/progress');
-    }
+    /** Encoded question refs (see lib/catalog). */
+    refs: string;
+    modules: ScoredModule[];
   }
 
-  $effect(() => {
-    checkCurrent();
-    document.addEventListener('astro:page-load', checkCurrent);
-    return () => document.removeEventListener('astro:page-load', checkCurrent);
-  });
+  let { base, refs, modules }: Props = $props();
 
-  $effect(() =>
-    progress.subscribe((p) => {
-      readiness = computeReadiness(p, ALL_QUESTIONS, MODULES).overall;
-    }),
-  );
-
+  const questions = $derived(decodeQuestionRefs(refs));
+  const live = liveProgress();
+  const readiness = $derived(computeReadiness(live.value, questions, modules).overall);
   const href = $derived(`${base.replace(/\/$/, '')}/progress/`);
-  const tone = $derived(readiness >= 75 ? 'good' : readiness >= 45 ? 'mid' : 'low');
+
+  let current = $state(false);
+  $effect(() => {
+    const check = () => {
+      current = /\/progress\/?$/.test(window.location.pathname);
+    };
+    check();
+    document.addEventListener('astro:page-load', check);
+    return () => document.removeEventListener('astro:page-load', check);
+  });
 </script>
 
 <a
-  class="pill {tone}"
-  class:current={isCurrent}
+  class="chip-link pv"
+  class:ready={live.ready}
   {href}
-  title="Your exam readiness - click for details"
-  aria-current={isCurrent ? 'page' : undefined}
+  aria-current={current ? 'page' : undefined}
+  title="Exam readiness. Open your progress report."
 >
-  <span class="track" aria-hidden="true"><span class="fill" style:width={`${readiness}%`}></span></span>
-  <span class="value">{readiness}%</span>
-  <span class="visually-hidden">exam readiness</span>
+  <svg class="dial" viewBox="0 0 20 20" aria-hidden="true">
+    <circle cx="10" cy="10" r="8" pathLength="100" class="track" />
+    <circle
+      cx="10"
+      cy="10"
+      r="8"
+      pathLength="100"
+      class="fill"
+      stroke-dasharray={`${readiness} 100`}
+    />
+  </svg>
+  <span class="value num">{readiness}%</span>
+  <span class="label">ready</span>
+  <span class="visually-hidden">for the exam</span>
 </a>
 
 <style>
-  .pill {
+  .chip-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.42rem;
-    padding: 0.26rem 0.6rem 0.26rem 0.52rem;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0 0.8rem 0 0.45rem;
     border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    text-decoration: none;
-    color: var(--fg);
-    font-size: 0.78rem;
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--border);
+    color: var(--ink);
+    font-size: 0.875rem;
     font-weight: 650;
-    transition:
-      background 0.14s ease,
-      border-color 0.14s ease,
-      box-shadow 0.14s ease,
-      transform 0.1s ease;
-    box-shadow: var(--shadow-sm);
+    text-decoration: none;
     white-space: nowrap;
+    transition: background 0.15s ease;
   }
-  .pill:hover {
-    background: var(--bg-hover);
-    border-color: var(--border-strong);
-    color: var(--fg);
+  .chip-link:hover {
+    background: var(--hover);
+    color: var(--ink);
   }
-  .pill:active {
-    transform: scale(0.97);
-  }
-  .pill.current {
-    border-color: var(--accent);
+  .chip-link[aria-current='page'] {
+    box-shadow: inset 0 0 0 1px var(--accent-edge);
     background: var(--accent-soft);
-    color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .label {
+    margin-left: -0.15rem;
+    color: var(--ink-3);
+    font-weight: 500;
   }
 
+  .dial {
+    width: 22px;
+    height: 22px;
+    rotate: -90deg;
+  }
+  .dial circle {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
   .track {
-    display: block;
-    width: 36px;
-    height: 5px;
-    border-radius: 999px;
-    background: var(--bg-sunken);
-    border: 1px solid var(--border);
-    overflow: hidden;
-    flex-shrink: 0;
+    stroke: var(--track);
   }
   .fill {
-    display: block;
-    height: 100%;
-    border-radius: 999px;
-    background: var(--accent);
-    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    stroke: var(--accent);
+    transition: stroke-dasharray 0.6s var(--ease);
   }
-  .low .fill {
-    background: var(--danger);
-  }
-  .mid .fill {
-    background: var(--warn);
-  }
-  .good .fill {
-    background: var(--success);
+  /* Zero length still draws a round cap; hide it until there is progress. */
+  .fill[stroke-dasharray^='0 '] {
+    stroke: transparent;
   }
 
-  .value {
-    font-variant-numeric: tabular-nums;
-    min-width: 2.3em;
-    text-align: right;
-  }
-
-  @media (max-width: 560px) {
-    .track {
+  @media (max-width: 420px) {
+    .label {
       display: none;
     }
   }

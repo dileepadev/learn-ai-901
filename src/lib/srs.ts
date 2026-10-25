@@ -31,11 +31,10 @@ export interface Schedulable {
 /** Advance or reset an item's box after an attempt, and compute its next due time. */
 export function schedule(prev: Schedulable | undefined, correct: boolean, now = Date.now()): Schedulable {
   const currentBox = prev?.box ?? 0;
-  // A miss drops the item most of the way back but not always to zero, so a
-  // single slip on a well-known item doesn't flood the queue.
-  const box = correct
-    ? Math.min(MAX_BOX, currentBox + 1)
-    : Math.max(0, Math.min(currentBox - 2, 0));
+  // A miss drops the item two boxes rather than straight to zero, so a single
+  // slip on a well-known item doesn't flood the queue. Anything shaky (box 0-2)
+  // still lands back in box 0 and returns within minutes.
+  const box = correct ? Math.min(MAX_BOX, currentBox + 1) : Math.max(0, currentBox - 2);
   return { box, due: now + BOX_INTERVALS[box]! };
 }
 

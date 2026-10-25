@@ -1,12 +1,17 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PracticeHub from '../../components/PracticeHub.svelte';
+import { moduleCoverage, questionRefs } from '../../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
 ---
 
-<Base title="Practice your weak areas - AI-901" active="practice">
+<Base
+  title="Your weakest topics"
+  description="Practice questions from the AI-901 topics where you have the most readiness left to gain."
+  active="practice"
+>
   <div class="wrap">
-    <PracticeHub client:only="svelte" base={base} fixedMode="weak-areas" />
+    <PracticeHub client:load {base} refs={questionRefs} modules={moduleCoverage} fixedMode="weak-areas" />
   </div>
 </Base>

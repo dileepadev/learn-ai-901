@@ -1,12 +1,26 @@
 ---
 import Base from '../../layouts/Base.astro';
 import ModuleList from '../../components/ModuleList.svelte';
+import { MODULES, TOTAL_LESSON_MINUTES } from '../../data/modules';
+import { moduleRefs as modules } from '../../lib/pageData';
 
 const base = import.meta.env.BASE_URL;
+const hours = Math.round((TOTAL_LESSON_MINUTES / 60) * 10) / 10;
 ---
 
-<Base title="Lessons - AI-901 Exam Prep" active="learn">
+<Base
+  title="Lessons"
+  description={`${MODULES.length} short lessons covering every skill measured on Exam AI-901, in recommended study order, with knowledge checks and a quiz at the end of each.`}
+  active="learn"
+>
   <div class="wrap">
-    <ModuleList client:only="svelte" base={base} />
+    <header class="page-head">
+      <h1>Lessons</h1>
+      <p>
+        {MODULES.length} lessons in recommended study order, about {hours} hours of reading in all. Each
+        ends with a short quiz, and scoring 70% or more marks the lesson complete.
+      </p>
+    </header>
+    <ModuleList client:load {base} {modules} />
   </div>
 </Base>

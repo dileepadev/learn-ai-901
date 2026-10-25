@@ -7,7 +7,7 @@ export const ragFoundryIq: Module = {
   summary:
     'Grounding agents in your own data: the RAG pipeline, agentic retrieval, and what a Foundry IQ knowledge base actually is.',
   topic: 'foundry-genai-agents',
-  minutes: 20,
+  minutes: 22,
   priority: 'high',
   icon: '📚',
   outcomes: [
@@ -15,7 +15,7 @@ export const ragFoundryIq: Module = {
     'Explain what Foundry IQ provides beyond a plain search index',
     'Diagnose a grounding failure and pick the right fix',
   ],
-  quiz: ['fg-030', 'fg-031', 'fg-032', 'fg-033', 'fg-034', 'fg-035', 'fg-036'],
+  quiz: ['fg-030', 'fg-044', 'sc-fg-07', 'sc-fg-08', 'sc-fg-12', 'sc-fg-13', 'sc-rai-08', 'dd-fg-02'],
   sections: [
     {
       id: 'why',
@@ -75,7 +75,7 @@ export const ragFoundryIq: Module = {
           t: 'table',
           headers: ['Choose…', 'When'],
           rows: [
-            ['**Agentic retrieval**', 'The client is an agent or chatbot; queries are complex or conversational; you want maximum relevance and structured, cited responses'],
+            ['**Agentic retrieval**', 'The client is an agent or chatbot; queries are complex or conversational; you want maximum relevance and structured, cited responses; you are building a new RAG solution'],
             ['**Classic RAG**', 'You need generally available features only, want simplicity and speed, or already have orchestration code and want fine-grained control'],
           ],
         },
@@ -97,6 +97,14 @@ export const ragFoundryIq: Module = {
           priority: 'high',
         },
         {
+          t: 'table',
+          headers: ['Knowledge source kind', 'How it works', 'Examples'],
+          rows: [
+            ['**Indexed**', 'Content is ingested into a search index; chunking, vectorising and permission sync are automatic', 'Azure Blob Storage, OneLake, SharePoint, an existing search index'],
+            ['**Remote**', 'Nothing is copied; the source is queried live at retrieval time', 'SharePoint through the Copilot Retrieval API, the web through Grounding with Bing'],
+          ],
+        },
+        {
           t: 'list',
           items: [
             'Automates **chunking, embedding generation and metadata extraction**; indexers can run on a schedule for incremental refresh.',
@@ -105,7 +113,12 @@ export const ragFoundryIq: Module = {
             'Returns **extractive data with citations** so answers trace back to source documents.',
             'Synchronises **access control lists**, honours **Microsoft Purview sensitivity labels**, and enforces permissions **at query time**.',
             'Can run queries under the **caller\'s Microsoft Entra identity** for end-to-end permission enforcement.',
+            'Sets a **retrieval reasoning effort**: *minimal* merges results with no language model, while *low* and *medium* use a model to plan subqueries - medium adds iterative search.',
           ],
+        },
+        {
+          t: 'p',
+          md: 'Release status is mixed, so read questions carefully: extractive retrieval at minimal effort is generally available, while model-based query planning and answer synthesis are still in preview. For agents, Microsoft recommends returning **extractive data** and letting the agent write the answer.',
         },
         {
           t: 'trap',

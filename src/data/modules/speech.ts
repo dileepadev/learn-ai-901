@@ -8,7 +8,7 @@ export const speech: Module = {
     'Recognition and synthesis, SSML, and the exam-relevant choice between a cascaded pipeline and a native multimodal audio model.',
   topic: 'foundry-text-speech',
   alsoCovers: ['ai-workloads'],
-  minutes: 16,
+  minutes: 17,
   priority: 'medium',
   icon: '🎙️',
   outcomes: [
@@ -16,7 +16,7 @@ export const speech: Module = {
     'Say what SSML controls',
     'Justify a native multimodal audio model over a three-service cascade',
   ],
-  quiz: ['wl-021', 'wl-022', 'wl-023', 'ts-005', 'ts-007', 'ts-009'],
+  quiz: ['wl-021', 'ts-009', 'sc-wl-04', 'sc-ts-02', 'sc-ts-03', 'sc-ts-06', 'sc-ts-08', 'yn-wl-01', 'yn-ts-02', 'dd-ts-01', 'code-sp-01', 'code-sp-03'],
   sections: [
     {
       id: 'directions',
@@ -83,9 +83,11 @@ export const speech: Module = {
           t: 'table',
           headers: ['Option', 'What it is', 'Choose it when'],
           rows: [
-            ['**Prebuilt neural voices**', 'Hundreds of expressive voices across many locales', 'Almost always - this is the default'],
-            ['**Custom neural voice**', 'A branded voice trained from studio recordings of a voice actor', 'You need a distinctive brand voice; note it is a gated, responsible-AI-reviewed capability'],
+            ['**Standard voices**', 'Hundreds of natural voices, including HD voices, across more than 150 locales', 'Almost always - this is the default'],
+            ['**Professional voice** (custom voice)', 'A branded voice fine-tuned from studio recordings of a voice talent, with their recorded consent', 'You need a distinctive brand or character voice'],
+            ['**Personal voice** (custom voice)', 'A replica of a user\'s own voice from a short sample', 'Users voice their own content, such as personalised narration'],
           ],
+          caption: 'Both kinds of custom voice are Limited Access: you apply with an eligible use case first.',
         },
         { t: 'check', qid: 'ts-007' },
       ],
@@ -113,6 +115,11 @@ export const speech: Module = {
           title: 'How to answer these',
           body: 'Latency, naturalness, or picking up on *how* something was said ⇒ **native multimodal**. Needing a specific branded voice, or control over the transcript itself ⇒ **cascade with Azure Speech**.',
           priority: 'high',
+        },
+        {
+          t: 'changed',
+          title: 'Foundry now packages both for you',
+          body: '**Voice Live** is a fully managed speech-to-speech API with noise suppression, echo cancellation and turn detection built in. A **voice-based prompt agent** runs on it and lets you pick either architecture - a native realtime speech model such as the `gpt-realtime` family, or a cascade of speech recognition, a text model and speech synthesis - with no voice orchestration code of your own.',
         },
         { t: 'check', qid: 'ts-005' },
         { t: 'check', qid: 'wl-023' },
