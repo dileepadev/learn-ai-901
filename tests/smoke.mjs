@@ -46,27 +46,48 @@ async function goto(path) {
 const overflows = () =>
   page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
 
-/** Answer whatever question is in `card`, any type. */
+/** Answer whatever question is in `card`, any type, and say which format it was. */
 async function answer(card) {
   const options = card.locator('.option');
   if ((await options.count()) > 0) {
-    const multi = (await card.locator('.bubble.square').count()) > 0;
-    await options.first().click();
-    if (multi) {
-      await options.nth(1).click();
-      const checkBtn = card.getByRole('button', { name: 'Check answer' });
-      if (await checkBtn.isVisible().catch(() => false)) await checkBtn.click();
+    if ((await card.locator('.bubble.square').count()) === 0) {
+      await options.first().click();
+      return 'single';
     }
-    return;
+    const need = Number((await card.locator('.choose').innerText()).match(/Choose (\d+)/)?.[1] ?? 2);
+    for (let i = 0; i < need; i++) await options.nth(i).click();
+    await checkAnswer(card);
+    return 'multi';
   }
-  const selects = card.locator('select');
-  const n = await selects.count();
-  for (let i = 0; i < n; i++) await selects.nth(i).selectOption({ index: 1 });
-  if (n === 0) {
-    // Ordering: move the last item up once so the answer is a deliberate choice.
-    const up = card.getByRole('button', { name: /Move up/ });
-    if ((await up.count()) > 0) await up.last().click();
+
+  let format = 'order';
+  const statements = card.locator('.statement');
+  const blanks = card.locator('select.blank');
+  const slots = card.locator('button.slot');
+  if ((await statements.count()) > 0) {
+    // Yes to everything, so a set with a false statement earns partial credit.
+    format = 'yesno';
+    for (let i = 0; i < (await statements.count()); i++) await statements.nth(i).locator('.yn-choice').first().click();
+  } else if ((await blanks.count()) > 0) {
+    format = 'dropdown';
+    for (let i = 0; i < (await blanks.count()); i++) await blanks.nth(i).selectOption({ index: 1 });
+  } else if ((await slots.count()) > 0) {
+    // Drag and drop, answered by select-and-place: pick up a value, then choose its row.
+    format = 'match';
+    for (let i = 0; i < (await slots.count()); i++) {
+      await card.locator('.tokens .token').first().click();
+      await slots.nth(i).click();
+    }
+  } else {
+    // Build list: select each step to move it into the answer area.
+    const steps = card.locator('.steps .token');
+    while ((await steps.count()) > 0) await steps.first().click();
   }
+  await checkAnswer(card);
+  return format;
+}
+
+async function checkAnswer(card) {
   const checkBtn = card.getByRole('button', { name: 'Check answer' });
   if (await checkBtn.isVisible().catch(() => false)) await checkBtn.click();
 }
@@ -145,17 +166,40 @@ console.log('\n[5] Lesson quiz');
 await goto('/learn/responsible-ai/quiz/');
 check('quiz page shows the runner', await page.locator('.runner-title').isVisible());
 check('quiz shows its length', /Question 1 of \d+/.test(await page.locator('.runner-head .small').first().innerText()));
+const formats = new Set();
+let partial = false;
+let dragged = false;
 for (let guard = 0; guard < 30; guard++) {
   if (await page.locator('.result-sheet').isVisible().catch(() => false)) break;
   const card = page.locator('.question-sheet');
   if (!(await card.isVisible().catch(() => false))) break;
-  await answer(card);
+  if (!dragged && (await card.locator('button.slot').count()) > 0) {
+    // Real drag and drop, once: a value dragged onto a row fills it. Both ends
+    // must be on screen first, because scrolling mid-drag cancels a native drag.
+    await card.locator('.dnd').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await card.locator('.tokens .token').first().dragTo(card.locator('button.slot').first());
+    dragged = await card
+      .locator('button.slot.filled')
+      .first()
+      .waitFor({ timeout: 3000 })
+      .then(() => true)
+      .catch(() => false);
+    await card.getByRole('button', { name: /^Remove / }).first().click().catch(() => {});
+  }
+  const format = await answer(card);
+  formats.add(format);
   await page.waitForTimeout(120);
+  if (format === 'yesno') partial ||= /Partly right: \d+ of \d+ points/.test(await card.locator('.verdict-head').innerText());
   const next = card.getByRole('button', { name: /Next question|See results/ });
   if (await next.isVisible().catch(() => false)) await next.click();
   await page.waitForTimeout(120);
 }
 check('quiz reaches its results', await page.locator('.result-sheet').isVisible());
+check('lesson quiz includes a Yes/No set', formats.has('yesno'));
+check('lesson quiz includes a sentence to complete', formats.has('dropdown'));
+check('lesson quiz includes drag and drop', formats.has('match'));
+check('a value can be dragged onto a row', dragged);
+check('a partly right Yes/No set earns partial points', partial);
 check('results give a score', /\d+ of \d+ correct/.test(await page.locator('#result-title').innerText()));
 
 /* ---------------- 6. Practice ---------------- */
@@ -165,6 +209,11 @@ check('practice sets listed', (await page.locator('.set').count()) >= 6);
 await page.locator('.set', { hasText: 'Quick set' }).click();
 await page.waitForSelector('.question-sheet', { timeout: 10000 });
 check('a quick set starts', await page.locator('.question-sheet').isVisible());
+// Letter shortcuts belong to choice questions, so move past any other format first.
+for (let guard = 0; guard < 10 && (await page.locator('.question-sheet .option').count()) === 0; guard++) {
+  await answer(page.locator('.question-sheet'));
+  await page.locator('.question-sheet').getByRole('button', { name: /Next question/ }).click();
+}
 await page.keyboard.press('a');
 await page.waitForTimeout(200);
 const afterKey = (await page.locator('.question-sheet .verdict').isVisible()) || (await page.locator('.question-sheet .option.chosen').count()) > 0;
@@ -176,6 +225,23 @@ check('ending early only scores what was answered', await page.locator('.result-
 await goto('/practice/?start=quick');
 await page.waitForSelector('.question-sheet', { timeout: 10000 });
 check('?start=quick opens a set directly', await page.locator('.runner-title').isVisible());
+
+await goto('/practice/?start=code');
+await page.waitForSelector('.question-sheet', { timeout: 10000 });
+check('?start=code opens the Code set', (await page.locator('.runner-title').innerText()).includes('Code'));
+let snippetShown = false;
+let blankInCode = false;
+for (let guard = 0; guard < 20 && !(snippetShown && blankInCode); guard++) {
+  const sheet = page.locator('.question-sheet');
+  if ((await sheet.locator('.q-code:not(.answer-code)').count()) > 0) snippetShown = true;
+  if ((await sheet.locator('.answer-code select.blank').count()) > 0) blankInCode = true;
+  await answer(sheet);
+  const next = sheet.getByRole('button', { name: /Next question/ });
+  if ((await next.count()) === 0) break;
+  await next.click();
+}
+check('code questions show their Python snippet', snippetShown);
+check('code dropdowns put the blanks in the code', blankInCode);
 
 await goto('/practice/weak/?topic=responsible-ai');
 await page.waitForSelector('.runner-title', { timeout: 10000 });
@@ -195,10 +261,15 @@ await page.getByRole('button', { name: 'Start the exam' }).click();
 await page.waitForSelector('.exam-bar', { timeout: 10000 });
 check('exam starts with a timer', await page.locator('.timer').isVisible());
 check('question palette has every question', (await page.locator('.palette .pal').count()) === 10);
+check('each question names its format', ((await page.locator('.q-type').innerText()) ?? '').trim().length > 0);
 await answer(page.locator('.exam-question'));
 await page.waitForTimeout(200);
 check('nothing is marked during the exam', (await page.locator('.verdict').count()) === 0);
 check('answered questions fill their palette square', (await page.locator('.palette .pal.done').count()) >= 1);
+await page.getByRole('button', { name: 'Reset answer' }).click();
+check('an answer can be reset', (await page.locator('.palette .pal.done').count()) === 0);
+await answer(page.locator('.exam-question'));
+await page.waitForTimeout(200);
 await page.getByRole('button', { name: 'Mark for review' }).click();
 check('questions can be marked for review', (await page.locator('.palette .pal.flag').count()) === 1);
 
@@ -208,13 +279,49 @@ await page.getByRole('button', { name: 'Resume the exam' }).click();
 await page.waitForSelector('.exam-bar', { timeout: 10000 });
 check('resuming keeps the answers', (await page.locator('.palette .pal.done').count()) >= 1);
 
-await page.getByRole('button', { name: 'Review and submit' }).click();
-check('submitting asks for confirmation', await page.locator('dialog.review').isVisible());
-await page.getByRole('button', { name: 'Submit and see my result' }).click();
+await page.getByRole('button', { name: 'Review answers' }).first().click();
+check('the review screen lists every question', (await page.locator('.review-row').count()) === 10);
+await page.locator('.review-screen .segmented button', { hasText: 'For review' }).click();
+check('the review screen filters to marked questions', (await page.locator('.review-row').count()) === 1);
+await page.locator('.review-row').first().click();
+check('a review row opens its question', await page.locator('.exam-question').isVisible());
+await page.getByRole('button', { name: 'Back to review' }).click();
+await page.getByRole('button', { name: 'Finish the exam' }).click();
+check('finishing asks for confirmation', await page.locator('dialog.review').isVisible());
+await page.getByRole('button', { name: 'Finish and see my result' }).click();
 await page.waitForSelector('.score-sheet', { timeout: 10000 });
 check('exam reports a percentage', /\d+%/.test(await page.locator('.score-big').innerText()));
+check('exam is scored in points', /\d+ of \d+ points/.test(await page.locator('.score-sheet h1').innerText()));
+check('results show performance by section', (await page.locator('.section-bar').count()) >= 1);
 check('topic report renders', (await page.locator('.topic-report li').count()) > 0);
 check('the finished attempt is cleared', (await page.evaluate(() => localStorage.getItem('ai901:exam'))) === null);
+
+// A question counts as answered only once every part is: fe-008 is a build list, fe-002 a "Choose 2".
+await page.evaluate(() =>
+  localStorage.setItem(
+    'ai901:exam',
+    JSON.stringify({
+      v: 1, preset: 'custom', ids: ['fe-008', 'fe-002'], seed: 1, answers: {}, done: [], flagged: [], index: 0,
+      startedAt: Date.now(), deadline: null, limitSeconds: null,
+    }),
+  ),
+);
+await goto('/exam/');
+await page.getByRole('button', { name: 'Resume the exam' }).click();
+await page.waitForSelector('.exam-bar', { timeout: 10000 });
+const steps = page.locator('.exam-question .steps .token');
+await steps.first().click();
+check('a part-built list is not answered', (await page.locator('.palette .pal.done').count()) === 0);
+while ((await steps.count()) > 0) await steps.first().click();
+check('a full list is answered', (await page.locator('.palette .pal.done').count()) === 1);
+await page.locator('.palette .pal').nth(1).click();
+await page.locator('.exam-question .option').first().click();
+check('one pick on a "Choose 2" is not answered', (await page.locator('.palette .pal.done').count()) === 1);
+await page.locator('.exam-question .option').nth(1).click();
+check('two picks on a "Choose 2" are answered', (await page.locator('.palette .pal.done').count()) === 2);
+await page.locator('.exam-question .option').nth(2).click();
+check('a third pick is refused, and says so', (await page.locator('.exam-question .option.chosen').count()) === 2 && (await page.getByText(/You have chosen 2/).first().isVisible()));
+await page.evaluate(() => localStorage.removeItem('ai901:exam'));
 
 /* ---------------- 8. Rapid review ---------------- */
 console.log('\n[8] Rapid review');
